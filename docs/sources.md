@@ -11,7 +11,7 @@ against that service before it is relied on.
 | `static.krcg.org/data/v4` (`vtes.json`, `twda.json`) | Cards with their rulings; the tournament winning deck archive | Every 6 hours, and at once when a ruling is approved | Public files |
 | `vtes-biased/vtes-rulings` (`rulings.yaml`, `groups.yaml`, `references.yaml`) | The rulings database: the durable source of truth for rulings, the card groups they apply to, the URL of each reference | Pushed by the rulings site on each approval | Public repository |
 | `rulings.krcg.org` | Curation of the rulings database by the rulemongers; proposals under discussion | Live | Pages public; a read API under `/api` (undocumented, public access unchecked) |
-| `usenet.krcg.org` (`vtes-biased/newsgroup-archive`) | The rulings archive: 14,417 threads in which a rules director took part, 1994 to today (the newsgroup, the V:EKN forum, BoardGameGeek) | Nightly forum sweep at 04:17 UTC | Pages and a search index; thread JSON in the repository only |
+| `usenet.krcg.org` (`vtes-biased/newsgroup-archive`) | The rulings archive: 14,417 threads in which a rules director took part, 1994 to today (the newsgroup, the V:EKN forum, BoardGameGeek) | Nightly forum sweep at 04:17 UTC | Pages and a search index; every thread in one file, `usenet.krcg.org/archive.json.gz` (below) |
 | `vtes-biased/vtes-advanced-rules` | The 2024 rulebook text and the advanced rules | By hand | Public repository |
 | `api.archon.vekn.net` | Tournaments, published decklists, members and ratings, community links | Export rebuilt within 15 minutes of a change | App token (below) |
 | `engine.krcg.org` | Rules enforcement for the cards it covers; bots | On each engine release | Public API |
@@ -30,6 +30,17 @@ a stable hash of its text and links to it as
 `rulings.krcg.org/index.html?uid=<card id>#r-<hash>`; the id changes when the
 wording is edited. A ruling ending in `[REMINDER]` restates card text or a
 core rule and may carry no reference.
+
+## The archive's bulk file
+
+`usenet.krcg.org/archive.json.gz` (about 57 MB) is rebuilt with the site on
+every push and every sweep that finds something. Unzipped, it is one JSON
+object: `LastPost`, the date of the newest post the archive holds (ISO, no
+time zone), and `Threads`, every thread file as the repository holds it
+(`ThreadId`, `Url`, `Title`, an optional `Group`, and `Messages` with
+`Author`, `Date`, `Body`, for forum posts `Id`, and `Recovered` on a post
+restored from the Internet Archive's copy). GitHub Pages serves it
+with an `ETag`, so an unchanged archive costs a conditional request.
 
 ## The archive's limits
 
