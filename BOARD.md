@@ -1,0 +1,22 @@
+# Board
+
+What must change. The goal is zero. Completion is deletion: no closed state,
+no archive. Context lives in [`docs/`](docs/index.md), never here. Order is
+priority, by the ranking rules of [`docs/roadmap.md`](docs/roadmap.md). At
+most 12 lines: adding a thirteenth means removing one. A line waiting on a
+date or an outside event is not a line.
+
+---
+
+- **The archive publishes a bulk file** [M:rules] (work in `newsgroup-archive`, through its own conventions: standard-library build, plain files): one file of all threads with a last-modified date, written by its build. Done when `usenet.krcg.org` serves it and `docs/sources.md` names its URL. Docs: sources.md.
+- **The advanced rules absorb what zero-vtes taught** [M:rules] (work in `vtes-advanced-rules`, with its rulemonger loop): `zero-vtes/docs/rules-digest.md` triaged mechanism by mechanism, in the advanced rules' section order: already there; follows from the rulebook or a ruling, added with its citation; the owner's reading with no official source, added and marked as a reading; an engine modelling choice (digest section 22), left out. The digest's contradictions and open readings (sections 23, 24) become the advanced rules' list of open questions. Done when every digest section has been triaged upstream. Docs: none here (principles.md already states the authority).
+- **The knowledge moves in from `vtes-skill`** [M:cards]: its `references/` to `knowledge/` (rules synced, strategy authored), its provenance map to a docs page, its calibration corpus and regression set to `calibration/`, its sync and calibrate loops as skills here; `references/community/` and the raw usenet mailboxes are left behind. Done when `vtes-skill`'s README points here and nothing in primogen reads that repository. Docs: a provenance page, index.md, principles.md "Knowledge files".
+- **A card and its rulings from a shell** [M:cards]: the Go module, the data bundle built from `static.krcg.org` and `vtes-rulings`, `vtes_cards` behind `primogen query` and over stdio. Done when `primogen query cards "Freak Drive"` returns the text, the requirements and every ruling with its `rulings.krcg.org` link and its archive link, and a test on pinned real data covers an exact name, a translated name and an unknown name. Docs: product.md "Tools", operations.md (the commands).
+- **The hosted server, refreshing itself** [M:cards]: Streamable HTTP, the refresh scheduler and the bundle swap of operations.md "Data refresh", the published bundle, the deploy on `server-setup`. Done when an MCP client connected to `https://mcp.krcg.org/mcp` gets a card, a local install downloads the bundle, and the data date advances after an upstream change with nobody touching the server. Docs: operations.md.
+- **What each client does with the server** [M:cards]: Claude, ChatGPT, Gemini and one local client, hands-on: whether the server's instructions reach the model, how prompts appear, what a tool result looks like to the user. Done when product.md "Connecting" carries a table of the findings and the server's instructions and results are adjusted to the weakest client. Docs: product.md.
+- **A README a newcomer can follow** [M:cards]: what primogen is, the hosted URL, a configuration snippet per checked client, the local install. Done when each checked client connects by following it. Docs: none (the README is the page).
+- **The archive's sweep does not miss or stop silently** [M:rules] (work in `newsgroup-archive`): the `--refresh` run scheduled weekly over recent topics; the `--expect` check fed every forum topic the rulings database cites; a monthly dated heartbeat commit so the schedule is not disabled. Done when the three run in its workflow. Docs: sources.md "The archive's limits".
+- **Is the rulings site's read API public?** [M:rules] (in `rulings-website`): call `/api/card/<id>`, `/api/search`, `/api/group`, `/api/reference` without login. Done when sources.md says what answers, and the site's own docs describe the API if it is public. Docs: sources.md.
+- **A rules answer's evidence in one call** [M:rules]: the section index over rulebook, advanced rules, tournament rules and judges' guide; `vtes_rules_case`, `vtes_rules_search`, `vtes_rules_read`, `vtes_rulings_archive`; the evidence tests seeded from the calibration corpus, the codex cases, the `rules-qa` items as questions and the engine's rulings ledger. Done when the evidence tests pass and the owner has graded a rules session. Docs: product.md "Tools" and "Evaluation".
+
+<!-- completed-since-upkeep: 0 -->
