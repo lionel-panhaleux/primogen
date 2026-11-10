@@ -27,7 +27,7 @@ The server refreshes itself; there is no cron job and no operator.
   and says how old it is.
 - Each refresh reports what needs a person: decks that matched no archetype,
   cards with no module tag, evidence tests that started failing, an upstream
-  rules diff waiting for sync, an archive whose last sweep is old.
+  rules diff waiting for sync, an archive whose newest post is old.
 
 ## Releases and deploys
 

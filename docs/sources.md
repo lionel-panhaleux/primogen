@@ -36,11 +36,12 @@ core rule and may carry no reference.
 `usenet.krcg.org/archive.json.gz` (about 57 MB) is rebuilt with the site on
 every push and every sweep that finds something. Unzipped, it is one JSON
 object: `LastPost`, the date of the newest post the archive holds (ISO, no
-time zone), and `Threads`, every thread file as the repository holds it
-(`ThreadId`, `Url`, `Title`, an optional `Group`, and `Messages` with
-`Author`, `Date`, `Body`, for forum posts `Id`, and `Recovered` on a post
-restored from the Internet Archive's copy). GitHub Pages serves it
-with an `ETag`, so an unchanged archive costs a conditional request.
+time zone), and `Threads`, every thread file as the repository holds it, in
+the format its README describes.
+
+GitHub Pages stamps its `ETag` and `Last-Modified` at each deploy, not from
+the content, so a `200` does not mean a thread changed: a pass that must know
+compares the unzipped content.
 
 ## The archive's limits
 
@@ -50,6 +51,9 @@ with an `ETag`, so an unchanged archive costs a conditional request.
   profile), so a topic can be missing.
 - GitHub disables a scheduled workflow after 60 days without a commit, which
   would stop the sweep.
+- Nothing published records when a sweep last ran: a sweep that finds nothing
+  commits and deploys nothing, and `LastPost` is the newest post's date. A
+  stopped sweep and a quiet forum look the same from outside.
 
 ## Archon
 
