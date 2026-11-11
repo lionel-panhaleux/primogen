@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"net/http"
 	"regexp"
 	"strconv"
 	"strings"
@@ -54,15 +55,22 @@ func (a archiveIndex) link(u string) string {
 	return ""
 }
 
-// fetchArchive streams the bulk file thread by thread, keeping only the ids,
-// and returns the date of its newest post.
-func fetchArchive(ctx context.Context, u string) (archiveIndex, string, error) {
-	resp, err := open(ctx, u, "")
+// Archive is what a bundle reads of the rulings archive, the heaviest source:
+// which posts it holds, and the date of its newest.
+type Archive struct {
+	index    archiveIndex
+	LastPost string
+}
+
+// FetchArchive streams the bulk file thread by thread, keeping only the ids.
+func FetchArchive(ctx context.Context, up Upstream) (*Archive, error) {
+	u := up.Archive
+	resp, err := open(ctx, http.MethodGet, u, "")
 	if err != nil {
-		return nil, "", err
+		return nil, err
 	}
 	defer resp.Body.Close()
-	fail := func(err error) (archiveIndex, string, error) { return nil, "", fmt.Errorf("%s: %w", u, err) }
+	fail := func(err error) (*Archive, error) { return nil, fmt.Errorf("%s: %w", u, err) }
 	z, err := gzip.NewReader(resp.Body)
 	if err != nil {
 		return fail(err)
@@ -112,5 +120,5 @@ func fetchArchive(ctx context.Context, u string) (archiveIndex, string, error) {
 	if len(index) == 0 || len(lastPost) < len("2006-01-02") {
 		return fail(fmt.Errorf("no threads or no LastPost"))
 	}
-	return index, lastPost[:len("2006-01-02")], nil
+	return &Archive{index, lastPost[:len("2006-01-02")]}, nil
 }

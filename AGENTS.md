@@ -73,6 +73,8 @@ trailer; upkeep reads them.
 
 ## Right now
 
-One tool, `vtes_cards`, works from a source checkout: `primogen build`,
-then `primogen query` or `primogen stdio`. Nothing is hosted or published
-yet; the board holds the next lines.
+One tool, `vtes_cards`. `primogen serve` is the hosted server, refreshing
+itself, and `mise run deploy` puts it on frankfurt; it is not deployed yet,
+so a local install has nothing to download. From a checkout: `primogen
+build`, then `primogen query` or `primogen stdio` with `-bundle
+data/bundle.json.gz`. The board holds the next lines.

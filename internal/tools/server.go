@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"runtime/debug"
 	"strings"
+	"sync/atomic"
 	"time"
 
 	"github.com/modelcontextprotocol/go-sdk/mcp"
@@ -19,13 +20,36 @@ const instructions = `Primogen grounds answers about Vampire: The Eternal Strugg
 Never state a card's text or a ruling from memory: call vtes_cards for every card the answer relies on, and quote what it returns.
 Each item carries its authority and its link; cite the link. When the result says no ruling covers a point, say the point is unsettled rather than filling the gap.`
 
-func NewServer(b *bundle.Bundle) *mcp.Server {
-	version := "dev"
+// Live is the data the tools serve. A call reads one snapshot, so a swap lands
+// between two calls.
+type Live struct{ p atomic.Pointer[data] }
+
+type data struct {
+	b  *bundle.Bundle
+	ix *cardIndex
+}
+
+func NewLive(b *bundle.Bundle) *Live {
+	l := &Live{}
+	l.Swap(b)
+	return l
+}
+
+func (l *Live) Swap(b *bundle.Bundle) { l.p.Store(&data{b, newCardIndex(b.Cards)}) }
+
+func (l *Live) Bundle() *bundle.Bundle { return l.p.Load().b }
+
+// Version is the binary's module version, "dev" when it has none.
+func Version() string {
 	if info, ok := debug.ReadBuildInfo(); ok && info.Main.Version != "" {
-		version = info.Main.Version
+		return info.Main.Version
 	}
-	s := mcp.NewServer(&mcp.Implementation{Name: "primogen", Version: version}, &mcp.ServerOptions{Instructions: instructions})
-	addCards(s, b)
+	return "dev"
+}
+
+func NewServer(l *Live) *mcp.Server {
+	s := mcp.NewServer(&mcp.Implementation{Name: "primogen", Version: Version()}, &mcp.ServerOptions{Instructions: instructions})
+	addCards(s, l)
 	return s
 }
 
@@ -59,8 +83,8 @@ func Call(ctx context.Context, s *mcp.Server, tool string, args map[string]any) 
 	return out.String(), nil
 }
 
-// dataLine dates what an answer was read from.
-func dataLine(b *bundle.Bundle) string {
+// DataLine dates what an answer was read from.
+func DataLine(b *bundle.Bundle) string {
 	parts := make([]string, 0, len(b.Sources))
 	for _, s := range b.Sources {
 		parts = append(parts, s.Name+" "+s.Version)

@@ -1,0 +1,11 @@
+[project]
+name = "primogen-deploy"
+version = "0"
+requires-python = ">=3.13"
+dependencies = ["server-setup"]
+
+[tool.uv]
+package = false
+
+[tool.uv.sources]
+server-setup = { git = "https://github.com/lionel-panhaleux/server-setup", tag = "v2.2.1" }

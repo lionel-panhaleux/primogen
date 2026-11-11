@@ -21,8 +21,7 @@ type cardsInput struct {
 	Detail bool     `json:"detail,omitempty" jsonschema:"also list the printings and the translated texts"`
 }
 
-func addCards(s *mcp.Server, b *bundle.Bundle) {
-	ix := newCardIndex(b.Cards)
+func addCards(s *mcp.Server, l *Live) {
 	mcp.AddTool(s, &mcp.Tool{
 		Name: "vtes_cards",
 		Description: "VTES cards by name: the official text, the requirements and costs, legality, " +
@@ -34,9 +33,10 @@ func addCards(s *mcp.Server, b *bundle.Bundle) {
 		if len(in.Names) == 0 || len(in.Names) > maxNames || slices.ContainsFunc(in.Names, func(n string) bool { return bundle.Fold(n) == "" }) {
 			return nil, nil, fmt.Errorf(`give 1 to %d non-empty card names, e.g. {"names": ["Freak Drive", "Kiss of Ra"]}; got %q`, maxNames, in.Names)
 		}
+		d := l.p.Load()
 		var out strings.Builder
 		for _, name := range in.Names {
-			cards, note := ix.resolve(name)
+			cards, note := d.ix.resolve(name)
 			if note != "" {
 				fmt.Fprintf(&out, "%s\n\n", note)
 			}
@@ -44,7 +44,7 @@ func addCards(s *mcp.Server, b *bundle.Bundle) {
 				writeCard(&out, c, in.Detail)
 			}
 		}
-		out.WriteString(dataLine(b))
+		out.WriteString(DataLine(d.b))
 		return &mcp.CallToolResult{Content: []mcp.Content{&mcp.TextContent{Text: out.String()}}}, nil, nil
 	})
 }

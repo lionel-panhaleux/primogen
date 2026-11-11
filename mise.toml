@@ -1,3 +1,9 @@
 [tools]
 go = "1.27"
 jq = "1.8"
+uv = "0.13"
+
+[tasks.deploy]
+description = "Deploy to frankfurt with pyinfra: shows every change, then asks (--dry only shows)"
+dir = "deploy"
+run = "uv run pyinfra inventory.py deploy.py --diff"

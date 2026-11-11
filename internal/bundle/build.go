@@ -27,20 +27,35 @@ type Upstream struct {
 	RulingsHead string // answers the vtes-rulings commit to read, as a bare SHA
 	RulingsFile string // a file at that commit, formatted with the SHA and the file name
 	Archive     string // the archive's bulk file
+	// primogen's own knowledge/: a local directory, or else a head and files
+	// as for the rulings.
+	KnowledgeDir  string
+	KnowledgeHead string
+	KnowledgeFile string
 }
 
 var KRCG = Upstream{
-	Cards:       "https://static.krcg.org/data/v4/vtes.json",
-	RulingsHead: "https://api.github.com/repos/vtes-biased/vtes-rulings/commits/main",
-	RulingsFile: "https://raw.githubusercontent.com/vtes-biased/vtes-rulings/%s/rulings/%s",
-	Archive:     "https://usenet.krcg.org/archive.json.gz",
+	Cards:         "https://static.krcg.org/data/v4/vtes.json",
+	RulingsHead:   "https://api.github.com/repos/vtes-biased/vtes-rulings/commits/main",
+	RulingsFile:   "https://raw.githubusercontent.com/vtes-biased/vtes-rulings/%s/rulings/%s",
+	Archive:       "https://usenet.krcg.org/archive.json.gz",
+	KnowledgeHead: "https://api.github.com/repos/lionel-panhaleux/primogen/commits/main",
+	KnowledgeFile: "https://raw.githubusercontent.com/lionel-panhaleux/primogen/%s/knowledge/%s",
 }
 
-// Build reads every upstream and the knowledge directory. The warnings name
-// what needs a person.
-func Build(ctx context.Context, up Upstream, knowledge string) (*Bundle, []string, error) {
+// The names of Bundle.Sources, which Probe answers in the same terms.
+const (
+	SourceCards     = "cards of static.krcg.org"
+	SourceRulings   = "vtes-rulings"
+	SourceKnowledge = "knowledge"
+	SourceArchive   = "rulings archive to"
+)
+
+// Build reads every upstream but the archive, fetched apart by FetchArchive.
+// The warnings name what needs a person.
+func Build(ctx context.Context, up Upstream, archive *Archive) (*Bundle, []string, error) {
 	var raw []krcgCard
-	cardsDate, err := fetchJSON(ctx, up.Cards, &raw)
+	cardsVersion, err := fetchJSON(ctx, up.Cards, &raw)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -51,11 +66,7 @@ func Build(ctx context.Context, up Upstream, knowledge string) (*Bundle, []strin
 	if err != nil {
 		return nil, nil, err
 	}
-	archive, lastPost, err := fetchArchive(ctx, up.Archive)
-	if err != nil {
-		return nil, nil, err
-	}
-	history, err := os.ReadFile(filepath.Join(knowledge, "card-changes.md"))
+	knowledgeVersion, history, err := readKnowledge(ctx, up, "card-changes.md")
 	if err != nil {
 		return nil, nil, err
 	}
@@ -63,9 +74,10 @@ func Build(ctx context.Context, up Upstream, knowledge string) (*Bundle, []strin
 	b := &Bundle{
 		Built: time.Now().UTC(),
 		Sources: []Source{
-			{"cards of static.krcg.org", cardsDate},
-			{"vtes-rulings", db.commit[:7]},
-			{"rulings archive to", lastPost},
+			{SourceCards, cardsVersion},
+			{SourceRulings, db.commit[:7]},
+			{SourceKnowledge, knowledgeVersion},
+			{SourceArchive, archive.LastPost},
 		},
 		Cards: make([]Card, len(raw)),
 	}
@@ -74,9 +86,64 @@ func Build(ctx context.Context, up Upstream, knowledge string) (*Bundle, []strin
 	}
 	var warnings []string
 	warn := func(format string, a ...any) { warnings = append(warnings, fmt.Sprintf(format, a...)) }
-	b.attachRulings(db, archive, warn)
+	b.attachRulings(db, archive.index, warn)
 	b.attachChanges(history, warn)
 	return b, warnings, nil
+}
+
+// Probe answers the versions of every source but the archive, as Build would
+// record them, at the cost of a few small requests.
+func Probe(ctx context.Context, up Upstream) ([]Source, error) {
+	resp, err := open(ctx, http.MethodHead, up.Cards, "")
+	if err != nil {
+		return nil, err
+	}
+	resp.Body.Close()
+	cards, err := lastModified(resp)
+	if err != nil {
+		return nil, err
+	}
+	rulings, err := headCommit(ctx, up.RulingsHead)
+	if err != nil {
+		return nil, err
+	}
+	knowledge := "local"
+	if up.KnowledgeDir == "" {
+		if knowledge, err = headCommit(ctx, up.KnowledgeHead); err != nil {
+			return nil, err
+		}
+		knowledge = knowledge[:7]
+	}
+	return []Source{{SourceCards, cards}, {SourceRulings, rulings[:7]}, {SourceKnowledge, knowledge}}, nil
+}
+
+// readKnowledge reads a file of knowledge/ and says which version it read.
+func readKnowledge(ctx context.Context, up Upstream, name string) (string, []byte, error) {
+	if up.KnowledgeDir != "" {
+		body, err := os.ReadFile(filepath.Join(up.KnowledgeDir, name))
+		return "local", body, err
+	}
+	commit, err := headCommit(ctx, up.KnowledgeHead)
+	if err != nil {
+		return "", nil, err
+	}
+	body, err := fetch(ctx, fmt.Sprintf(up.KnowledgeFile, commit, name), "")
+	return commit[:7], body, err
+}
+
+var reCommit = regexp.MustCompile(`^[0-9a-f]{40}$`)
+
+// headCommit asks GitHub's API for a branch's commit, as a bare SHA.
+func headCommit(ctx context.Context, u string) (string, error) {
+	head, err := fetch(ctx, u, "application/vnd.github.sha")
+	if err != nil {
+		return "", err
+	}
+	commit := strings.TrimSpace(string(head))
+	if !reCommit.MatchString(commit) {
+		return "", fmt.Errorf("%s: not a commit: %q", u, commit)
+	}
+	return commit, nil
 }
 
 type rulingsDB struct {
@@ -101,17 +168,12 @@ func (e *rulingEntry) UnmarshalYAML(n *yaml.Node) error {
 	return n.Decode((*plain)(e))
 }
 
-var reCommit = regexp.MustCompile(`^[0-9a-f]{40}$`)
-
 func fetchRulings(ctx context.Context, up Upstream) (*rulingsDB, error) {
-	head, err := fetch(ctx, up.RulingsHead, "application/vnd.github.sha")
+	commit, err := headCommit(ctx, up.RulingsHead)
 	if err != nil {
 		return nil, err
 	}
-	db := &rulingsDB{commit: strings.TrimSpace(string(head))}
-	if !reCommit.MatchString(db.commit) {
-		return nil, fmt.Errorf("%s: not a commit: %q", up.RulingsHead, db.commit)
-	}
+	db := &rulingsDB{commit: commit}
 	for name, v := range map[string]any{"rulings.yaml": &db.rulings, "groups.yaml": &db.groups, "references.yaml": &db.references} {
 		u := fmt.Sprintf(up.RulingsFile, db.commit, name)
 		body, err := fetch(ctx, u, "")
@@ -121,6 +183,9 @@ func fetchRulings(ctx context.Context, up Upstream) (*rulingsDB, error) {
 		if err := yaml.Unmarshal(body, v); err != nil {
 			return nil, fmt.Errorf("%s: %w", u, err)
 		}
+	}
+	if len(db.rulings) == 0 {
+		return nil, fmt.Errorf("vtes-rulings %s: no rulings", commit)
 	}
 	return db, nil
 }
@@ -282,8 +347,8 @@ func (k krcgCard) card() Card {
 
 var client = &http.Client{Timeout: 10 * time.Minute}
 
-func open(ctx context.Context, u, accept string) (*http.Response, error) {
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, u, nil)
+func open(ctx context.Context, method, u, accept string) (*http.Response, error) {
+	req, err := http.NewRequestWithContext(ctx, method, u, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -303,7 +368,7 @@ func open(ctx context.Context, u, accept string) (*http.Response, error) {
 }
 
 func fetch(ctx context.Context, u, accept string) ([]byte, error) {
-	resp, err := open(ctx, u, accept)
+	resp, err := open(ctx, http.MethodGet, u, accept)
 	if err != nil {
 		return nil, err
 	}
@@ -313,7 +378,7 @@ func fetch(ctx context.Context, u, accept string) ([]byte, error) {
 
 // fetchJSON decodes the body and returns the server's date for it.
 func fetchJSON(ctx context.Context, u string, v any) (string, error) {
-	resp, err := open(ctx, u, "")
+	resp, err := open(ctx, http.MethodGet, u, "")
 	if err != nil {
 		return "", err
 	}
@@ -321,9 +386,13 @@ func fetchJSON(ctx context.Context, u string, v any) (string, error) {
 	if err := json.NewDecoder(resp.Body).Decode(v); err != nil {
 		return "", fmt.Errorf("%s: %w", u, err)
 	}
+	return lastModified(resp)
+}
+
+func lastModified(resp *http.Response) (string, error) {
 	date, err := http.ParseTime(resp.Header.Get("Last-Modified"))
 	if err != nil {
-		return "", fmt.Errorf("%s: no Last-Modified to date the data: %w", u, err)
+		return "", fmt.Errorf("%s: no Last-Modified to date the data: %w", resp.Request.URL, err)
 	}
-	return date.UTC().Format(time.DateOnly), nil
+	return date.UTC().Format("2006-01-02 15:04 UTC"), nil
 }
