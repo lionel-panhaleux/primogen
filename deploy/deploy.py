@@ -15,7 +15,8 @@ from server_setup import nginx_site
 REPO = Path(__file__).resolve().parent.parent
 DOMAIN = "mcp.krcg.org"
 NAME = "primogen"
-PORT = 8040
+# frankfurt has no port registry: 8040 is the engine's (zero-vtes), 8030 the forum's, 7007-9008 archon's
+PORT = 8050
 OPT = f"/opt/{NAME}"
 
 # A certificate request for a name that does not resolve here fails, and Let's Encrypt counts

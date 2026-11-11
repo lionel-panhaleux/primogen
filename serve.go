@@ -23,7 +23,7 @@ import (
 const nightly = 6
 
 func serve(ctx context.Context, fs *flag.FlagSet, path *string, args []string) error {
-	addr := fs.String("addr", "127.0.0.1:8040", "the address to listen on")
+	addr := fs.String("addr", "127.0.0.1:8050", "the address to listen on")
 	knowledge := fs.String("knowledge", "", "a local knowledge directory (default: knowledge/ at primogen's main branch on GitHub)")
 	if err := fs.Parse(args); err != nil {
 		return err
