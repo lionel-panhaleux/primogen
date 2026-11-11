@@ -73,6 +73,6 @@ trailer; upkeep reads them.
 
 ## Right now
 
-No code yet. The design is decided and recorded in `docs/`; the knowledge
-and the calibration corpus have moved in from `vtes-skill`; the board holds
-the next lines.
+One tool, `vtes_cards`, works from a source checkout: `primogen build`,
+then `primogen query` or `primogen stdio`. Nothing is hosted or published
+yet; the board holds the next lines.

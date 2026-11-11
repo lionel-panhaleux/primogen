@@ -31,11 +31,12 @@ then consumes primogen's output.
 
 ## Tools
 
-Names are provisional until the first one ships.
+`vtes_cards` has shipped and keeps its name; the others are provisional until
+they ship.
 
 | Tool | What it returns |
 |---|---|
-| `vtes_cards` | Cards resolved from names (fuzzy, translated names accepted): full text, requirements, every ruling with its link, errata history, legality. An unknown name returns the closest matches. |
+| `vtes_cards` | Cards resolved from names (exact, translated, or one or two letters off a single card): full text, requirements and costs, legality, every ruling with its `rulings.krcg.org` link and each cited post's link in the rulings archive, the card's entries in the history of changes (an entry whose name matches no card exactly, or several, says so). An unknown name returns the closest names and no card. The detailed mode adds the printings and the translated texts. |
 | `vtes_rules_case` | For the cards involved and a question: an evidence pack. Each card's verbatim text, every ruling that applies with the rules director's original post, the governing rulebook and advanced-rules sections, a structured breakdown of each card (type, cost, inferior and superior effects, timing restrictions), what is explicitly absent, and the answer contract. |
 | `vtes_rules_search`, `vtes_rules_read` | Keyword search over rulebook, advanced rules, tournament rules and judges' guide by section; a section read whole by id. |
 | `vtes_rulings_archive` | Full-text search of the rulings archive: posts with author, date, whether the author was the sitting rules director then, and the citable link. |

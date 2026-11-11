@@ -29,6 +29,29 @@ The server refreshes itself; there is no cron job and no operator.
   cards with no module tag, evidence tests that started failing, an upstream
   rules diff waiting for sync, an archive whose newest post is old.
 
+## Commands
+
+Go comes from mise: `mise install` in the checkout reads `mise.toml`.
+
+- `primogen build` fetches the card data, `vtes-rulings` at its latest
+  commit and the archive's bulk file, reads `knowledge/` in the current
+  directory (`-knowledge` to change it), and writes the bundle (by default
+  `bundle.json.gz` in the user cache directory, `-bundle` to change it). It
+  prints what needs a person: a reference the archive does not hold, a ruling
+  not in the rulings site's canonical form or citing no reference, a line of
+  the history of changes naming no card exactly (filed as possible under the
+  closest cards, or under none).
+- `primogen query cards NAME...` (`-detail` for the detailed mode) calls
+  `vtes_cards` through the MCP server and prints what the model reads.
+- `primogen stdio` serves the tools over stdio for a local MCP client.
+
+## Checks
+
+`gofmt -l .` prints nothing, `go vet ./...` and `go test ./...` pass. The
+tests read `testdata/bundle.json.gz`, a bundle built from the real sources
+and pinned: rebuilt with `go run . build -bundle testdata/bundle.json.gz`
+only when the bundle's format changes, the expectations checked again.
+
 ## Releases and deploys
 
 Trunk-based. A release is a tag; the owner tags and deploys. Knowledge files

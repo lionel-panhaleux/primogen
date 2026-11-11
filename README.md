@@ -9,9 +9,9 @@ texts, rulings, rules sections and computed deck and tournament facts, and
 your own assistant writes the answer. It will be hosted at `mcp.krcg.org` and
 runnable locally from the same binary.
 
-**Status: design decided, nothing built yet.** [`docs/index.md`](docs/index.md)
+**Status: under construction, not yet served.** [`docs/index.md`](docs/index.md)
 maps what it is and what was decided; [`BOARD.md`](BOARD.md) holds the work.
-Setup instructions arrive with the first served tool.
+Setup instructions arrive with the hosted server.
 
 ## License
 

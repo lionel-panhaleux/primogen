@@ -22,14 +22,25 @@ service is checked against that service before it is relied on.
 ## The rulings chain
 
 A rulemonger approves a proposal on `rulings.krcg.org`; the site writes
-`vtes-rulings`; that repository feeds the card data at `static.krcg.org`.
-Each ruling ends with a reference id (`[LSJ 20040518]`), which
-`references.yaml` resolves to an exact message in the archive
-(`usenet.krcg.org/t/<thread>/#m<n>`).
+`vtes-rulings`; the copy packaged with `krcg` feeds the card data at
+`static.krcg.org`, and lags: on 2026-11-11 its references still pointed at
+Google Groups where `references.yaml` points at the archive. Primogen reads
+`vtes-rulings` itself.
 
-A ruling has no id of its own in the YAML. The rulings site identifies it by
-a stable hash of its text and links to it as
-`rulings.krcg.org/index.html?uid=<card id>#r-<hash>`; the id changes when the
+Each ruling ends with reference ids (`[LSJ 20040518]`), which
+`references.yaml` resolves to a URL. A newsgroup-era reference points into
+the archive (`usenet.krcg.org/t/<thread>/#m<n>`, the anchor positional); a
+forum reference points at `vekn.net/forum/<category>/<topic>-<slug>#<post>`,
+which the archive holds as `usenet.krcg.org/t/vekn-<topic>/#<post>` (the
+`newsgroup-archive` README). Rules Team rulings on `blackchantry.com` and
+rulebook references are not in the archive.
+
+A ruling has no id of its own in the YAML. The rulings site's id is the first
+5 bytes of SHAKE128 over the ruling's text (`[REMINDER]` stripped, each card
+token `{100788|Freak Drive}` cut to `{100788}`), in base32; for a group
+ruling, the group's text, whatever prefix or override a card shows. The card
+page carries every ruling that applies, group rulings included, at
+`rulings.krcg.org/index.html?uid=<card id>#r-<id>`; the id changes when the
 wording is edited. A ruling ending in `[REMINDER]` restates card text or a
 core rule and may carry no reference.
 
