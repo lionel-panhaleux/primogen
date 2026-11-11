@@ -9,6 +9,7 @@ import (
 	"strings"
 	"unicode/utf8"
 
+	"github.com/google/jsonschema-go/jsonschema"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 
 	"github.com/lionel-panhaleux/primogen/internal/bundle"
@@ -17,24 +18,43 @@ import (
 const maxNames = 10
 
 type cardsInput struct {
-	Names  []string `json:"names" jsonschema:"card names, in English or translated, exact or approximate; at most 10"`
-	Detail bool     `json:"detail,omitempty" jsonschema:"also list the printings and the translated texts"`
+	Names  []string `json:"names"`
+	Detail bool     `json:"detail,omitempty"`
+}
+
+// cardsSchema is written out because the inferred one types names as
+// ["null", "array"], which the Gemini API rejects.
+var cardsSchema = &jsonschema.Schema{
+	Type: "object",
+	Properties: map[string]*jsonschema.Schema{
+		"names": {
+			Type: "array", Items: &jsonschema.Schema{Type: "string"},
+			Description: "card names, in English or translated, exact or approximate; at most 10",
+		},
+		"detail": {Type: "boolean", Description: "also list the printings and the translated texts"},
+	},
+	Required: []string{"names"},
 }
 
 func addCards(s *mcp.Server, l *Live) {
 	mcp.AddTool(s, &mcp.Tool{
-		Name: "vtes_cards",
-		Description: "VTES cards by name: the official text, the requirements and costs, legality, " +
+		Name:  "vtes_cards",
+		Title: "VTES cards",
+		Description: "Call for every Vampire: The Eternal Struggle (VTES) card an answer relies on: " +
+			"never state a card's text or a ruling from memory. " +
+			"Returns, by name: the official text, the requirements and costs, legality, " +
 			"every ruling of the rulings database with its rulings.krcg.org link and the archived post it cites, " +
 			"and the card's entries in the history of card changes. Accepts translated and misspelled names; " +
 			"an unknown name returns the closest names.",
-		Annotations: &mcp.ToolAnnotations{ReadOnlyHint: true},
+		InputSchema: cardsSchema,
+		Annotations: &mcp.ToolAnnotations{ReadOnlyHint: true, IdempotentHint: true, OpenWorldHint: new(false)},
 	}, func(ctx context.Context, _ *mcp.CallToolRequest, in cardsInput) (*mcp.CallToolResult, any, error) {
 		if len(in.Names) == 0 || len(in.Names) > maxNames || slices.ContainsFunc(in.Names, func(n string) bool { return bundle.Fold(n) == "" }) {
 			return nil, nil, fmt.Errorf(`give 1 to %d non-empty card names, e.g. {"names": ["Freak Drive", "Kiss of Ra"]}; got %q`, maxNames, in.Names)
 		}
 		d := l.p.Load()
 		var out strings.Builder
+		found := false
 		for _, name := range in.Names {
 			cards, note := d.ix.resolve(name)
 			if note != "" {
@@ -42,7 +62,12 @@ func addCards(s *mcp.Server, l *Live) {
 			}
 			for _, c := range cards {
 				writeCard(&out, c, in.Detail)
+				found = true
 			}
+		}
+		if found {
+			out.WriteString("Answer from these texts and rulings, quoting them and citing their links, never from memory. " +
+				"Where neither a card's text nor a ruling here settles a point, say it is unsettled rather than filling the gap.\n\n")
 		}
 		out.WriteString(DataLine(d.b))
 		return &mcp.CallToolResult{Content: []mcp.Content{&mcp.TextContent{Text: out.String()}}}, nil, nil

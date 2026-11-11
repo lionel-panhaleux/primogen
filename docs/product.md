@@ -58,10 +58,10 @@ the same tools from a shell.
   works, and the user is told once that tournaments, full-field meta and
   rankings need the login.
 - **MCP only.** The method reaches the model through the server's
-  instructions (the grounding rules first), through every tool result (the
-  contract and the next step), and through MCP prompts where the client
-  offers them. Nothing is shipped per client beyond a configuration snippet
-  in the README.
+  instructions (the grounding rules first), through each tool's description
+  and every tool result (the contract and the next step), and through MCP
+  prompts where the client offers them. Nothing is shipped per client beyond
+  a configuration snippet in the README.
 - **Local installs** run the same binary over stdio. They download the
   published data bundle and build nothing. They have every tool except the
   Archon-backed ones.
@@ -69,6 +69,30 @@ the same tools from a shell.
   developers and their agents: a catalog of the public services, their
   specifications, data formats and recipes, generated from the live
   specifications.
+
+### What each client does with a remote server
+
+As of 2026-11-11. Only Claude Code was tried by hand; the other rows are read
+from each vendor's documentation and issue tracker, linked in each cell.
+
+| Client | Adding the server | Instructions | Prompts | Results and tools | Checked |
+|---|---|---|---|---|---|
+| Claude (web, desktop, mobile) | A custom connector, "No sign-in" accepted, one on the Free plan ([docs](https://claude.com/docs/connectors/custom/add-unlisted.md)). Since 2026-11-03 authless connectors fail to connect ([claude-ai-mcp#1214](https://github.com/anthropics/claude-ai-mcp/issues/1214), open) | Not passed to the model ([#93](https://github.com/anthropics/claude-ai-mcp/issues/93), open) | Documented, reported missing from the menu since 2026-05 ([#333](https://github.com/anthropics/claude-ai-mcp/issues/333)) | About 150,000 characters at most ([docs](https://claude.com/docs/connectors/building/index.md)); the tools deferred, listed to the model by name only ([#1105](https://github.com/anthropics/claude-ai-mcp/issues/1105)); the list refreshed hours after a change ([#1044](https://github.com/anthropics/claude-ai-mcp/issues/1044)) | Docs and issues |
+| ChatGPT | Plugins, "Add custom MCP server", no authentication accepted ([docs](https://developers.openai.com/api/docs/guides/custom-mcp-server)); which plans qualify is unconfirmed | Read since 2026-05-26 ([changelog](https://developers.openai.com/plugins/changelog)); the first 512 characters must stand alone ([docs](https://developers.openai.com/apps-sdk/build/mcp-server)) | Not documented | The model reads `content` and `structuredContent` ([reference](https://developers.openai.com/apps-sdk/reference)); a tool not marked read-only asks for confirmation ([docs](https://developers.openai.com/api/docs/guides/custom-mcp-server)); a change needs a manual Refresh and a new conversation ([docs](https://developers.openai.com/apps-sdk/deploy/connect-chatgpt)) | Docs |
+| Gemini app | Settings, Connected apps, Custom apps: in the US, 18 or over, a personal account, Keep Activity on, added from the web ([help](https://support.google.com/gemini/answer/17209137)); whether a server without sign-in is accepted is undocumented | Added to the system prompt ([docs](https://developers.google.com/connected-apps/mcp/server-optimization)) | Not documented | `structuredContent` not supported; a tool marked destructive or open-world asks for confirmation; the schema and instructions snapshotted at registration (same page) | Docs |
+| Claude Code (local) | `claude mcp add`, HTTP or stdio ([docs](https://code.claude.com/docs/en/mcp)) | Passed, cut at 4,096 characters | Slash commands | 25,000 tokens at most by default, a text over 50,000 characters saved to a file; the tools deferred | By hand, hosted and stdio: the instructions quoted back, `vtes_cards` found and called unprompted |
+
+Primogen is built for the weakest of them. Claude's connectors drop the
+instructions and defer the tools, so a model may first meet primogen through
+a tool's name alone: the grounding rule opens each tool's description and is
+repeated after the cards of every result. Results are text only. Every tool
+is marked read-only and closed-world, the marks by which ChatGPT, Gemini and
+Claude ([criteria](https://claude.com/docs/connectors/building/review-criteria.md))
+decide whether to ask the user before a call. Input
+schemas carry no type union: the Go SDK infers `["null", "array"]` for a
+list, which the Gemini API answers with a 400
+([prometheus-mcp#189](https://github.com/prometheus/prometheus-mcp/pull/189),
+[gemini-cli#21094](https://github.com/google-gemini/gemini-cli/issues/21094)).
 
 ## What it deliberately does not do
 

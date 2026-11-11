@@ -136,6 +136,7 @@ func TestQueryCards(t *testing.T) {
 			"LSJ 19981028: https://usenet.krcg.org/t/JZHY1bTCAa0/#m1",
 			"ANK 20190425: https://usenet.krcg.org/t/vekn-77581/#94652 (archived from https://www.vekn.net/",
 			"Changes: no line of the history of card changes names this card.",
+			"Answer from these texts and rulings, quoting them and citing their links, never from memory.",
 			"Data: cards of static.krcg.org ",
 		}, not: []string{"Printings:"}},
 		{args: []string{"cards", "Lord of Serenity"}, want: []string{
@@ -144,7 +145,7 @@ func TestQueryCards(t *testing.T) {
 		{args: []string{"-detail", "cards", "Freak Drive"}, want: []string{"Printings: Jyhad 1994-08-16", "Translation (fr), Pulsion monstrueuse:"}},
 		{args: []string{"cards", "Pulsion monstrueuse"}, want: []string{"## Freak Drive", "#r-KHOYNPJM"}},
 		{args: []string{"cards", "Freak Drvie"}, want: []string{`No card is named "Freak Drvie"; this is Freak Drive`, "## Freak Drive"}},
-		{args: []string{"cards", "Blood Doll Supreme"}, want: []string{`No card is named "Blood Doll Supreme". Closest names: Blood Doll;`}, not: []string{"## "}},
+		{args: []string{"cards", "Blood Doll Supreme"}, want: []string{`No card is named "Blood Doll Supreme". Closest names: Blood Doll;`}, not: []string{"## ", "Answer from these texts"}},
 		// Misdirection is "Distraction" in French
 		{args: []string{"cards", "Distraction"}, want: []string{"## Distraction"}, not: []string{"## Misdirection"}},
 		{args: []string{"cards", "Theo Bell"}, want: []string{"## Theo Bell (G2)\n", "## Theo Bell (G2 ADV)\n", "## Theo Bell (G6)\n"}},
@@ -160,6 +161,7 @@ func TestQueryCards(t *testing.T) {
 		}, not: []string{"1995-11-01"}},
 		{args: []string{"cards", "Anson"}, want: []string{"## Anson (G1)", "Rulings: the rulings database has none for this card."}},
 		{args: []string{"cards", " "}, err: "give 1 to 10 non-empty card names"},
+		{args: []string{"cards", "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k"}, err: "give 1 to 10 non-empty card names"},
 	} {
 		t.Run(strings.Join(tc.args, " "), func(t *testing.T) {
 			var stdout, stderr strings.Builder
@@ -223,12 +225,17 @@ func TestServe(t *testing.T) {
 	}))
 	defer hosted.Close()
 
-	card := func() string {
+	connect := func() *mcp.ClientSession {
 		t.Helper()
 		cs, err := mcp.NewClient(&mcp.Implementation{Name: "test"}, nil).Connect(ctx, &mcp.StreamableClientTransport{Endpoint: hosted.URL + "/mcp"}, nil)
 		if err != nil {
 			t.Fatal(err)
 		}
+		return cs
+	}
+	card := func() string {
+		t.Helper()
+		cs := connect()
 		defer cs.Close()
 		res, err := cs.CallTool(ctx, &mcp.CallToolParams{Name: "vtes_cards", Arguments: map[string]any{"names": []string{"Freak Drive"}}})
 		if err != nil || res.IsError {
@@ -282,6 +289,22 @@ func TestServe(t *testing.T) {
 	published := hosted.URL + "/bundle.json.gz"
 
 	expect("first answer", card(), "cards of static.krcg.org 2026-11-01 00:00 UTC", "knowledge aaaaaaa")
+	cs := connect()
+	tools, err := cs.ListTools(ctx, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	cs.Close()
+	for _, tool := range tools.Tools {
+		var schema struct{ Properties map[string]struct{ Type any } }
+		raw, _ := json.Marshal(tool.InputSchema)
+		json.Unmarshal(raw, &schema)
+		for name, p := range schema.Properties {
+			if _, ok := p.Type.(string); !ok {
+				t.Errorf("%s: %s has the type %v, not a single type", tool.Name, name, p.Type)
+			}
+		}
+	}
 	expect("status page", get("/"), "Data: cards of static.krcg.org 2026-11-01 00:00 UTC", "Last refresh")
 	out, _ := local(published)
 	expect("first local run", out, "## Freak Drive", "cards of static.krcg.org 2026-11-01 00:00 UTC")
