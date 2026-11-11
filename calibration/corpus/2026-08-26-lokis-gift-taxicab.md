@@ -4,6 +4,7 @@ mode: rules
 answered-by: vtes-skill eb6dcd4
 status: graded
 regression: no
+settled-by: advanced rules, Card-provided hunt actions; card text of Loki's Gift, Unlicensed Taxicab
 ---
 
 ## Question

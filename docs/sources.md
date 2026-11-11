@@ -17,7 +17,7 @@ service is checked against that service before it is relied on.
 | `engine.krcg.org` | Rules enforcement for the cards it covers; bots | On each engine release | Public API |
 | `api.krcg.org` | Card search and decklist conversion | Live | Public API |
 | `gist.github.com/lionel-panhaleux/a4a9cad2e492af7c45c50a1cea7e6cf6` | The history of card and rules changes: each errata and rules change, dated (one section, 1995-10, by its month), linking its announcement (a newsgroup or forum post at its `usenet.krcg.org` copy) | By hand, by the owner; primogen copies it with `/sync` ([provenance.md](provenance.md)) | Public gist |
-| `vekn.net` (`/tournament-rules`, `/judges-guide`, `/code-of-ethics`) | The official tournament rules, judges' guide and code of ethics | When the VEKN publishes a revision | Public pages |
+| `vekn.net` (`/tournament-rules`, `/judges-guide`, `/code-of-ethics`) | The official tournament rules, judges' guide and code of ethics; the rulebook's page, whose anchors the rulings cite | When the VEKN publishes a revision; each page states its date ("Version updated 21th September 2025", "Effective August 7, 2026") | Public pages, `Last-Modified` the time of the request; primogen reads the first two, and the rulebook's page for its anchors |
 
 ## The rulings chain
 
@@ -43,6 +43,30 @@ page carries every ruling that applies, group rulings included, at
 `rulings.krcg.org/index.html?uid=<card id>#r-<id>`; the id changes when the
 wording is edited. A ruling ending in `[REMINDER]` restates card text or a
 core rule and may carry no reference.
+
+## The rules directors
+
+The succession, as `krcg`'s `RULING_AUTHORS` dates it (`krcg/rulings.py`),
+each start checked against its announcement in the archive where one was
+found (2026-11-11 and 2026-11-12). Ankha's is a span: krcg's 2016-12-04 is the
+day the V:EKN announced he would take over, not the day he did. Wizards of
+the Coast's net representatives answered the newsgroup until the V:EKN took
+the seat.
+
+| Label | Director | From | Announced |
+|---|---|---|---|
+| `TOM` | Thomas R. Wylie | 1994-12-15 | none held: he posted for Wizards of the Coast from 1994-04 |
+| `SFC` | Shawn F. Carnes | 1996-07-29 | ["I guess I'm the net NetRep!"](https://usenet.krcg.org/t/WzCRgg6ZYZ0/#m0) |
+| `JON` | Jon Wilkie | 1996-10-18 | ["OFFICIAL: New NetRep!"](https://usenet.krcg.org/t/p43vjjRTpds/#m0), by Carnes |
+| `LSJ` | L. Scott Johnson | 1997-02-24 | ["New Net.Rep"](https://usenet.krcg.org/t/w3et8cc8unk/#m0); his last ruling 2011-06-11, on BoardGameGeek |
+| `PIB` | Pascal Bertrand | 2011-07-06 | [the V:EKN's press release](https://usenet.krcg.org/t/vekn-5958/#m0) |
+| `ANK` | Vincent Ripoll (Ankha) | between 2016-12-04 and 2017-01-11 | [the V:EKN's new Inner Circle](https://usenet.krcg.org/t/vekn-75402/#m0), 2016-12-04: Bertrand stays Rules Director "until he finishes the new qualification system", then "Vincent Ripoll will take over"; the first ruling the database cites by Ankha is of 2017-01-11 |
+
+The archive spells them several ways (`LSJ`, `L. Scott Johnson
+(Rulemonger)`, `Tom Wylie`: the rulings site's `USENET_AUTHORS`). Primogen
+calls a post's author the sitting director only within these dates; between
+the Inner Circle's announcement and Ankha's first cited ruling, either may
+have been sitting, and a post of theirs there says so.
 
 ## The rulings site's read API
 

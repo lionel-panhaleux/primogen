@@ -4,6 +4,7 @@ mode: rules
 answered-by: vtes-skill eb6dcd4
 status: graded
 regression: no
+settled-by: rulebook, Who May Attempt to Block; advanced rules, Declaring and declining; ANK 20211003; card text of Deflection, Direct Intervention, Govern the Unaligned
 ---
 
 ## Question

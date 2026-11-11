@@ -57,9 +57,13 @@ none".
   evidence test shows one of them changed, the entry goes back to the owner,
   who re-grades it or retires it. Retiring sets `status: retired` and
   `regression: no`: the entry stays as a record. A served example drawn from
-  an entry the owner re-grades or retires is removed. The rules entries
-  answered by `vtes-skill` get their `settled-by` when they seed the
-  evidence tests.
+  an entry the owner re-grades or retires is removed.
+- A rules entry's `settled-by` is what its evidence test reads: items
+  separated by `; `, each `rulebook, <title>`, `advanced rules, <title>`
+  (without its number), `tournament rules, <title>`, `judges' guide,
+  <title>`, a ruling reference (`ANK 20211003`), `card text of <name>, <name>`
+  (the cards the test passes), or `owner's grade`; a closing parenthesis
+  explains an item and is not read.
 - No entry is served or shown to an answering model with its answer: only
   its question. The one exception is an excerpt the owner promotes to a
   served example (principle 8, `/calibrate` "Graded session" step 7).

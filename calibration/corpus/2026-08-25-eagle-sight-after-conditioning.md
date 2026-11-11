@@ -5,6 +5,7 @@ answered-by: vtes-skill eb6dcd4
 model: opus
 status: graded
 regression: yes
+settled-by: rulebook, Stealth and Intercept; rulebook, Who May Attempt to Block; card text of Eagle's Sight, Conditioning; owner's grade (the table's repair: the Conditioning back to hand if possible)
 ---
 
 ## Question

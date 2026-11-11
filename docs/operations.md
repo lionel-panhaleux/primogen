@@ -19,11 +19,23 @@ The server refreshes itself; there is no cron job and no operator.
 
 - A scheduler inside `primogen serve` checks the cheap sources at start and
   hourly: the card data's `Last-Modified`, the head commits of
-  `vtes-rulings` and of primogen's `main` (its `knowledge/`). When one moved,
-  it rebuilds. The heavy source, the archive's bulk file, is fetched at start
+  `vtes-rulings` and of primogen's `main` (its `knowledge/`), and vekn.net's
+  tournament rules and judges' guide, read whole (330 KB) since the server
+  dates every page by the request: each is dated by the date it states and
+  the hash of its sections' text. When one moved, it rebuilds. A vekn.net
+  page that fails, or comes back with under half its sections (a changed
+  template), keeps the live bundle's copy, with a warning. vekn.net's
+  rulebook page is read at each build for its anchors, not probed: a section
+  links an anchor the page has, or the section above it; when the page
+  fails, only the anchors the rulings cite count, with a warning. Section
+  ids are the headings' own and do not depend on the page. The heavy source, the archive's bulk file, is fetched at start
   and again after 06:00 UTC each night; it rebuilds when its newest post
   moved. A failed fetch keeps the archive held, and the cheap sources still
-  refresh ([sources.md](sources.md) says how each source refreshes).
+  refresh ([sources.md](sources.md) says how each source refreshes). The
+  archive is held whole in memory for `vtes_rulings_archive` (about 750 MB
+  resident at its peak, measured on a local query, and briefly twice that
+  while a nightly fetch replaces it); the bundle keeps only the posts the
+  rulings and the advanced rules cite.
 - A refresh builds a new bundle, checks it (no fewer cards than the live one;
   decks and the evidence tests join the check when they exist), saves it
   beside the live file and renames it over, then swaps it in between two tool
@@ -34,8 +46,9 @@ The server refreshes itself; there is no cron job and no operator.
   stops advancing.
 - Archon data goes into a separate database that is never published.
 - A local install downloads the published bundle on first run and again when
-  a newer one exists, checked at most daily. Offline, it serves what it has
-  and says how old it is.
+  a newer one exists, checked at most daily, and the archive's bulk file the
+  same way, from `usenet.krcg.org`, the first time `vtes_rulings_archive` is
+  called. Offline, it serves what it has and says how old it is.
 - Each refresh reports what needs a person, on the status page and in the
   journal: the build's warnings (below). Decks that matched no archetype,
   cards with no module tag, evidence tests that started failing, an upstream
@@ -47,20 +60,24 @@ The server refreshes itself; there is no cron job and no operator.
 Go, jq and uv come from mise: `mise install` in the checkout reads `mise.toml`.
 
 - `primogen build` fetches the card data, `vtes-rulings` at its latest
-  commit and the archive's bulk file, reads `knowledge/` in the current
+  commit, the archive's bulk file and vekn.net's rulebook, tournament rules
+  and judges' guide, reads `knowledge/` in the current
   directory (`-knowledge` to change it), and writes the bundle (by default
   `data/bundle.json.gz`, `-bundle` to change it, and to query it). It
   prints what needs a person: a reference the archive does not hold, a ruling
   not in the rulings site's canonical form or citing no reference, a line of
   the history of changes naming no card exactly or under no dated heading,
-  left out of the bundle: the fix is in the gist, then `/sync`.
-- `primogen query cards NAME...` (`-detail` for the detailed mode) calls
-  `vtes_cards` through the MCP server and prints what the model reads.
+  left out of the bundle: the fix is in the gist, then `/sync`; a post the
+  advanced rules cite that the archive does not hold: the fix is upstream.
+- `primogen query TOOL ARG...` (`-detail` for the detailed mode) calls a
+  tool through the MCP server and prints what the model reads: `cards
+  NAME...`, `case QUESTION [CARD...]`, `search WORDS...`, `read ID...`,
+  `archive WORDS...`.
 - `primogen stdio` serves the tools over stdio for a local MCP client.
 - Without `-bundle`, `query` and `stdio` are a local install: they use the
   published bundle in the user cache directory, which only the download
-  writes, as "Data refresh" says (`-from` changes where it downloads from,
-  for the tests).
+  writes, as "Data refresh" says (`-from` and `-archive` change where the
+  bundle and the archive are downloaded from, for the tests).
 - `primogen serve` is the hosted server: the tools over Streamable HTTP at
   `/mcp` (stateless, JSON responses), the published bundle and the status
   page, refreshed as "Data refresh" says, keeping current the file given
@@ -74,10 +91,13 @@ Go, jq and uv come from mise: `mise install` in the checkout reads `mise.toml`.
 ## Checks
 
 `gofmt -l .` prints nothing, `go vet ./...` and `go test ./...` pass, in
-a few seconds. The tests build a bundle from `testdata/upstream`, the real
-upstreams pinned and served by a local file server (the whole card data,
-`vtes-rulings` at one commit, the archive cut to its ids), with
-`knowledge/card-changes.md` as it stands, then query it as a user does. They
+about ten seconds. The tests build a bundle from `testdata/upstream`, the
+real upstreams pinned and served by a local file server (the whole card
+data, `vtes-rulings` at one commit, vekn.net's three pages, the archive cut to
+its ids and titles with the text of the posts the rulings and the advanced
+rules cite), with `knowledge/` as it stands, then query it as a user does,
+and run the evidence tests ([product.md](product.md) "Evaluation") on it,
+with zero-vtes's `rules-qa` and rulings ledger pinned beside them. They
 also run the hosted server through its refreshes against that server (the
 card data changed, a push to `main`, a quiet night, then the card data cut),
 as an MCP client and a local install see it.

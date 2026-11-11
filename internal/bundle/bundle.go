@@ -20,9 +20,16 @@ import (
 )
 
 type Bundle struct {
-	Built   time.Time
-	Sources []Source
-	Cards   []Card
+	Built    time.Time
+	Sources  []Source
+	Cards    []Card
+	Sections []Section
+	// Posts holds the archive's posts the rulings and the advanced rules cite, by link.
+	Posts map[string]Post
+	// RulesAnswer is knowledge/guide/rules-answer.md, the procedure a rules answer follows.
+	RulesAnswer string
+	// GameTerms are the game's terms in English, from knowledge/game-terms.json.
+	GameTerms []string
 }
 
 // Source dates what the bundle read: a commit, a file date, the newest post.

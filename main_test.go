@@ -11,6 +11,8 @@ import (
 	"net/http/httptest"
 	"os"
 	"path/filepath"
+	"regexp"
+	"slices"
 	"strings"
 	"sync"
 	"sync/atomic"
@@ -52,7 +54,7 @@ func buildTestBundle(path string) error {
 	if err != nil {
 		return err
 	}
-	b, warnings, err := bundle.Build(context.Background(), up, archive)
+	b, warnings, err := bundle.Build(context.Background(), up, archive, nil)
 	if err != nil {
 		return err
 	}
@@ -77,11 +79,14 @@ func newUpstream() (*upstream, bundle.Upstream, error) {
 	u.srv = httptest.NewServer(u)
 	srv := u.srv
 	return u, bundle.Upstream{
-		Cards:        srv.URL + "/vtes.json",
-		RulingsHead:  srv.URL + "/commit",
-		RulingsFile:  srv.URL + "/vtes-rulings/%s/%s",
-		Archive:      srv.URL + "/archive.json.gz",
-		KnowledgeDir: "knowledge",
+		Cards:           srv.URL + "/vtes.json",
+		RulingsHead:     srv.URL + "/commit",
+		RulingsFile:     srv.URL + "/vtes-rulings/%s/%s",
+		Archive:         srv.URL + "/archive.json.gz",
+		KnowledgeDir:    "knowledge",
+		TournamentRules: srv.URL + "/vekn/tournament-rules.html",
+		JudgesGuide:     srv.URL + "/vekn/judges-guide.html",
+		Rulebook:        srv.URL + "/vekn/rulebook.html",
 	}, err
 }
 
@@ -190,6 +195,141 @@ func TestQueryCards(t *testing.T) {
 	}
 }
 
+// TestQueryRules calls the rules tools as a model does.
+func TestQueryRules(t *testing.T) {
+	// the ten cards with the most rulings
+	b, err := bundle.Load(testBundle)
+	if err != nil {
+		t.Fatal(err)
+	}
+	cards := slices.Clone(b.Cards)
+	slices.SortStableFunc(cards, func(x, y bundle.Card) int { return len(y.Rulings) - len(x.Rulings) })
+	var ten []string
+	for _, c := range cards[:10] {
+		ten = append(ten, c.Name)
+	}
+	for _, tc := range []struct {
+		args      []string // after query -bundle
+		want, not []string
+		max       int // the result's bound, in characters
+	}{
+		{args: []string{"case", "Can I play a Freak Drive after I played superior Kiss of Ra?"}, want: []string{
+			"Found in the question: Freak Drive; The Kiss of Ra.",
+			"## Freak Drive", "## The Kiss of Ra",
+			"Breakdown (computed from the text above, which governs):\n- Type: Action Modifier",
+			"- Superior [FOR]: Only usable if the action was blocked. Unlock this vampire.",
+			// a ruling's original post, its author the sitting rules director then
+			"Original post: L. Scott Johnson, the sitting rules director, 1998-10-28",
+			"# The rules sections",
+			"### [advanced:3.5.3] 3.5.3 Ended and failed",
+			"- No ruling names Freak Drive and The Kiss of Ra together.",
+			"# Procedure: a rules answer",
+			"tournament rules of vekn.net Version updated 21th September 2025",
+		}},
+		{args: []string{"case", "Can a minion block twice?"}, want: []string{"No card given or found in the question", "### [rulebook:who-may-attempt-to-block]"}},
+		// a discipline is no card, and cards given are the cards
+		{args: []string{"case", "Can a vampire with superior Fortitude play Freak Drive after an action blocked by a vampire with Presence and The Kiss of Ra?", "Freak Drive"},
+			want: []string{"## Freak Drive", "The question also names The Kiss of Ra, not in cards"}, not: []string{"## Fortitude", "## Presence", "## The Kiss of Ra"}},
+		// a card whose name the rulebook stems alike is found; a word opening a sentence is suggested
+		{args: []string{"case", "Majesty against Immortal Grapple: who wins? And may my predator block after I play Conditioning?"}, want: []string{
+			"Found in the question: Immortal Grapple; Conditioning.", "The question may also name Majesty: pass them in cards if meant.",
+		}, not: []string{"## Majesty"}},
+		{args: append([]string{"case", "How do these interact?"}, ten...), want: []string{"## " + ten[9], "less close to the question: vtes_cards gives them all"}, max: 40000},
+		{args: append([]string{"-detail", "case", "How do these interact?"}, ten...), want: []string{"## " + ten[9]}, max: 80000},
+		{args: []string{"read", "rulebook:4-detailed-turn-sequence", "advanced:3", "advanced:4", "advanced:1", "advanced:2"}, want: []string{"Cut here, too long to read at once"}, max: 40000},
+		{args: []string{"search", "block after declining"}, want: []string{"### [advanced:3.3.2] 3.3.2 Declaring and declining", "vtes_rules_read gives a section whole"}},
+		{args: []string{"search", "stalling"}, want: []string{"### [judges:4.6] 4.6. Unsportsmanlike Conduct — Stalling", "the judges' guide › 4. Unsportsmanlike Conduct (official)"}},
+		{args: []string{"read", "advanced:3.5", "rulebook:nothing"}, want: []string{
+			"### [advanced:3.5] 3.5 Action repetition (NRA) and canceled actions",
+			"### [advanced:3.5.3] 3.5.3 Ended and failed",
+			"Its sources (footnotes):\n[^3-5-",
+			`No section has the id "rulebook:nothing"`,
+		}, not: []string{"(excerpt:"}},
+	} {
+		t.Run(strings.Join(tc.args, " "), func(t *testing.T) {
+			var stdout, stderr strings.Builder
+			if err := run(t.Context(), append([]string{"query", "-bundle", testBundle}, tc.args...), &stdout, &stderr); err != nil {
+				t.Fatal(err, stderr.String())
+			}
+			out := stdout.String()
+			for _, w := range tc.want {
+				if !strings.Contains(out, w) {
+					t.Errorf("missing %q in:\n%s", w, out)
+				}
+			}
+			for _, n := range tc.not {
+				if strings.Contains(out, n) {
+					t.Errorf("unexpected %q", n)
+				}
+			}
+			if tc.max > 0 && len(out) > tc.max {
+				t.Errorf("%d characters, over %d", len(out), tc.max)
+			}
+		})
+	}
+}
+
+// TestQueryArchive searches the rulings archive as a local install does: the
+// archive downloaded on first use, then kept.
+func TestQueryArchive(t *testing.T) {
+	u, _, err := newUpstream()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer u.srv.Close()
+	t.Setenv("HOME", t.TempDir())
+	t.Setenv("XDG_CACHE_HOME", "")
+	for range 2 {
+		var stdout, stderr strings.Builder
+		args := []string{"query", "-bundle", testBundle, "-archive", u.srv.URL + "/archive.json.gz", "archive", `"Freak Drive"`, "action"}
+		if err := run(t.Context(), args, &stdout, &stderr); err != nil {
+			t.Fatal(err, stderr.String())
+		}
+		for _, w := range []string{"posts hold [\"freak drive\" \"action\"] as words of their own", "the sitting rules director", "https://usenet.krcg.org/t/", "Archive: posts to "} {
+			if !strings.Contains(stdout.String(), w) {
+				t.Errorf("missing %q in:\n%s", w, stdout.String())
+			}
+		}
+	}
+	if u.archives != 1 {
+		t.Errorf("%d downloads of the archive by two local runs the same day, want 1", u.archives)
+	}
+	var stdout, stderr strings.Builder
+	if err := run(t.Context(), []string{"query", "-bundle", testBundle, "-archive", u.srv.URL + "/archive.json.gz", "-detail", "archive", "action"}, &stdout, &stderr); err != nil {
+		t.Fatal(err, stderr.String())
+	}
+	if n := stdout.Len(); n > 80000 {
+		t.Errorf("a detailed search of %d characters, over 80,000", n)
+	}
+}
+
+// TestRulebookLinks checks a rulebook section links an anchor vekn.net's page
+// has, or a chapter's page, and that a section's id is its own.
+func TestRulebookLinks(t *testing.T) {
+	b, err := bundle.Load(testBundle)
+	if err != nil {
+		t.Fatal(err)
+	}
+	page, err := os.ReadFile("testdata/upstream/vekn/rulebook.html")
+	if err != nil {
+		t.Fatal(err)
+	}
+	ids := map[string]bool{}
+	for _, m := range regexp.MustCompile(`id="([^"]+)"`).FindAllStringSubmatch(string(page), -1) {
+		ids[strings.ToLower(m[1])] = true
+	}
+	seen := map[string]bool{}
+	for _, s := range b.Sections {
+		if a, ok := strings.CutPrefix(s.URL, "https://www.vekn.net/rulebook#"); ok && s.Doc == bundle.DocRulebook && !ids[a] {
+			t.Errorf("%s links #%s, which the page does not have", s.ID, a)
+		}
+		if seen[s.ID] {
+			t.Errorf("two sections have the id %s", s.ID)
+		}
+		seen[s.ID] = true
+	}
+}
+
 func TestHistoryFullyFiled(t *testing.T) {
 	for _, w := range testWarnings {
 		if strings.HasPrefix(w, "card-changes.md") {
@@ -278,7 +418,7 @@ func TestServe(t *testing.T) {
 	}
 	age := func() {
 		t.Helper()
-		p, _ := installed()
+		p, _ := installed("bundle.json.gz")
 		old := time.Now().Add(-48 * time.Hour)
 		for _, f := range []string{p, p + ".checked"} {
 			if err := os.Chtimes(f, old, old); err != nil {
@@ -306,6 +446,14 @@ func TestServe(t *testing.T) {
 		}
 	}
 	expect("status page", get("/"), "Data: cards of static.krcg.org 2026-11-01 00:00 UTC", "Last refresh")
+	r.refresh(ctx, r.fetched)
+	cs = connect()
+	res, err := cs.CallTool(ctx, &mcp.CallToolParams{Name: "vtes_rulings_archive", Arguments: map[string]any{"query": "Freak Drive", "directors": true}})
+	cs.Close()
+	if err != nil || res.IsError {
+		t.Fatal(err, res)
+	}
+	expect("the hosted archive", res.Content[0].(*mcp.TextContent).Text, "the sitting rules director")
 	out, _ := local(published)
 	expect("first local run", out, "## Freak Drive", "cards of static.krcg.org 2026-11-01 00:00 UTC")
 	local(published)
@@ -360,5 +508,5 @@ func TestServe(t *testing.T) {
 	age()
 	out, errs := local("http://127.0.0.1:1/bundle.json.gz")
 	expect("offline local run", out, "## Freak Drive")
-	expect("offline local run", errs, "could not check for a newer bundle, serving the one built")
+	expect("offline local run", errs, "could not check for a newer bundle.json.gz, serving the one of ")
 }

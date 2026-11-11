@@ -44,7 +44,8 @@ violating one silently is not.
 ## Authority of rules sources
 
 - **Official**: the rulebook; the rulings database (curated by the
-  rulemongers, each ruling citing a rules director's post); card text.
+  rulemongers, each ruling citing a rules director's post); card text; the
+  V:EKN's tournament rules and judges' guide.
 - **Curated, revisable, to be taken with a grain of salt**: the advanced
   rules, a synthesis by the owner and other rulemongers that no rules
   director has verified. Within them, a reading no official source settles is

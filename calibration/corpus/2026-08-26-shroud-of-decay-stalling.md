@@ -4,6 +4,7 @@ mode: rules
 answered-by: vtes-skill eb6dcd4
 status: graded
 regression: no
+settled-by: rulebook, Playing a Card; advanced rules, The ash heap; judges' guide, Tournament Error — Slow Play; judges' guide, Unsportsmanlike Conduct — Stalling; judges' guide, Tournament Error — Public Information Miscommunication; LSJ 20090710; card text of Shroud of Decay
 ---
 
 ## Question

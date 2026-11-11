@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"runtime/debug"
 	"strings"
+	"sync"
 	"sync/atomic"
 	"time"
 
@@ -17,16 +18,30 @@ import (
 )
 
 const instructions = `Primogen grounds answers about Vampire: The Eternal Struggle (VTES).
-Never state a card's text or a ruling from memory: call vtes_cards for every card the answer relies on, and quote what it returns.
+Never state a card's text, a ruling or a rule from memory: call vtes_cards for every card the answer relies on, and vtes_rules_case first for any rules question; quote what they return.
 Each item carries its authority and its link; cite the link. When the result says no ruling covers a point, say the point is unsettled rather than filling the gap.`
+
+// The bounds of a result, in characters: under the 50,000 past which Claude
+// Code saves a result to a file and, detailed, about 20,000 tokens.
+const (
+	budget       = 40000
+	detailBudget = 80000
+)
 
 // Live is the data the tools serve. A call reads one snapshot, so a swap lands
 // between two calls.
-type Live struct{ p atomic.Pointer[data] }
+type Live struct {
+	p       atomic.Pointer[data]
+	archive atomic.Pointer[archiveSearch]
+	// LoadArchive fetches the archive on first use, for a server not handed one.
+	LoadArchive func(context.Context) (*bundle.Archive, error)
+	loading     sync.Mutex
+}
 
 type data struct {
-	b  *bundle.Bundle
-	ix *cardIndex
+	b     *bundle.Bundle
+	ix    *cardIndex
+	rules *rulesIndex
 }
 
 func NewLive(b *bundle.Bundle) *Live {
@@ -35,7 +50,10 @@ func NewLive(b *bundle.Bundle) *Live {
 	return l
 }
 
-func (l *Live) Swap(b *bundle.Bundle) { l.p.Store(&data{b, newCardIndex(b.Cards)}) }
+func (l *Live) Swap(b *bundle.Bundle) {
+	ix := newCardIndex(b.Cards)
+	l.p.Store(&data{b, ix, newRulesIndex(b, ix)})
+}
 
 func (l *Live) Bundle() *bundle.Bundle { return l.p.Load().b }
 
@@ -50,6 +68,9 @@ func Version() string {
 func NewServer(l *Live) *mcp.Server {
 	s := mcp.NewServer(&mcp.Implementation{Name: "primogen", Version: Version()}, &mcp.ServerOptions{Instructions: instructions})
 	addCards(s, l)
+	addCase(s, l)
+	addRules(s, l)
+	addArchive(s, l)
 	return s
 }
 

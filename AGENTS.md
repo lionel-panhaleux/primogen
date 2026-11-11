@@ -73,8 +73,10 @@ trailer; upkeep reads them.
 
 ## Right now
 
-One tool, `vtes_cards`, hosted at `https://mcp.krcg.org/mcp` and refreshing
-itself (not announced yet), and from a local install (`primogen stdio`)
-downloading the published bundle. From a checkout: `primogen build`, then
+`vtes_cards` hosted at `https://mcp.krcg.org/mcp` and refreshing itself (not
+announced yet), and from a local install (`primogen stdio`) downloading the
+published bundle. The four rules tools (`vtes_rules_case`,
+`vtes_rules_search`, `vtes_rules_read`, `vtes_rulings_archive`) are in the
+code and reach the hosted server at its next deploy. From a checkout: `primogen build`, then
 `primogen query` or `primogen stdio` with `-bundle data/bundle.json.gz`.
 The board holds the next lines.

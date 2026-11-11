@@ -4,6 +4,7 @@ mode: rules
 answered-by: vtes-skill eb6dcd4
 status: graded
 regression: no
+settled-by: rulebook, Disciplines; ANK 20230824; card text of Pack Alpha
 ---
 
 ## Question

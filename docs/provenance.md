@@ -21,6 +21,8 @@ compares them with upstream and records the commit below.
   `card-comparison.md`, `meta-reading.md`) come from the `vtes` skill, the
   codex-of-the-damned strategist and their owner-graded lessons; the
   strategist's graded cases stay in `calibration/codex-cases.md`, unserved.
+  `rules-answer.md` closes every `vtes_rules_case` pack as its answer
+  contract.
   `modules.md` is the module catalog the owner canonized on 2026-08-25.
 - `classification.json`: the owner's archetype labels for the
   tournament-winning decks since 2021-07 (the 2026-07 pass), forked from
@@ -41,8 +43,9 @@ What `vtes-skill` @ `65b5c3e` carried and primogen does not:
   originals.
 - Condensed copies of the tournament rules, the judges' guides (current and
   2004), the code of ethics and the rulebook: paraphrases, where primogen
-  serves verbatim text. The official documents are on `vekn.net`
-  ([sources.md](sources.md)).
+  serves verbatim text. Primogen reads the tournament rules and the judges'
+  guide from `vekn.net` at each refresh ([sources.md](sources.md)); the
+  code of ethics and the 2004 judges' guide are not read.
 - Its notes on gaps in the official documents: unverified.
 - The meta tables by year: computed facts, which the meta tools compute
   from the archive (principle 7).

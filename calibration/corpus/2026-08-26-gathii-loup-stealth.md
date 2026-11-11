@@ -4,6 +4,7 @@ mode: rules
 answered-by: vtes-skill eb6dcd4
 status: graded
 regression: no
+settled-by: advanced rules, Adding what is not needed; ANK 20231031; LSJ 20011214-2; card text of Gathii (G7), Loup
 ---
 
 ## Question

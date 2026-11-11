@@ -4,6 +4,7 @@ mode: rules
 answered-by: vtes-skill eb6dcd4
 status: graded
 regression: no
+settled-by: rulebook, Disciplines; advanced rules, When a cost is paid; ANK 20190625; card text of The Slow Withering
 ---
 
 ## Question

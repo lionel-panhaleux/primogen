@@ -31,15 +31,15 @@ then consumes primogen's output.
 
 ## Tools
 
-`vtes_cards` has shipped and keeps its name; the others are provisional until
-they ship.
+`vtes_cards` and the four rules tools have shipped and keep their names; the
+others are provisional until they ship.
 
 | Tool | What it returns |
 |---|---|
 | `vtes_cards` | Cards resolved from names (exact, an English name before another card's translated one; translated; or one or two letters off a single card): full text, requirements and costs, legality, every ruling with its `rulings.krcg.org` link and each cited post's link in the rulings archive, the card's entries in the history of changes (an entry whose name several cards share, or an older spelling, says so). An unknown name returns the closest names and no card. The detailed mode adds the printings and the translated texts. |
-| `vtes_rules_case` | For the cards involved and a question: an evidence pack. Each card's verbatim text, every ruling that applies with the rules director's original post, the governing rulebook and advanced-rules sections, a structured breakdown of each card (type, cost, inferior and superior effects, timing restrictions), what is explicitly absent, and the answer contract. |
-| `vtes_rules_search`, `vtes_rules_read` | Keyword search over rulebook, advanced rules, tournament rules and judges' guide by section; a section read whole by id. |
-| `vtes_rulings_archive` | Full-text search of the rulings archive: posts with author, date, whether the author was the sitting rules director then, and the citable link. |
+| `vtes_rules_case` | For a question and its cards, given, or else found in the question (an English name that is no game term and no phrase of the rulebook; a single word opening a sentence, a capitalized phrase of the rulebook, or another card when some are given, only suggested): each card's verbatim text and requirements, a breakdown computed from the text (type, effects by level, timing and limits), every ruling with its link (the closest to the question only, when all would not fit, and how many more `vtes_cards` gives), the original post of the rulings closest to the question with its author's role then; the rulings on other cards naming two of its cards; the sections joined to the cards (naming them, citing the posts their rulings cite, or linked by them) and the sections closest to the question's words, each with the footnotes it calls; what no source covers (no ruling for a card, no advanced rules section naming it, no ruling naming two of the cards together); and the procedure of `knowledge/guide/rules-answer.md` as the answer contract. |
+| `vtes_rules_search`, `vtes_rules_read` | Keyword search over the rulebook, the advanced rules, the tournament rules and the judges' guide by section, each labelled with its authority; a section read whole by id, with the sections under it and its footnotes. |
+| `vtes_rulings_archive` | Full-text search of the rulings archive over what each author wrote (not what they quoted): posts with author, date, whether the author was the sitting rules director then ([sources.md](sources.md) "The rules directors"), and the citable link. |
 | `vtes_deck` | A decklist (text, TWDA id, VDB link) parsed and validated, then a dossier: crypt table, which vampires can play each library card and at which level, library by type and module, hand expectation per module, costs, nearest archetypes, nearest tournament decks with their authors' comments, differences from those relatives. |
 | `vtes_meta` | Archetype shares over a window weighted by event size, what rises and falls against the previous window, an archetype's core cards and representative decks. With Archon login: play share against win share over the full field. |
 | `vtes_card_stats` | Play rates, co-occurrence, competitors for the same slot, overall or within an archetype. |
@@ -47,8 +47,9 @@ they ship.
 | `vtes_engine_check` | A described position and a proposed play, answered by the engine at `engine.krcg.org` with the legal options; says plainly when a card is outside the engine's pool. |
 | `vtes_guide` | The procedure for a task (rules answer, deck analysis, advice, card comparison, meta reading), the theory of the game, the module vocabulary, the game terms in a language with their label (translations unchecked, not an authority). |
 
-Every tool has a concise default and a detailed mode, says how to narrow when
-it truncates, and dates the data behind its answer. `primogen query` calls
+Every tool that excerpts has a concise default and a detailed mode; every
+tool says how to narrow when it truncates and dates the data behind its
+answer. `primogen query` calls
 the same tools from a shell. A tool that ships adds its one line to the README's
 "Tools".
 
@@ -67,8 +68,9 @@ the same tools from a shell. A tool that ships adds its one line to the README's
   per client (where to add the server, or the command), the detail left to
   each client's documentation and to these pages.
 - **Local installs** run the same binary over stdio. They download the
-  published data bundle and build nothing. They have every tool except the
-  Archon-backed ones.
+  published data bundle and build nothing, and the rulings archive's bulk
+  file the first time `vtes_rulings_archive` is called. They have
+  every tool except the Archon-backed ones.
 - **`mcp.krcg.org/llms.txt`** is the front door of the whole KRCG stack for
   developers and their agents: a catalog of the public services, their
   specifications, data formats and recipes, generated from the live
@@ -90,7 +92,11 @@ documentation and issue tracker, linked in each cell.
 Primogen is built for the weakest of them. Claude's connectors drop the
 instructions and defer the tools, so a model may first meet primogen through
 a tool's name alone: the grounding rule opens each tool's description and is
-repeated after the cards of every result. Results are text only. Every tool
+repeated at the end of every result. Results are text only. The rules
+tools bound theirs under 40,000 characters, below the 50,000 past which
+Claude Code saves a result to a file; a detailed one, under 80,000, is saved
+there and read from it. What a bound leaves out is named, with the call
+that gives it. Every tool
 is marked read-only and closed-world, the marks by which ChatGPT, Gemini and
 Claude ([criteria](https://claude.com/docs/connectors/building/review-criteria.md))
 decide whether to ask the user before a call. Input
@@ -117,8 +123,18 @@ list, which the Gemini API answers with a 400
 
 ## Evaluation
 
-- **Evidence tests**, with no LLM: for each graded case, the pack returned
-  for the question must contain the rule or ruling that settles it.
+- **Evidence tests**, with no LLM: for each graded case, the pack
+  `vtes_rules_case` returns for the question must contain the rule or
+  ruling that settles it. The cases: the owner-graded rules entries of the
+  calibration corpus, by their `settled-by`; the rules facts of the codex
+  strategist's cases C and F; each item of zero-vtes's `rules-qa` the
+  advanced rules cite, asked as the question, against the sections citing
+  it; and each row of zero-vtes's rulings ledger the pinned rulings database
+  files the same way: a ruling filed under the card or its group among the
+  card's rulings (`vtes_cards`), one filed under another card naming it
+  among the rulings naming it (`vtes_rules_case`'s detail). The
+  evidence keyword search does not reach is listed as a known miss, with
+  why; a miss not listed fails, and so does a listed one found again.
 - **Owner-graded sessions** on Claude, per milestone, with a regression set
   re-run after each revision (`calibration/`).
 - **Other models** are spot-checked by hand, not graded.

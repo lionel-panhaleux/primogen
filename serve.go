@@ -98,6 +98,9 @@ func newRefresher(ctx context.Context, up bundle.Upstream, path string, log *slo
 
 func (r *refresher) refresh(ctx context.Context, now time.Time) {
 	b, err := r.build(ctx, now, r.live.Bundle())
+	if r.archive != nil {
+		r.live.SetArchive(r.archive)
+	}
 	if b != nil {
 		r.live.Swap(b)
 		r.log.Info("refreshed", "data", tools.DataLine(b))
@@ -142,7 +145,7 @@ func (r *refresher) build(ctx context.Context, now time.Time, live *bundle.Bundl
 			return nil, stale
 		}
 	}
-	b, warnings, err := bundle.Build(ctx, r.up, r.archive)
+	b, warnings, err := bundle.Build(ctx, r.up, r.archive, live)
 	if err != nil {
 		return nil, errors.Join(stale, err)
 	}

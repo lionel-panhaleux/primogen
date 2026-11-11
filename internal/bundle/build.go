@@ -32,28 +32,40 @@ type Upstream struct {
 	KnowledgeDir  string
 	KnowledgeHead string
 	KnowledgeFile string
+	// vekn.net's pages
+	TournamentRules string
+	JudgesGuide     string
+	Rulebook        string
 }
 
 var KRCG = Upstream{
-	Cards:         "https://static.krcg.org/data/v4/vtes.json",
-	RulingsHead:   "https://api.github.com/repos/vtes-biased/vtes-rulings/commits/main",
-	RulingsFile:   "https://raw.githubusercontent.com/vtes-biased/vtes-rulings/%s/rulings/%s",
-	Archive:       "https://usenet.krcg.org/archive.json.gz",
-	KnowledgeHead: "https://api.github.com/repos/lionel-panhaleux/primogen/commits/main",
-	KnowledgeFile: "https://raw.githubusercontent.com/lionel-panhaleux/primogen/%s/knowledge/%s",
+	Cards:           "https://static.krcg.org/data/v4/vtes.json",
+	RulingsHead:     "https://api.github.com/repos/vtes-biased/vtes-rulings/commits/main",
+	RulingsFile:     "https://raw.githubusercontent.com/vtes-biased/vtes-rulings/%s/rulings/%s",
+	Archive:         "https://usenet.krcg.org/archive.json.gz",
+	KnowledgeHead:   "https://api.github.com/repos/lionel-panhaleux/primogen/commits/main",
+	KnowledgeFile:   "https://raw.githubusercontent.com/lionel-panhaleux/primogen/%s/knowledge/%s",
+	TournamentRules: "https://www.vekn.net/tournament-rules",
+	JudgesGuide:     "https://www.vekn.net/judges-guide",
+	Rulebook:        rulebookURL,
 }
 
 // The names of Bundle.Sources, which Probe answers in the same terms.
 const (
-	SourceCards     = "cards of static.krcg.org"
-	SourceRulings   = "vtes-rulings"
-	SourceKnowledge = "knowledge"
-	SourceArchive   = "rulings archive to"
+	SourceCards      = "cards of static.krcg.org"
+	SourceRulings    = "vtes-rulings"
+	SourceKnowledge  = "knowledge"
+	SourceArchive    = "rulings archive to"
+	SourceTournament = "tournament rules of vekn.net"
+	SourceJudges     = "judges' guide of vekn.net"
 )
 
 // Build reads every upstream but the archive, fetched apart by FetchArchive.
-// The warnings name what needs a person.
-func Build(ctx context.Context, up Upstream, archive *Archive) (*Bundle, []string, error) {
+// vekn.net's pages failing, the previous bundle's copy of them stands in,
+// when there is one. The warnings name what needs a person.
+func Build(ctx context.Context, up Upstream, archive *Archive, previous *Bundle) (*Bundle, []string, error) {
+	var warnings []string
+	warn := func(format string, a ...any) { warnings = append(warnings, fmt.Sprintf(format, a...)) }
 	var raw []krcgCard
 	cardsVersion, err := fetchJSON(ctx, up.Cards, &raw)
 	if err != nil {
@@ -66,9 +78,41 @@ func Build(ctx context.Context, up Upstream, archive *Archive) (*Bundle, []strin
 	if err != nil {
 		return nil, nil, err
 	}
-	knowledgeVersion, history, err := readKnowledge(ctx, up, "card-changes.md")
+	knowledgeVersion, read, err := knowledge(ctx, up)
 	if err != nil {
 		return nil, nil, err
+	}
+	var history, rulebook, advanced, procedure, terms []byte
+	for name, body := range map[string]*[]byte{
+		"card-changes.md": &history, "rules/rulebook.md": &rulebook, "rules/advanced-rules.md": &advanced,
+		"guide/rules-answer.md": &procedure, "game-terms.json": &terms,
+	} {
+		if *body, err = read(name); err != nil {
+			return nil, nil, err
+		}
+	}
+	gameTerms, err := readGameTerms(terms)
+	if err != nil {
+		return nil, nil, err
+	}
+	tournament, tournamentVersion, err := fetchVEKNOr(ctx, up.TournamentRules, DocTournament, SourceTournament, previous, warn)
+	if err != nil {
+		return nil, nil, err
+	}
+	judges, judgesVersion, err := fetchVEKNOr(ctx, up.JudgesGuide, DocJudges, SourceJudges, previous, warn)
+	if err != nil {
+		return nil, nil, err
+	}
+	anchors := map[string]bool{}
+	for _, u := range db.references {
+		if a, ok := strings.CutPrefix(u, rulebookURL+"#"); ok {
+			anchors[strings.ToLower(a)] = true
+		}
+	}
+	if page, err := fetchAnchors(ctx, up.Rulebook); err != nil {
+		warn("the rulebook's page: %v; its sections link only the anchors the rulings cite", err)
+	} else {
+		maps.Copy(anchors, page)
 	}
 
 	b := &Bundle{
@@ -78,16 +122,22 @@ func Build(ctx context.Context, up Upstream, archive *Archive) (*Bundle, []strin
 			{SourceRulings, db.commit[:7]},
 			{SourceKnowledge, knowledgeVersion},
 			{SourceArchive, archive.LastPost},
+			{SourceTournament, tournamentVersion},
+			{SourceJudges, judgesVersion},
 		},
-		Cards: make([]Card, len(raw)),
+		Cards:       make([]Card, len(raw)),
+		Sections:    slices.Concat(parseRulebook(rulebook), parseAdvanced(advanced), tournament, judges),
+		Posts:       map[string]Post{},
+		RulesAnswer: string(procedure),
+		GameTerms:   gameTerms,
 	}
 	for i, k := range raw {
 		b.Cards[i] = k.card()
 	}
-	var warnings []string
-	warn := func(format string, a ...any) { warnings = append(warnings, fmt.Sprintf(format, a...)) }
-	b.attachRulings(db, archive.index, warn)
+	linkRulebook(b.Sections, anchors)
+	b.attachRulings(db, archive, warn)
 	b.attachChanges(history, warn)
+	b.keepPosts(archive, warn)
 	return b, warnings, nil
 }
 
@@ -107,28 +157,76 @@ func Probe(ctx context.Context, up Upstream) ([]Source, error) {
 	if err != nil {
 		return nil, err
 	}
-	knowledge := "local"
-	if up.KnowledgeDir == "" {
-		if knowledge, err = headCommit(ctx, up.KnowledgeHead); err != nil {
-			return nil, err
-		}
-		knowledge = knowledge[:7]
+	version, _, err := knowledge(ctx, up)
+	if err != nil {
+		return nil, err
 	}
-	return []Source{{SourceCards, cards}, {SourceRulings, rulings[:7]}, {SourceKnowledge, knowledge}}, nil
+	probed := []Source{{SourceCards, cards}, {SourceRulings, rulings[:7]}, {SourceKnowledge, version}}
+	// a vekn.net page that fails is left out: it moves nothing
+	for _, p := range []struct{ name, url, doc string }{{SourceTournament, up.TournamentRules, DocTournament}, {SourceJudges, up.JudgesGuide, DocJudges}} {
+		if _, v, err := fetchVEKN(ctx, p.url, p.doc); err == nil {
+			probed = append(probed, Source{p.name, v})
+		}
+	}
+	return probed, nil
 }
 
-// readKnowledge reads a file of knowledge/ and says which version it read.
-func readKnowledge(ctx context.Context, up Upstream, name string) (string, []byte, error) {
+// fetchVEKNOr reads a vekn.net page, or keeps the previous bundle's copy of it
+// when the page fails or holds under half its sections (a changed template).
+func fetchVEKNOr(ctx context.Context, u, doc, source string, previous *Bundle, warn func(string, ...any)) ([]Section, string, error) {
+	sections, version, err := fetchVEKN(ctx, u, doc)
+	if previous == nil {
+		return sections, version, err
+	}
+	var kept []Section
+	for _, s := range previous.Sections {
+		if s.Doc == doc {
+			kept = append(kept, s)
+		}
+	}
+	if err == nil && len(sections) < len(kept)/2 {
+		err = fmt.Errorf("%s: %d sections, where the live bundle has %d", u, len(sections), len(kept))
+	}
+	if err == nil || len(kept) == 0 {
+		return sections, version, err
+	}
+	for _, s := range previous.Sources {
+		if s.Name == source {
+			version = s.Version
+		}
+	}
+	warn("%v: the live bundle's copy is kept", err)
+	return kept, version, nil
+}
+
+// readGameTerms answers the English terms of game-terms.json, every key of
+// its categories.
+func readGameTerms(raw []byte) ([]string, error) {
+	var categories map[string]map[string]json.RawMessage
+	if err := json.Unmarshal(raw, &categories); err != nil {
+		return nil, fmt.Errorf("game-terms.json: %w", err)
+	}
+	var out []string
+	for name, terms := range categories {
+		if name != "_meta" {
+			out = append(out, slices.Collect(maps.Keys(terms))...)
+		}
+	}
+	slices.Sort(out)
+	return out, nil
+}
+
+// knowledge says which version of knowledge/ a build reads, and reads its files
+// at that version.
+func knowledge(ctx context.Context, up Upstream) (string, func(string) ([]byte, error), error) {
 	if up.KnowledgeDir != "" {
-		body, err := os.ReadFile(filepath.Join(up.KnowledgeDir, name))
-		return "local", body, err
+		return "local", func(name string) ([]byte, error) { return os.ReadFile(filepath.Join(up.KnowledgeDir, name)) }, nil
 	}
 	commit, err := headCommit(ctx, up.KnowledgeHead)
 	if err != nil {
 		return "", nil, err
 	}
-	body, err := fetch(ctx, fmt.Sprintf(up.KnowledgeFile, commit, name), "")
-	return commit[:7], body, err
+	return commit[:7], func(name string) ([]byte, error) { return fetch(ctx, fmt.Sprintf(up.KnowledgeFile, commit, name), "") }, nil
 }
 
 var reCommit = regexp.MustCompile(`^[0-9a-f]{40}$`)
@@ -200,7 +298,7 @@ var (
 
 // attachRulings files each ruling under the card it names, and a group's
 // rulings under each member, behind the member's prefix or in its own wording.
-func (b *Bundle) attachRulings(db *rulingsDB, archive archiveIndex, warn func(string, ...any)) {
+func (b *Bundle) attachRulings(db *rulingsDB, archive *Archive, warn func(string, ...any)) {
 	refs := map[string]Reference{}
 	for label, u := range db.references {
 		ref := Reference{Label: label, URL: u, Archive: archive.link(u)}
@@ -261,6 +359,39 @@ func (b *Bundle) attachRulings(db *rulingsDB, archive archiveIndex, warn func(st
 				r.Text = cmp.Or(overrides[id], strings.TrimSpace(prefix+" "+text))
 				r.Link = rulingLink(card.ID, text)
 				card.Rulings = append(card.Rulings, r)
+			}
+		}
+	}
+}
+
+var reArchiveLink = regexp.MustCompile(`https://usenet\.krcg\.org/t/[^/\s)]+/#[\w-]+`)
+
+// keepPosts copies from the archive every post a ruling or the advanced rules
+// cite, which the evidence for a question quotes.
+func (b *Bundle) keepPosts(archive *Archive, warn func(string, ...any)) {
+	keep := func(link, citer string) {
+		if _, ok := b.Posts[link]; ok {
+			return
+		}
+		if p, ok := archive.Post(link); ok {
+			b.Posts[link] = p
+		} else if citer != "" {
+			warn("%s: the archive does not hold %s", citer, link)
+		}
+	}
+	for _, c := range b.Cards {
+		for _, r := range c.Rulings {
+			for _, ref := range r.References {
+				if ref.Archive != "" {
+					keep(ref.Archive, "")
+				}
+			}
+		}
+	}
+	for _, s := range b.Sections {
+		for _, n := range s.Notes {
+			for _, link := range reArchiveLink.FindAllString(n, -1) {
+				keep(link, "advanced-rules.md "+s.ID)
 			}
 		}
 	}

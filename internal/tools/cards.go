@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"regexp"
 	"slices"
+	"strconv"
 	"strings"
 	"unicode/utf8"
 
@@ -56,12 +57,12 @@ func addCards(s *mcp.Server, l *Live) {
 		var out strings.Builder
 		found := false
 		for _, name := range in.Names {
-			cards, note := d.ix.resolve(name)
+			cards, note := d.ix.resolve(name, "vtes_cards")
 			if note != "" {
 				fmt.Fprintf(&out, "%s\n\n", note)
 			}
 			for _, c := range cards {
-				writeCard(&out, c, in.Detail)
+				writeCard(&out, c, in.Detail, false, 0, nil)
 				found = true
 			}
 		}
@@ -115,7 +116,7 @@ func (ix *cardIndex) lookup(k string) []*bundle.Card {
 
 // resolve takes an exact match, else a misspelling one or two letters off a
 // single card, else answers with the closest names and no card.
-func (ix *cardIndex) resolve(name string) ([]*bundle.Card, string) {
+func (ix *cardIndex) resolve(name, tool string) ([]*bundle.Card, string) {
 	q := bundle.Fold(name)
 	if cards := ix.lookup(q); cards != nil {
 		return cards, ""
@@ -165,13 +166,16 @@ func (ix *cardIndex) resolve(name string) ([]*bundle.Card, string) {
 			break
 		}
 	}
-	return nil, fmt.Sprintf("No card is named %q. Closest names: %s. Call vtes_cards again with the intended one.",
-		name, strings.Join(closest, "; "))
+	return nil, fmt.Sprintf("No card is named %q. Closest names: %s. Call %s again with the intended one.",
+		name, strings.Join(closest, "; "), tool)
 }
 
 var reCardToken = regexp.MustCompile(`\{\d+\|([^}]*)\}`)
 
-func writeCard(out *strings.Builder, c *bundle.Card, detail bool) {
+// writeCard writes a card; compact puts a ruling's sources on one line,
+// archived copies only, of says how many rulings the card has when c holds
+// only some, and posts, when given, adds under each ruling.
+func writeCard(out *strings.Builder, c *bundle.Card, detail, compact bool, of int, posts func(*bundle.Ruling)) {
 	fmt.Fprintf(out, "## %s\n", c.Name)
 	fmt.Fprintf(out, "Card %d · %s · %s\n", c.ID, strings.Join(c.Types, " / "), c.Image)
 	for _, line := range requirements(c) {
@@ -191,7 +195,11 @@ func writeCard(out *strings.Builder, c *bundle.Card, detail bool) {
 	if len(c.Rulings) == 0 {
 		out.WriteString("Rulings: the rulings database has none for this card.\n\n")
 	} else {
-		fmt.Fprintf(out, "Rulings (%d, official: the rulings database):\n", len(c.Rulings))
+		count := strconv.Itoa(len(c.Rulings))
+		if of > len(c.Rulings) {
+			count += fmt.Sprintf(" of %d, the closest to the question", of)
+		}
+		fmt.Fprintf(out, "Rulings (%s, official: the rulings database):\n", count)
 		for i, r := range c.Rulings {
 			fmt.Fprintf(out, "%d. ", i+1)
 			if r.Group != "" {
@@ -201,8 +209,11 @@ func writeCard(out *strings.Builder, c *bundle.Card, detail bool) {
 				out.WriteString("[reminder of card text or a core rule] ")
 			}
 			fmt.Fprintf(out, "%s\n   Ruling: %s\n", reCardToken.ReplaceAllString(r.Text, "$1"), r.Link)
+			var sources []string
 			for _, ref := range r.References {
 				switch {
+				case compact:
+					sources = append(sources, ref.Label+" "+cmp.Or(ref.Archive, ref.URL))
 				case ref.Unarchived:
 					fmt.Fprintf(out, "   %s: %s (the rulings archive does not hold this post)\n", ref.Label, ref.URL)
 				case ref.Archive == "" || ref.Archive == ref.URL:
@@ -210,6 +221,12 @@ func writeCard(out *strings.Builder, c *bundle.Card, detail bool) {
 				default:
 					fmt.Fprintf(out, "   %s: %s (archived from %s)\n", ref.Label, ref.Archive, ref.URL)
 				}
+			}
+			if len(sources) > 0 {
+				fmt.Fprintf(out, "   Sources: %s\n", strings.Join(sources, "; "))
+			}
+			if posts != nil {
+				posts(&c.Rulings[i])
 			}
 		}
 		out.WriteString("\n")
