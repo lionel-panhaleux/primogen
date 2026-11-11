@@ -1,11 +1,13 @@
 package tools
 
 import (
+	"cmp"
 	"context"
 	"fmt"
 	"regexp"
 	"slices"
 	"strings"
+	"unicode/utf8"
 
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 
@@ -47,42 +49,41 @@ func addCards(s *mcp.Server, b *bundle.Bundle) {
 	})
 }
 
+// cardIndex maps folded names to cards: a vampire's printed name is shared by
+// its groups. An English name wins over a translation.
 type cardIndex struct {
-	cards []bundle.Card
-	// english and translated map folded names to cards: a vampire's printed
-	// name is shared by its groups. An English name wins over a translation.
-	english, translated map[string][]int
+	english, translated map[string][]*bundle.Card
 	names               []string
 }
 
 func newCardIndex(cards []bundle.Card) *cardIndex {
-	ix := &cardIndex{cards: cards, english: map[string][]int{}, translated: map[string][]int{}}
-	add := func(m map[string][]int, name string, i int) {
+	ix := &cardIndex{english: map[string][]*bundle.Card{}, translated: map[string][]*bundle.Card{}}
+	add := func(m map[string][]*bundle.Card, name string, c *bundle.Card) {
 		k := bundle.Fold(name)
-		if k == "" || slices.Contains(m[k], i) {
+		if k == "" || slices.Contains(m[k], c) {
 			return
 		}
 		if ix.english[k] == nil && ix.translated[k] == nil {
 			ix.names = append(ix.names, k)
 		}
-		m[k] = append(m[k], i)
+		m[k] = append(m[k], c)
 	}
-	for i, c := range cards {
-		for _, n := range slices.Concat([]string{c.Name, c.PrintedName}, c.Aliases) {
-			add(ix.english, n, i)
+	for i := range cards {
+		for _, n := range cards[i].Names() {
+			add(ix.english, n, &cards[i])
 		}
 	}
-	for i, c := range cards {
-		for _, t := range c.Translations {
-			add(ix.translated, t.Name, i)
+	for i := range cards {
+		for _, t := range cards[i].Translations {
+			add(ix.translated, t.Name, &cards[i])
 		}
 	}
 	return ix
 }
 
-func (ix *cardIndex) lookup(k string) []int {
-	if ids := ix.english[k]; ids != nil {
-		return ids
+func (ix *cardIndex) lookup(k string) []*bundle.Card {
+	if cards := ix.english[k]; cards != nil {
+		return cards
 	}
 	return ix.translated[k]
 }
@@ -91,52 +92,48 @@ func (ix *cardIndex) lookup(k string) []int {
 // single card, else answers with the closest names and no card.
 func (ix *cardIndex) resolve(name string) ([]*bundle.Card, string) {
 	q := bundle.Fold(name)
-	if ids := ix.lookup(q); ids != nil {
-		return ix.pick(ids), ""
+	if cards := ix.lookup(q); cards != nil {
+		return cards, ""
 	}
 	type candidate struct {
 		name      string
 		contained bool
 		distance  int
 	}
-	var cands []candidate
-	for _, n := range ix.names {
-		cands = append(cands, candidate{n, strings.Contains(n, q), bundle.Distance(q, n)})
+	cands := make([]candidate, len(ix.names))
+	for i, n := range ix.names {
+		cands[i] = candidate{n, strings.Contains(n, q), bundle.Distance(q, n)}
 	}
-	slices.SortStableFunc(cands, func(a, b candidate) int {
-		if a.distance != b.distance {
-			return a.distance - b.distance
-		}
-		return len(a.name) - len(b.name)
+	slices.SortFunc(cands, func(a, b candidate) int {
+		return cmp.Or(cmp.Compare(a.distance, b.distance), cmp.Compare(len(a.name), len(b.name)), strings.Compare(a.name, b.name))
 	})
-	if best := cands[0]; best.distance <= 2 && len([]rune(q)) >= 5 {
-		ids := ix.lookup(best.name)
-		unique := len(ids) == 1
+	if best := cands[0]; best.distance <= 2 && utf8.RuneCountInString(q) >= 5 {
+		cards := ix.lookup(best.name)
+		unique := len(cards) == 1
 		for _, c := range cands[1:] {
 			if c.distance > best.distance {
 				break
 			}
-			unique = unique && slices.Equal(ix.lookup(c.name), ids)
+			unique = unique && slices.Equal(ix.lookup(c.name), cards)
 		}
 		if unique {
-			c := &ix.cards[ids[0]]
-			return []*bundle.Card{c}, fmt.Sprintf("No card is named %q; this is %s, the one closest name.", name, c.Name)
+			return cards, fmt.Sprintf("No card is named %q; this is %s, the one closest name.", name, cards[0].Name)
 		}
 	}
 	slices.SortStableFunc(cands, func(a, b candidate) int {
-		if a.contained != b.contained {
-			if a.contained {
-				return -1
-			}
-			return 1
+		switch {
+		case a.contained == b.contained:
+			return 0
+		case a.contained:
+			return -1
 		}
-		return 0
+		return 1
 	})
 	var closest []string
 	for _, c := range cands {
-		for _, i := range ix.lookup(c.name) {
-			if n := ix.cards[i].Name; !slices.Contains(closest, n) {
-				closest = append(closest, n)
+		for _, card := range ix.lookup(c.name) {
+			if !slices.Contains(closest, card.Name) {
+				closest = append(closest, card.Name)
 			}
 		}
 		if len(closest) >= 5 {
@@ -145,14 +142,6 @@ func (ix *cardIndex) resolve(name string) ([]*bundle.Card, string) {
 	}
 	return nil, fmt.Sprintf("No card is named %q. Closest names: %s. Call vtes_cards again with the intended one.",
 		name, strings.Join(closest, "; "))
-}
-
-func (ix *cardIndex) pick(ids []int) []*bundle.Card {
-	cards := make([]*bundle.Card, len(ids))
-	for i, id := range ids {
-		cards[i] = &ix.cards[id]
-	}
-	return cards
 }
 
 var reCardToken = regexp.MustCompile(`\{\d+\|([^}]*)\}`)

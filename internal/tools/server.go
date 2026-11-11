@@ -4,6 +4,7 @@ package tools
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"runtime/debug"
 	"strings"
@@ -53,7 +54,7 @@ func Call(ctx context.Context, s *mcp.Server, tool string, args map[string]any) 
 		}
 	}
 	if res.IsError {
-		return "", fmt.Errorf("%s", out.String())
+		return "", errors.New(out.String())
 	}
 	return out.String(), nil
 }

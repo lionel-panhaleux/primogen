@@ -5,9 +5,11 @@ package bundle
 import (
 	"compress/gzip"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 	"time"
 	"unicode"
@@ -63,6 +65,11 @@ type Card struct {
 	Changes []Change
 }
 
+// Names are the card's English names.
+func (c *Card) Names() []string {
+	return slices.Concat([]string{c.Name, c.PrintedName}, c.Aliases)
+}
+
 type Translation struct {
 	Lang string
 	Name string
@@ -98,9 +105,8 @@ type Change struct {
 	Date         string
 	Announcement string
 	URL          string
-	// Named is the name as the history writes it.
-	Named string
-	Text  string
+	Named        string // the name as the history writes it
+	Text         string
 	// Possible marks a name matching no card exactly, filed under the cards
 	// whose name is close to it.
 	Possible bool
@@ -122,6 +128,9 @@ func Load(path string) (*Bundle, error) {
 	if err := json.NewDecoder(z).Decode(&b); err != nil {
 		return nil, fmt.Errorf("%s: %w", path, err)
 	}
+	if len(b.Cards) == 0 {
+		return nil, fmt.Errorf("%s: no cards", path)
+	}
 	return &b, nil
 }
 
@@ -136,18 +145,7 @@ func (b *Bundle) Save(path string) error {
 	}
 	defer os.Remove(tmp.Name())
 	z := gzip.NewWriter(tmp)
-	if err := json.NewEncoder(z).Encode(b); err != nil {
-		tmp.Close()
-		return err
-	}
-	if err := z.Close(); err != nil {
-		tmp.Close()
-		return err
-	}
-	if err := tmp.Close(); err != nil {
-		return err
-	}
-	if err := os.Chmod(tmp.Name(), 0o644); err != nil {
+	if err := errors.Join(json.NewEncoder(z).Encode(b), z.Close(), tmp.Chmod(0o644), tmp.Close()); err != nil {
 		return err
 	}
 	return os.Rename(tmp.Name(), path)
@@ -165,8 +163,7 @@ func Fold(s string) string {
 // Distance is the Levenshtein distance over runes.
 func Distance(a, b string) int {
 	ra, rb := []rune(a), []rune(b)
-	prev := make([]int, len(rb)+1)
-	cur := make([]int, len(rb)+1)
+	prev, cur := make([]int, len(rb)+1), make([]int, len(rb)+1)
 	for j := range prev {
 		prev[j] = j
 	}

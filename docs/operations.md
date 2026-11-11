@@ -31,7 +31,7 @@ The server refreshes itself; there is no cron job and no operator.
 
 ## Commands
 
-Go comes from mise: `mise install` in the checkout reads `mise.toml`.
+Go and jq come from mise: `mise install` in the checkout reads `mise.toml`.
 
 - `primogen build` fetches the card data, `vtes-rulings` at its latest
   commit and the archive's bulk file, reads `knowledge/` in the current
@@ -47,10 +47,14 @@ Go comes from mise: `mise install` in the checkout reads `mise.toml`.
 
 ## Checks
 
-`gofmt -l .` prints nothing, `go vet ./...` and `go test ./...` pass. The
-tests read `testdata/bundle.json.gz`, a bundle built from the real sources
-and pinned: rebuilt with `go run . build -bundle testdata/bundle.json.gz`
-only when the bundle's format changes, the expectations checked again.
+`gofmt -l .` prints nothing, `go vet ./...` and `go test ./...` pass, in
+about a second. The tests build a bundle from `testdata/upstream`, the real
+upstreams pinned and served by a local file server (the whole card data,
+`vtes-rulings` at one commit, the archive cut to its ids), with
+`knowledge/card-changes.md` as it stands, then query it as a user does.
+`testdata/upstream/refresh.sh` pins them again; the expectations are then
+checked against the new data, and a `/sync` changing an entry a test names
+updates that test in the same change.
 
 ## Releases and deploys
 
