@@ -11,8 +11,8 @@ of real questions ([product.md](product.md) "Evaluation").
 
 ## The phase: building, before any user
 
-Nothing is served yet. Ends when the owner announces `mcp.krcg.org` to the
-community; real users change the ranking and may change the harness.
+Served at `mcp.krcg.org`, not announced. Ends when the owner announces it
+to the community; real users change the ranking and may change the harness.
 
 ## Ranking
 

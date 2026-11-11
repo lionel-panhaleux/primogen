@@ -6,8 +6,8 @@ commands are added here by the lines that create them.
 ## Environments
 
 - **This machine**: sessions in the one checkout on `main`.
-- **frankfurt** (the VPS shared with the engine and Archon beta): the home
-  of `https://mcp.krcg.org`, not deployed yet. `primogen serve` listens on `127.0.0.1:8050` as
+- **frankfurt** (the VPS shared with the engine and Archon beta): serves
+  `https://mcp.krcg.org`. `primogen serve` listens on `127.0.0.1:8050` as
   the `primogen` systemd unit (a dynamic user, its bundle in
   `/var/lib/primogen`, logs under `journalctl -t primogen`), behind
   `server-setup`'s `nginx_site` and certbot. No secrets yet; the first one

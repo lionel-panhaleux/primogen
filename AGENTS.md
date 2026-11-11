@@ -73,8 +73,8 @@ trailer; upkeep reads them.
 
 ## Right now
 
-One tool, `vtes_cards`. `primogen serve` is the hosted server, refreshing
-itself, and `mise run deploy` puts it on frankfurt; it is not deployed yet,
-so a local install has nothing to download. From a checkout: `primogen
-build`, then `primogen query` or `primogen stdio` with `-bundle
-data/bundle.json.gz`. The board holds the next lines.
+One tool, `vtes_cards`, hosted at `https://mcp.krcg.org/mcp` and refreshing
+itself (not announced yet), and from a local install (`primogen stdio`)
+downloading the published bundle. From a checkout: `primogen build`, then
+`primogen query` or `primogen stdio` with `-bundle data/bundle.json.gz`.
+The board holds the next lines.
