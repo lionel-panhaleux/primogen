@@ -66,15 +66,20 @@ compares the unzipped content.
 
 ## The archive's limits
 
-- A plain nightly sweep does not see a reply posted after the director's last
-  post in a topic; only its `--refresh` run does.
+- A reply posted after the director's last post in a topic is seen only by
+  the weekly refresh, which reads again the topics with a post in the last 60
+  days: a reply to a topic quiet for longer is missed.
 - The forum's search under-reports (5,609 of the 6,947 posts on Ankha's
-  profile), so a topic can be missing.
-- GitHub disables a scheduled workflow after 60 days without a commit, which
-  would stop the sweep.
+  profile), so a topic no ruling cites can be missing. Every forum topic the
+  rulings database cites by its forum link is checked each night and fetched
+  if absent; one the forum no longer serves fails the sweep.
+- GitHub disables a scheduled workflow after 60 days without repository
+  activity, a term its docs leave undefined. A monthly empty commit, dated in
+  its message, is the activity.
 - Nothing published records when a sweep last ran: a sweep that finds nothing
   commits and deploys nothing, and `LastPost` is the newest post's date. A
-  stopped sweep and a quiet forum look the same from outside.
+  failed sweep goes red in the repository's Actions tab, but from outside a
+  stopped sweep and a quiet forum look the same.
 
 ## Archon
 
