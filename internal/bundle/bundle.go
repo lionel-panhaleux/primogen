@@ -102,14 +102,11 @@ type Reference struct {
 
 // Change is an entry of the history of card and rules changes.
 type Change struct {
-	Date         string
+	Date         string // a day, or a month
 	Announcement string
 	URL          string
 	Named        string // the name as the history writes it
 	Text         string
-	// Possible marks a name matching no card exactly, filed under the cards
-	// whose name is close to it.
-	Possible bool
 	// Shared marks a name several cards answer to, the entry filed under each.
 	Shared bool
 }

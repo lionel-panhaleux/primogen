@@ -197,8 +197,6 @@ func writeCard(out *strings.Builder, c *bundle.Card, detail bool) {
 		for _, ch := range c.Changes {
 			fmt.Fprintf(out, "- %s, %s (%s): %s", ch.Date, ch.Announcement, ch.URL, ch.Text)
 			switch {
-			case ch.Possible:
-				fmt.Fprintf(out, " [the history names %q, no card exactly: possibly this one]", ch.Named)
 			case ch.Shared:
 				fmt.Fprintf(out, " [the history names %q, which several cards share: it may concern another]", ch.Named)
 			case bundle.Fold(ch.Named) != bundle.Fold(c.Name) && bundle.Fold(ch.Named) != bundle.Fold(c.PrintedName):

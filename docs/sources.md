@@ -16,7 +16,7 @@ service is checked against that service before it is relied on.
 | `api.archon.vekn.net` | Tournaments, published decklists, members and ratings, community links | Export rebuilt within 15 minutes of a change | App token (below) |
 | `engine.krcg.org` | Rules enforcement for the cards it covers; bots | On each engine release | Public API |
 | `api.krcg.org` | Card search and decklist conversion | Live | Public API |
-| `gist.github.com/lionel-panhaleux/a4a9cad2e492af7c45c50a1cea7e6cf6` | The history of card and rules changes: each errata and rules change, dated, linking its announcement | By hand, by the owner; primogen copies it with `/sync` ([provenance.md](provenance.md)) | Public gist |
+| `gist.github.com/lionel-panhaleux/a4a9cad2e492af7c45c50a1cea7e6cf6` | The history of card and rules changes: each errata and rules change, dated (one section, 1995-10, by its month), linking its announcement (a newsgroup or forum post at its `usenet.krcg.org` copy, the 1998-08-01 one excepted) | By hand, by the owner; primogen copies it with `/sync` ([provenance.md](provenance.md)) | Public gist |
 | `vekn.net` (`/tournament-rules`, `/judges-guide`, `/code-of-ethics`) | The official tournament rules, judges' guide and code of ethics | When the VEKN publishes a revision | Public pages |
 
 ## The rulings chain

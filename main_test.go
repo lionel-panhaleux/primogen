@@ -7,7 +7,6 @@ import (
 	"net/http/httptest"
 	"os"
 	"path/filepath"
-	"slices"
 	"strings"
 	"testing"
 
@@ -84,7 +83,13 @@ func TestQueryCards(t *testing.T) {
 		{args: []string{"cards", "Count Germaine (G4)"}, want: []string{`[the history names "Count Germaine", which several cards share`}},
 		// the 1998 entry naming Kalinda predates the G6 card
 		{args: []string{"cards", "Kalinda (G6)"}, want: []string{"Changes: no line of the history of card changes names this card."}},
-		{args: []string{"cards", "Constanza Vinti"}, want: []string{`[the history names "Constanza Vinzi", no card exactly: possibly this one]`}},
+		{args: []string{"cards", "Constanza Vinti"}, want: []string{
+			"- 1996-05-31, RTR 19960531 (https://usenet.krcg.org/t/DpvF2Peet9o/#m0): Only gets the bleed bonus if you're bleeding your prey.\n",
+		}},
+		// a section dated by its month only
+		{args: []string{"cards", "Patagia: Flaps Allowing Limited Flight"}, want: []string{
+			"- 1995-10, VTES (https://archive.org/details/Duelist7/page/n109): Can only be played once on a given vampire.\n",
+		}, not: []string{"1995-11-01"}},
 		{args: []string{"cards", "Anson"}, want: []string{"## Anson (G1)", "Rulings: the rulings database has none for this card."}},
 		{args: []string{"cards", " "}, err: "give 1 to 10 non-empty card names"},
 	} {
@@ -115,13 +120,10 @@ func TestQueryCards(t *testing.T) {
 	}
 }
 
-func TestBuildWarnings(t *testing.T) {
-	for _, w := range []string{
-		`"Monacle of Clarity" names no card exactly; filed as possible under Monocle of Clarity`,
-		`no card named in "- The promo vampires`,
-	} {
-		if !slices.ContainsFunc(testWarnings, func(s string) bool { return strings.Contains(s, w) }) {
-			t.Errorf("no warning %q in:\n%s", w, strings.Join(testWarnings, "\n"))
+func TestHistoryFullyFiled(t *testing.T) {
+	for _, w := range testWarnings {
+		if strings.HasPrefix(w, "card-changes.md") {
+			t.Error(w)
 		}
 	}
 }

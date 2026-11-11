@@ -1,7 +1,7 @@
 # History of cards and rules changes
 
 # 2026-05-22
-[Effective Strike](https://www.vekn.net/forum/rules-questions/83009-clarification-effective-strike#117087)
+[Effective Strike](https://usenet.krcg.org/t/vekn-83009/#117087)
 
 Ineffective strikes still affect the striking minion, and can provide press and/or maneuver. 
 
@@ -83,7 +83,7 @@ New terms: **Stun:** and **Queue a combat**.
 - Wamukota: Now explicitly locks the blocking minion.
 
 # 2021-09-03
-[Vlad Tepes change](https://www.vekn.net/forum/rules-questions/76491-no-secrets-from-vlad-tepes?start=30#103038)
+[Vlad Tepes change](https://usenet.krcg.org/t/vekn-76491/#103038)
 - Vlad Tepes: he now "uses" the card continuously (previously was: "can use"). No Secrets from the Magaji now works for him the same way it does for a regular Magaji.
 
 # 2021-07-09
@@ -176,7 +176,7 @@ Renamings: Thaumaturgy is now **Blood Sorcery**, Assamites are **Banu Haqim** an
 - Black Metamorphosis: Is now at +1 stealth.
 
 # 2019-02-17
-[Sabbat Preconstructed](https://www.vekn.net/forum/news-and-announcements/77280-release-date-for-first-2019-starter-decks-february-16#93508)
+[Sabbat Preconstructed](https://usenet.krcg.org/t/vekn-77280/#93508)
 - Perfectionist: Gaining blood is now optional.
 - Trap: Is now put into play with counters to track the number of presses it can provide.
 - Powerbase: Madrid: Adding the counter is now optional.
@@ -191,7 +191,7 @@ Rule change: **Cold Iron vulnerability** is dropped, weapons updated to inflict 
 Rule change: **Scarce** now only accounts for the _owner's_ vampires of the same clan
 
 - Banshee Ironwail: Now inflicts aggravated damage on Kiasyd.
-- Cheat the Fate: The vampire unlocks as part of the resolution.
+- Cheat the Fates: The vampire unlocks as part of the resolution.
 - Code of Samiel: Gaining blood and unlocking are now optional.
 - Dagger: Now inflicts aggravated damage on Kiasyd.
 - Danylo: The location that is retrieved from the library is now revealed.
@@ -253,14 +253,14 @@ Rule change: **Recruited allies** are now moved to the ready region but cannot a
 Rule change: **Caitiff** is now a clan
 
 # 2017-04-03
-[Anthology](https://www.vekn.net/forum/news-and-announcements/75693-anthology-set-previews-april-3?start=0)
+[Anthology](https://usenet.krcg.org/t/vekn-75693/)
 
 Rule change: **Lock/unlock** replaces tap/untap
 
 Rule change: **Wake** is added to the rulebook (and explained in parenthesis on cards where possible)
 
 # 2016-01-17
-[Anarch Unbound Release](https://www.vekn.net/forum/news-and-announcements/74630-anarchs-unbound-released)
+[Anarch Unbound Release](https://usenet.krcg.org/t/vekn-74630/)
 - Anthelios, The Red Star: Banned.
 - Temptation of Greater Power: Banned.
 - Seeds of Corruption: Banned.
@@ -288,7 +288,7 @@ Rule change: **Ballots** is what Priscii have, to distinguish from votes
 - Horrid Reality: The retrieved weapon does not contest any other copies in play.
 
 # 2008-01-01
-[Tournament rules update](https://groups.google.com/g/rec.games.trading-cards.jyhad/c/uqlirlrTXis/m/Aq0HEAV-AugJ)
+[V:EKN Tournament Rules 2008](https://web.archive.org/web/20071212073443/http://www.white-wolf.com/vtes/index.php?line=veknRules)
 - Edge Explosion: Banned.
 - Memories of Mortality: Banned.
 - Protect Thine Own: Banned.
@@ -309,31 +309,31 @@ Rule change: **Ballots** is what Priscii have, to distinguish from votes
 - Echo of Harmonies: The Political Action card is played as if from hand.
 
 # 2005-02-18
-[Kindred Most Wanted](https://groups.google.com/g/rec.games.trading-cards.jyhad/c/BvfxIeGPsY0/m/BuelWFntc4IJ)
+[Kindred Most Wanted](https://usenet.krcg.org/t/BvfxIeGPsY0/#m0)
 - Anarch Revolt: Only Methuselahs who do not control ready Anarchs are affected.
 - Heart of Darkness: Changes the way the vampire treat the aggravated damage, rather than changing the damage itself.
 
 # 2005-01-01
-[Tournament Rules Update](https://groups.google.com/g/rec.games.trading-cards.jyhad/c/_Fou-GQwMqw/m/zur8UobxZqQJ)
+[Tournament Rules Update](https://usenet.krcg.org/t/_Fou-GQwMqw/#m0)
 - Dramatic Upheaval: Banned.
 - Kindred Restructure: Banned.
 - Succubus Club: Banned.
 
 # 2004-12-02
-[Tenth Anniversary](https://groups.google.com/g/rec.games.trading-cards.jyhad/c/LAi4mEK-bYI/m/JxinQ_0qAe0J)
+[Tenth Anniversary](https://usenet.krcg.org/t/LAi4mEK-bYI/#m0)
 - Antoinette DuChamp: Celerity actions and combat have increased cost, not a burn blood side effect. (Note that the new version is misprinted -- swapping capacity for group. Errata: Antoinette is still group 2 and has a capacity of 1).
 - Blood Bond: is put into play.
 - Camille Devereux, The Raven: Is not two different vampires. (1994 Jyhad version of Camille, 1995 VTES version of Raven, and these cards all contest one another, as they are the same vampire).
 - Ghoul Escort: is once again only employable by a vampire (The 1995 VTES version had inadvertently dropped the "All Kindred" designation of the Jyhad version).
 - Giovanni Acceptance, Invitation Accepted, Ravnos Acceptance, and Revocation of Tyre: work on in-play vampires as well as vampires brought into play later. Sect change is optional, but only choosable when the acceptance enters play or when the vampire enters play.
-- Magdalena Schaefer: Thaumaturgy strikes have increased cost, not a burn blood side effect.
+- Magdelena Schaefer: Thaumaturgy strikes have increased cost, not a burn blood side effect.
 - Mariel, Lady Thunder: She inflicts the damage (interesting only for effects like Memories of Mortality).
 - Patrizia Giovanni: Retrieval actions have increased cost, not a burn blood side effect.
 - Tainted Vitae: is put into play.
 - Veiled Sight: If the acting vampire has negative stealth, the effect will raise it to zero.
 
 # 2003-05-19
-[RTR 20030519](https://groups.google.com/g/rec.games.trading-cards.jyhad/c/NOBWXWrd-vA/m/iEOpQp1uhvAJ)
+[RTR 20030519](https://usenet.krcg.org/t/NOBWXWrd-vA/#m0)
 
 Rule Change: Hunt amount modification is allowed on **special hunt actions**
 
@@ -341,9 +341,9 @@ Rule Change: Hunt amount modification is allowed on **special hunt actions**
 
 # 2002-08-19
 
-[Camarilla Edition](https://groups.google.com/g/rec.games.trading-cards.jyhad/c/zjgrU0n0uCs/m/JMMkv0e7jUMJ)
-[LSJ 20020812](https://groups.google.com/g/rec.games.trading-cards.jyhad/c/YowGjqEVHAY/m/Ab8sONeAErcJ)
-[LSJ 20030110](https://groups.google.com/g/rec.games.trading-cards.jyhad/c/cn97fjkKuqk/m/tHaOydMbER8J)
+[Camarilla Edition](https://usenet.krcg.org/t/zjgrU0n0uCs/#m0)
+[LSJ 20020812](https://usenet.krcg.org/t/YowGjqEVHAY/#m0)
+[LSJ 20030110](https://usenet.krcg.org/t/cn97fjkKuqk/#m1)
 
 Rule change: The **grouping** rule is introduced.
 
@@ -359,7 +359,7 @@ Rule change: The **No Repeat Action (NRA)** rule is now part of the rulebook.
 - Blood Rage: Damage based on the striker's strength (hence a handstrike).
 - Blood Fury: Damage based on the striker's strength (hence a handstrike).
 - Cauldron of Blood: Damage based on the striker's strength (hence a handstrike).
-- Bureacratic Overload: Increases the cost of political actions (instead of burning blood).
+- Bureaucratic Overload: Increases the cost of political actions (instead of burning blood).
 - Catatonic Fear: Costs 1 blood.
 - Concealed Weapon: No discipline requirement, weapon cannot be unique, deal agg damage, cost more than 2 pool, or deal more than 3 damage (with a standard strike).
 - Day Operation: Only vampires are restricted from blocking.
@@ -391,7 +391,7 @@ Rule change: The **No Repeat Action (NRA)** rule is now part of the rulebook.
 - Psychic Projection: Is put in play.
 - Rowan Ring: Unbanned. Sends opposing vampire to torpor with the ring as a strike.
 - Second Tradition: Domain: the effect costs 1 blood when used by a tapped vampire.
-- Succubus Club, The: Only one trade per untap phase. Tap to trade.
+- Succubus Club: Only one trade per untap phase. Tap to trade.
 - Taste of Vitae: play at end of round. Only 1.
 - Temptation of Greater Power: Only 1 can be played in a game.
 - Tremere Convocation: No cost. Unique.
@@ -399,18 +399,18 @@ Rule change: The **No Repeat Action (NRA)** rule is now part of the rulebook.
 - Weather Control: Only one each combat.
 
 # 2002-05-01
-[RTR 20020501](https://groups.google.com/g/rec.games.trading-cards.jyhad/c/M1snoR2msbQ/m/RFwCmX3anDkJ)
+[RTR 20020501](https://usenet.krcg.org/t/M1snoR2msbQ/#m0)
 - The Grandest Trick: Makes vampires unable to block the minion who played it, not the action in general.
 - Melange: Should refer to the "minion with this card" not "the vampire with this card".
 - Psychomachia: Is playable when an ally or younger vampire blocks (successfully) - not merely on the attempt.
 
 # 2001-07-11
-[RTR 20010711](https://groups.google.com/g/rec.games.trading-cards.jyhad/c/GsI1UyH54jU/m/x9LfDZX1vR4J)
+[RTR 20010711](https://usenet.krcg.org/t/GsI1UyH54jU/#m0)
 Final Nights
 - Acquired Ventrue Assets: Costs no pool and is only activated on your own master phase.
 - Alamut: Can give only vampires (not allies) votes.
 - Banishment: Cannot choose a vampire the same age or older than the acting vampire.
-- Blood Tears: Can prevent damage only in combat (the gain blood effect can still be used at any time).
+- Blood Tears of Kephran: Can prevent damage only in combat (the gain blood effect can still be used at any time).
 - Fata Morgana: Can be used for just +1 bleed at superior (if the stealth is not needed, for instance).
 - Giuseppe, Gravedigger: Renamed from "Guiseppe". Both spellings represent the same unique retainer.
 - Heidelberg Castle: Name is corrected from "Heidelburg Castle". Both spellings represent the same unique location.
@@ -419,7 +419,7 @@ Final Nights
 - Purity of the Beast: Costs no blood and doesn't reduce the acting vampire's capacity.
 - Ravnos Cache: Costs no pool.
 - Rudolfo Giovanni: Name is corrected from "Rudolpho". Both spellings represent the same unique vampire.
-- Ruins of the Villers Abbey: Costs no blood and "Villers" is corrected from "Villars". Both spellings represent the same unique locaction.
+- Ruins of Villers Abbey, Belgium: Costs no blood and "Villers" is corrected from "Villars". Both spellings represent the same unique locaction.
 - Summon the Serpent: Puts a blood from the blood bank on the retrieved vampire.
 - Thetmes: Title of Calif is corrected to "Caliph". Both spellings of the card name represent the same unique vampire.
 
@@ -430,7 +430,7 @@ Errata
 - Ur-Shulgi, The Shepherd: has +1 bleed (errata).
 
 # 2000-10-27
-[Sabbat War](https://groups.google.com/g/rec.games.trading-cards.jyhad/c/zUs5JBhRLgE/m/z7JKJI2plsEJ)
+[Sabbat War](https://usenet.krcg.org/t/zUs5JBhRLgE/#m0)
 - Arson: Not replaced until the end of the action.
 - Blood of Acid: Limited to one per round.
 - Bum's Rush: Not replaced until the end of the action.
@@ -450,44 +450,46 @@ Errata
 - Elysium: The Arboretum: While not reprinted in the set, the errata printed in the Sabbat rules sheet has been extended. Only Camarilla vampires can call the referendum to burn the Elysium and, for the same reason, the Elysium can only be tapped to end combat involving two Camarilla vampires.
 
 # 2000-05-01
-[RTR 20000501](https://groups.google.com/g/rec.games.trading-cards.jyhad/c/MKrA0hBXuaU/m/1M5LOLftKWAJ)
+[RTR 20000501](https://usenet.krcg.org/t/MKrA0hBXuaU/#m0)
 - Life Boon: Doesn't provide a VP if you are ousted.
 
 # 1999-12-06
-[RTR 19991206](https://groups.google.com/g/rec.games.trading-cards.jyhad/c/N7iEmqgP9WU/m/tA1Q5rsqNeMJ)
+[RTR 19991206](https://usenet.krcg.org/t/N7iEmqgP9WU/#m2)
 
-- Asylum HG - VTES errataed to read as Jyhad version (2 pool).
+- Asylum Hunting Ground - VTES errataed to read as Jyhad version (2 pool).
 - Obedience - Sabbat errataed to read as VTES version (timing, cancel combat).
 - Undead Persistence - Sabbat errataed to read as VTES (continuing protection).
 
 # 1999-10-01
-[RTR 19991001](https://groups.google.com/g/rec.games.trading-cards.jyhad/c/RAvWWmYoX3U/m/lb2bLOvJDhoJ)
+[RTR 19991001](https://usenet.krcg.org/t/RAvWWmYoX3U/#m0)
 - Cardinal Sin: Failure of Mission: Is now controlled by the player who played it, so the directed action to remove it is directed against them.
 
 # 1999-07-12
-[RTR 19990712](https://groups.google.com/g/rec.games.trading-cards.jyhad/c/x5k5Vw_hkI0/m/lCqkvlUz5yIJ)
+[RTR 19990712](https://usenet.krcg.org/t/x5k5Vw_hkI0/#m0)
 - Talbot's Chainsaw: The press is only usable to continue combat.
 - Soul Burn: Does nullify the current weapon strike.
 - Guard Dogs: You only get the maneuver if you successfully block.
 
 # 1999-04-01
-[DCI 19990401](https://groups.google.com/g/rec.games.trading-cards.jyhad/c/k8mvIV5U21g/m/O20mfsFU7lQJ)
+[DCI 19990401](https://usenet.krcg.org/t/k8mvIV5U21g/#m0)
+
+The promo vampires _Dan Murdock_ and _Mariana Gilbert_ are legal to play.
+
 - Return to Innocence: Banned
 - Stake: Unbanned, renamed to _Wooden Stake_: new text and rulings of the card apply.(note this is a bit moot since it was officialy a rename when VTES came out in 95: the ban probably didn't make much sense in the first place).
-- The promo vampires _Dan Murdock_ and _Mariana Gilbert_ are legal to play
  
 # 1999-01-05
-[RTR 19990105](https://groups.google.com/g/rec.games.trading-cards.jyhad/c/2LT2jSX4Nlk/m/vNjIMCxSYTIJ)
+[RTR 19990105](https://usenet.krcg.org/t/2LT2jSX4Nlk/#m1)
 - Dragon's Breath Rounds: Is played "before resolution of a gun's strike", not "when damage from a gun is being resolved".
 - Glaser Rounds: Is played "before resolution of a gun's strike", not "when damage from a gun is being resolved".
 - Manstopper Rounds: Is played "before resolution of a gun's strike", not "when damage from a gun is being resolved".
 - Parity Shift: The reallocation is specified before votes are cast.
-- Tomb of Ramses, III: New card text: "When this card is brought into play or the controller of this card changes, you (the new controller) choose a vampire in your uncontrolled region. For each blood counter you transfer to the chosen vampire, put a blood counter on the Tomb from the Blood Bank. At the end of your influence phase, if the total number of counters on the chosen vampire and on the Tomb equals or exceeds that vampire's capacity, you may move the vampire to the ready region. Burn the Tomb (and the counters on it) when the chosen vampire leaves the uncontrolled region."
-- White Phosphorous Grenade: Now inflicts damage to the bearer if used, even if it is dodged.
+- Tomb of Rameses III: New card text: "When this card is brought into play or the controller of this card changes, you (the new controller) choose a vampire in your uncontrolled region. For each blood counter you transfer to the chosen vampire, put a blood counter on the Tomb from the Blood Bank. At the end of your influence phase, if the total number of counters on the chosen vampire and on the Tomb equals or exceeds that vampire's capacity, you may move the vampire to the ready region. Burn the Tomb (and the counters on it) when the chosen vampire leaves the uncontrolled region."
+- White Phosphorus Grenade: Now inflicts damage to the bearer if used, even if it is dodged.
 - Wooden Stake: New card text: "Melee Weapon. This weapon inflicts strength damage as a strike. If more than damage is inflicted on the opposing vampire by this weapon in a given combat, then that vampire is sent to torpor. In that case, this card is transferred to him and he does not untap as normal during the untap phase as long as he remains in torpor."
 
 # 1998-09-28
-[RTR 19980928](https://groups.google.com/g/rec.games.trading-cards.jyhad/c/Xva4_IRavxM/m/F-_fjzTmo88J)
+[RTR 19980928](https://usenet.krcg.org/t/Xva4_IRavxM/#m0)
 - Powerbase: New York: The action to steal the blood cannot be taken by your own Sabbat vampires.
 - Reform Body: Can be played in combat (as a combat card) by either combatant, acting or reacting/blocking. Can also be played (as a reaction card) from Torpor, even though only Ready vampires can play reaction cards by default.
 
@@ -499,7 +501,7 @@ Tournament rules: **No Repeat Action (NRA)** and **No Vote Pushing (NVP)**
 - Madness of the Bard: Banned
 
 # 1998-07-07
-[RTR 19980707](https://groups.google.com/g/rec.games.trading-cards.jyhad/c/t3BWHkOrdyE/m/1jH5udLMdiYJ)
+[RTR 19980707](https://usenet.krcg.org/t/t3BWHkOrdyE/#m0)
 
 Rule change: **No vote pushing**. Each Methuselah can only play no more than one Political Action card to gain a vote during a political action, including the Political Action card used to call the vote, if any.
 
@@ -516,12 +518,12 @@ Rule change: The first unprevented **aggravated damage** does not burn blood any
 - Return to Innocence: New card text: "Bleed. If you successfully bleed your Prey for one or more, put this card on the acting vampire. Burn this card if this vampire loses any blood or goes to torpor, or if your Prey is ousted. During your next untap, this vampire is removed from play and your Prey burns X pool, where X is the capacity of this vampire."
 - Sleeping Mind: Does not prevent to play Wake to block.
 - Thoughts Betrayed: The superior only prevents strike cards from being played, not other cards.
-- Tomb of Ramses III: New card text: "Master: Unique Location. 3 pool. When this card is brought into play, or the controller of this card changes, the controller chooses a vampire in her uncontrolled region. During your influence phase, tap to move 1 blood from the blood bank to the chosen vampire. Burn this card when the chosen vampire leaves the uncontrolled region."
+- Tomb of Rameses III: New card text: "Master: Unique Location. 3 pool. When this card is brought into play, or the controller of this card changes, the controller chooses a vampire in her uncontrolled region. During your influence phase, tap to move 1 blood from the blood bank to the chosen vampire. Burn this card when the chosen vampire leaves the uncontrolled region."
 - Wake with Evening's Freshness: "Do not replace until your next untap phase."
 - Zip Gun: Cannot use ammo cards
 
 # 1998-06-23
-[RTR 19980623](https://groups.google.com/g/rec.games.trading-cards.jyhad/c/tSpd9dtTElc/m/-CuHJF54_n0J)
+[RTR 19980623](https://usenet.krcg.org/t/tSpd9dtTElc/#m0)
 
 Rule change: An **unblocked action is successful** (an unblocked bleed reduced to zero is an unsuccessful bleed but a successful action).
 
@@ -529,12 +531,12 @@ Rule change: **Combat** is part of the block (modifiers and reactions played aft
 
 Rule change: **Damage prevention** can be played whenever appropriate in combat (not limited to strike resolution).
 
-- Antediluvian Awaking: A player can burn a vampire only during her untap phase.
-- Beast, Leatherface of Detroit: New card text: "Beast cannot perform action-card actions or recruit allies. He cannot have or use equipment or retainers. As a Ⓓ action, Beast can enter combat with any Ready minion controlled by another Methuselah. +1 hand damage."
+- Antediluvian Awakening: A player can burn a vampire only during her untap phase.
+- Beast, The Leatherface of Detroit: New card text: "Beast cannot perform action-card actions or recruit allies. He cannot have or use equipment or retainers. As a Ⓓ action, Beast can enter combat with any Ready minion controlled by another Methuselah. +1 hand damage."
 - Closed Session: New card text: "Only usable during a political action, before any votes are cast. Non-Camarilla vampires cannot vote during the current political action."
 - Deflection: New card text: "Only usable when a you are the target of a bleed. Choose another Methuselah. You cannot choose the acting minion's controller. The acting minion is now attempting to bleed the chosen Methuselah. The chosen Methuselah may attempt to block. Tap this reacting vampire. Superior: As above, but do not tap this vampire."
 - Form of Mist: New card text: "Superior: Strike: Combat Ends. If this vampire is the acting vampire, this vampire gets +1 stealth (and this card counts as an action modifier) and the action continues as if unblocked."
-- Golconda: Removes the selected vampire from the game instead of burning him. 
+- Golconda: Inner Peace: Removes the selected vampire from the game instead of burning him. 
 - Immortal Grapple: New card text: "Only usable at close range before strikes are chosen. This round, neither minion can strike except with hand strikes. Superior: As above, with an optional press, and if combat continues, the range of the next round of combat is set to close range - skip the Establish Range step for that round."
 - Kalinda: New card text: "As a Ⓓ action, Kalinda may bleed with +1 bleed and +1 stealth. This action costs 2 blood."
 - Living Manse: New card text: "The vampire with this location gets +1 bleed. When the vampire with this location is in combat, he or she can burn this card before range is determined to end combat. A vampire may have only one Living Manse."
@@ -546,18 +548,18 @@ Rule change: **Damage prevention** can be played whenever appropriate in combat 
 - Rutor's Hand: A vampire can only have one Rutor's Hand. New card text: "Superior: As above, but this vampire can pay 3 blood to prevent the damage."
 - The Second Tradition: Domain: New card text: "Requires ready Prince or Justicar. +2 intercept. Also usable by a tapped Prince or Justicar, even if intercept is not yet needed, to untap and attempt to block with +2 intercept."
 - Taste of Vitae: Is not cumulative. A Taste of Vitae will not count any blood loss counted by a previous Taste of Vitae.
-- Tereza Rotas: New card text: "If another Methuselah controls the Edge, Tereza may take the Edge as an action directed at that Methuselah. This action costs 2 blood."
+- Tereza Rostas: New card text: "If another Methuselah controls the Edge, Tereza may take the Edge as an action directed at that Methuselah. This action costs 2 blood."
 - Telepathic Misdirection: New card text: "Superior: Only usable when a you are the target of a bleed. Choose another Methuselah. You cannot choose the acting minion's controller. The acting minion is now attempting to bleed the chosen Methuselah. The chosen Methuselah may attempt to block. Tap this reacting vampire."
 
 # 1997-06-30
-[RTR 19970630](https://groups.google.com/g/rec.games.trading-cards.jyhad/c/KireUeOYY3c/m/t6ifm9lur1kJ)
+[RTR 19970630](https://usenet.krcg.org/t/KireUeOYY3c/#m1)
 - Of Noble Blood: Cannot be played on a vampire that already has a title of any kind.
 - Reform Body: May be played by a minion that is tapped.
 - Mind Rape: The counters only go away during your untap phase, not during each untap phase.
 - Tremere Convocation: The second sentence should read: "Vampires with basic Thaumaturgy may play combat cards requiring Thaumaturgy as if they had superior Thaumaturgy."
 
 # 1996-07-08
-[RTR 19960708](https://groups.google.com/g/rec.games.trading-cards.jyhad/c/Rd3Zb61ELuw/m/ii2OfLXTC6gJ)
+[RTR 19960708](https://usenet.krcg.org/t/Rd3Zb61ELuw/#m0)
 - Blood Hunt: Is a directed action.
 - Shackles of Enkidu: Once used, it is controlled by the Methuselah who controls the vampire who used it; changing the controller of the vampire changes who controls the Shackles.
 - Change of Target: Does not untap a blocking minion who was already tapped. Neither does Obedience or Elder Impersonation.
@@ -566,17 +568,17 @@ Rule change: **Damage prevention** can be played whenever appropriate in combat 
 - Temptation: Only gain counters during your master phases, not the master phases of other Methuselahs.
 
 # 1996-05-31
-[RTR 19960531](https://groups.google.com/g/rec.games.trading-cards.jyhad/c/DpvF2Peet9o/m/dJwiudauzEwJ)
+[RTR 19960531](https://usenet.krcg.org/t/DpvF2Peet9o/#m0)
 - Donal O'Connor: Forces a vampire blocking him to burn 1 blood immediately regardless of whether combat begins.
 - Cat Burglary: Inferior is a directed action.
-- Pulse of Canaille: Superior should begin with the words, "If this is the first time Pulse of Canaille has been played on the acting vampire..." It is not cumulative.
+- Pulse of the Canaille: Superior should begin with the words, "If this is the first time Pulse of Canaille has been played on the acting vampire..." It is not cumulative.
 - Renegade Garou: Its innate damage is considered to be hand damage.
 - Malkavian Prank: The first sentence should begin with "Each other Methuselah..." You cannot play a prank on yourself.
 - Hidden Lurker: Is an action modifier played by a vampire other than the acting vampire.
 - Academic Hunting Ground: Gives blood to vampires during the untap phase, not the master phase.
 - Elder Intervention: Can be used during any bleed attempt made against you, not just ones declared against you (eg. Deflection).
-- Rats' Warning: Can be used during any bleed attempt made against you, not just ones declared against you (eg. Deflection).
-- Constanza Vinzi: Only gets the bleed bonus if you're bleeding your prey.
+- Rat's Warning: Can be used during any bleed attempt made against you, not just ones declared against you (eg. Deflection).
+- Constanza Vinti: Only gets the bleed bonus if you're bleeding your prey.
 - Cornelius Ottavio: Only gets the bleed bonus if you're bleeding your prey.
 - Elisabetta Romano: Only gets the bleed bonus if you're bleeding your prey.
 - Katarina: Only gets the bleed bonus if you're bleeding your prey.
@@ -586,12 +588,12 @@ Rule change: **Damage prevention** can be played whenever appropriate in combat 
 - Sigrid Bekker: Only gets the bleed bonus if you're bleeding your prey.
 - Clan Loyalty: Ignore the word "other"; the vampire currently attempting to block the action is not allowed to attempt to block the acting vampire this turn.
 - The Embrace: Shuffle your library afterwards.
-- Progeny: Shuffle your library afterwards.
+- Third Tradition: Progeny: Shuffle your library afterwards.
 - Soul Gem of Etrius: Does not have a pool cost.
 - Ghoul Escort: Its ability applies to any employer, not just if it is a vampire.
 - Ghoul Retainer: Its ability applies to any employer, not just if it is a vampire.
 - Guiseppe: Its ability applies to any employer, not just if it is a vampire.
-- J.S. Simmons: Its ability applies to any employer, not just if it is a vampire.
+- J. S. Simmons, Esq.: Its ability applies to any employer, not just if it is a vampire.
 - Jackal: Its ability applies to any employer, not just if it is a vampire.
 - Jackie Therman: Its ability applies to any employer, not just if it is a vampire.
 - Mr. Winthrop: Its ability applies to any employer, not just if it is a vampire.
@@ -605,17 +607,17 @@ Rule change: **Damage prevention** can be played whenever appropriate in combat 
 - Force of Will: Ignore the words "untap this acting vampire". The vampire playing the card only takes one action: a (D) action to bleed with the extra bleed and the damage afterwards.
 
 # 1996-02-21
-[RTR 19960221](https://groups.google.com/g/rec.games.trading-cards.jyhad/c/UdU535eVm0Y/m/AQGxbaznHL0J)
+[RTR 19960221](https://usenet.krcg.org/t/UdU535eVm0Y/#m0)
 - Regina Giovanni: Reduces the cost of any ally or retainer she employs or recruits by 1; both blood and pool costs can be affected by this.
 - Smiling Jack, The Anarch: The second sentence should refer to "each other Methuselah".
 
 # 1996-02-01
 [DUELIST 9](https://archive.org/details/DuelistMagazine-Issue9-February1996/page/n81)
-[DCI 19960201](https://groups.google.com/g/rec.games.trading-cards.jyhad/c/cygWvLMK2mI/m/ndWN7_kQ46QJ)
+[DCI 19960201](https://usenet.krcg.org/t/cygWvLMK2mI/#m0)
 - Playing for Keeps: Banned
 
 # 1996-01-24
-[RTR 19960124](https://groups.google.com/g/rec.games.trading-cards.jyhad/c/wF82VdVPlm0/m/cSshmBFQs-EJ)
+[RTR 19960124](https://usenet.krcg.org/t/wF82VdVPlm0/#m0)
 - Sacrificial Lamb: The superior cannot be played on your own vampires; it does not override the definition of a (D) action.
 - Heidelburg Castle, Germany: Cannot transfer anything to or from a vampire in combat.
 - Fata Morgana: The restriction against playing modifiers to further increase bleed only applies if you use its superior ability.
@@ -626,20 +628,20 @@ Rule change: **Damage prevention** can be played whenever appropriate in combat 
 - Soul Stealing: Superior should read "As above, and this card can also be played as a combat card".
 
 # 1996-01-12
-[RTR 19960112](https://groups.google.com/g/rec.games.trading-cards.jyhad/c/d3n3StNS7no/m/k2NmZFUl9fAJ)
+[RTR 19960112](https://usenet.krcg.org/t/d3n3StNS7no/#m0)
 - Hector Sosa: The V:TES version has inferior Potence. This should be superior Potence.
 - Shackles of Enkidu: When used, control of it stays with the player who controlled the minion using it.
 - Triole's Revenge: The action to burn it should be a directed action, and the player who played the Revenge is always its controller.
 - Javier Montoya: Should say "blood", not "pool".
 
 # 1995-11-01
-[DCI 19951101](https://groups.google.com/g/rec.games.trading-cards.jyhad/c/Gv5EeWYiUFw/m/oFotU_1guPwJ)
+[DCI 19951101](https://usenet.krcg.org/t/Gv5EeWYiUFw/#m0)
 
 First tournament rules
 
 - Cunctator Motion: Banned
 - High Stakes: Banned
-- Monacle of Clarity: Banned
+- Monocle of Clarity: Banned
 - Rowan Ring: Banned
 - Stake: Banned
 
@@ -667,7 +669,7 @@ Rule change: The first unprevented **aggravated damage** sends to torpor _and_ b
 - Masquerade Endangered: Prohibits hunting altogether
 - Nosferatu Putrescence: Only reduce damage on the first strike
 - Parity Shift: Does not allow to give pool back to the player it's been taken from anymore.
-- Patagia: Flaps Allowing Limited Fligh: Can only be played once on a given vampire.
+- Patagia: Flaps Allowing Limited Flight: Can only be played once on a given vampire.
 - Pulled Fangs: Prohibits the target from hunting.
 - Rack, The: Now only functions if the controller of the Rack and the vampire are the same.
 - Ritual Challenge: Now gives a cumulative +1 strength bonus (instead of flat 2).
@@ -678,16 +680,16 @@ Rule change: The first unprevented **aggravated damage** sends to torpor _and_ b
 - Vast Wealth: Can only be played on the minions a player controls
 
 # 1995-06-15
-[RTR 19950615](https://groups.google.com/g/rec.games.trading-cards.jyhad/c/GE0L9WLH0Ao/m/qqWC_DaVsIAJ)
+[RTR 19950615](https://usenet.krcg.org/t/GE0L9WLH0Ao/#m0)
 - Army of Rats: Is not cumulative.
 - Blood Doll: Gives blood to whomever controls the vampire, even if controller changes.
 
 # 1995-05-09
-[RTR 19950509](https://groups.google.com/g/rec.games.trading-cards.jyhad/c/_LKyR7pdMig/m/ZvwdGmIwUnsJ)
+[RTR 19950509](https://usenet.krcg.org/t/_LKyR7pdMig/#m8)
 - Blood Rage: Should be a Thaumaturgy card (not Fortitude).
 
 # 1995-04-18
-[Jyhad Errata](https://groups.google.com/g/rec.games.trading-cards.jyhad/c/zFIzGdHszT8/m/FJz6RM0u84EJ)
+[Jyhad Errata](https://usenet.krcg.org/t/zFIzGdHszT8/#m0)
 - Anarch Troublemaker: Should say "During your untap phase..."
 - Embrace, The: The vampire created is the same clan as its creator.
 - Fame: This should be considered a unique master.

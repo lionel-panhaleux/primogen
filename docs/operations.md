@@ -39,8 +39,8 @@ Go and jq come from mise: `mise install` in the checkout reads `mise.toml`.
   `bundle.json.gz` in the user cache directory, `-bundle` to change it). It
   prints what needs a person: a reference the archive does not hold, a ruling
   not in the rulings site's canonical form or citing no reference, a line of
-  the history of changes naming no card exactly (filed as possible under the
-  closest cards, or under none).
+  the history of changes naming no card exactly or under no dated heading,
+  left out of the bundle: the fix is in the gist, then `/sync`.
 - `primogen query cards NAME...` (`-detail` for the detailed mode) calls
   `vtes_cards` through the MCP server and prints what the model reads.
 - `primogen stdio` serves the tools over stdio for a local MCP client.

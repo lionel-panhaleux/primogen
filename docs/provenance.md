@@ -12,7 +12,7 @@ compares them with upstream and records the commit below.
 |---|---|---|---|
 | `rules/rulebook.md` | `vtes-biased/vtes-advanced-rules` | `rulebook2024/content.md` (submodule) | `rulebook2024` @ `0644d3d`, 2026-11-11 |
 | `rules/advanced-rules.md` | `vtes-biased/vtes-advanced-rules` | `docs/advanced-rules.md` | `5c844a5`, 2026-11-11 |
-| `card-changes.md` | the owner's gist `a4a9cad2e492af7c45c50a1cea7e6cf6` | `VTES History of changes.md` | `18282fb`, 2026-11-11 |
+| `card-changes.md` | the owner's gist `a4a9cad2e492af7c45c50a1cea7e6cf6` | `VTES History of changes.md` | `b8beddd`, 2026-11-11 |
 
 ## Authored here
 
