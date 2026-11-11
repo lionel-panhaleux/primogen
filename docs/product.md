@@ -49,7 +49,8 @@ they ship.
 
 Every tool has a concise default and a detailed mode, says how to narrow when
 it truncates, and dates the data behind its answer. `primogen query` calls
-the same tools from a shell.
+the same tools from a shell. A tool that ships adds its one line to the README's
+"Tools".
 
 ## Connecting
 
@@ -61,7 +62,10 @@ the same tools from a shell.
   instructions (the grounding rules first), through each tool's description
   and every tool result (the contract and the next step), and through MCP
   prompts where the client offers them. Nothing is shipped per client beyond
-  a configuration snippet in the README.
+  its line in the README.
+- **The README** is compact and direct: one line per tool, per source and
+  per client (where to add the server, or the command), the detail left to
+  each client's documentation and to these pages.
 - **Local installs** run the same binary over stdio. They download the
   published data bundle and build nothing. They have every tool except the
   Archon-backed ones.
