@@ -10,7 +10,7 @@ service is checked against that service before it is relied on.
 |---|---|---|---|
 | `static.krcg.org/data/v4` (`vtes.json`, `twda.json`) | Cards with their rulings; the tournament winning deck archive | Every 6 hours, and at once when a ruling is approved | Public files |
 | `vtes-biased/vtes-rulings` (`rulings.yaml`, `groups.yaml`, `references.yaml`) | The rulings database: the durable source of truth for rulings, the card groups they apply to, the URL of each reference | Pushed by the rulings site on each approval | Public repository |
-| `rulings.krcg.org` | Curation of the rulings database by the rulemongers; proposals under discussion | Live | Pages public; a read API under `/api` (undocumented, public access unchecked) |
+| `rulings.krcg.org` | Curation of the rulings database by the rulemongers; proposals under discussion | Live | Pages public; a public read API (below) |
 | `usenet.krcg.org` (`vtes-biased/newsgroup-archive`) | The rulings archive: 14,417 threads in which a rules director took part, 1994 to today (the newsgroup, the V:EKN forum, BoardGameGeek) | Nightly forum sweep at 04:17 UTC | Pages and a search index; every thread in one file, `usenet.krcg.org/archive.json.gz` (below) |
 | `vtes-biased/vtes-advanced-rules` | The 2024 rulebook text and the advanced rules | By hand; primogen copies them with `/sync` ([provenance.md](provenance.md)) | Public repository |
 | `api.archon.vekn.net` | Tournaments, published decklists, members and ratings, community links | Export rebuilt within 15 minutes of a change | App token (below) |
@@ -43,6 +43,14 @@ page carries every ruling that applies, group rulings included, at
 `rulings.krcg.org/index.html?uid=<card id>#r-<id>`; the id changes when the
 wording is edited. A ruling ending in `[REMINDER]` restates card text or a
 core rule and may carry no reference.
+
+## The rulings site's read API
+
+Public by the owner's decision (2026-11-11), JSON, no login; checked
+2026-11-11: `GET /api/card/<id>` (the card, its rulings with their ids, its
+groups, the rulings naming it), `/api/search?query=<text>` (cards, groups and
+rulings matching), `/api/group` and `/api/group/<id>`, `/api/reference` (every
+reference id and its URL).
 
 ## The archive's bulk file
 
