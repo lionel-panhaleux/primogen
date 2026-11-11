@@ -28,7 +28,9 @@ baseline.
 4. Copy the changed files over their `knowledge/` counterparts.
 5. In `docs/provenance.md`, the new commits (the submodule's for the
    rulebook) and today's date.
-6. If the change moves a fact the guide or a calibration entry relies on,
-   say so to the owner: a regression re-run may be due (`/calibrate`).
+6. If the change moves a fact the guide relies on, a source a calibration
+   entry's `settled-by` names, or a fact an entry without `settled-by` relies
+   on, say so to the owner: that entry goes back to them to re-grade or
+   retire, and a regression re-run may be due (`/calibrate`).
 7. One commit for the sync, saying what changed upstream and what was
    decided. A `knowledge/` change is reviewed (`/ship` step 4).

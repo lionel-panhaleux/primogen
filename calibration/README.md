@@ -1,8 +1,9 @@
 # Calibration
 
 The owner-graded corpus and its regression set ([product.md](../docs/product.md)
-"Evaluation"). The `/calibrate` skill fills it; the lessons it distills go
-into the guide, `knowledge/guide/`.
+"Evaluation"), and `codex-cases.md`, the codex strategist's graded cases. The
+`/calibrate` skill fills the corpus; the lessons it distills go into the
+guide, `knowledge/guide/`.
 
 ## Corpus entries: `corpus/YYYY-MM-DD-<slug>.md`
 
@@ -14,8 +15,9 @@ date: 2026-08-25
 mode: rules | analysis | advice
 answered-by: primogen <short commit> | vtes-skill <short commit>
 model: <only when not the default model of the session>
-status: graded | candidate
+status: graded | candidate | retired
 regression: yes | no
+settled-by: <what settles it: rulebook or advanced rules section titles, ruling references, or "owner's grade">
 ---
 
 ## Question
@@ -48,6 +50,19 @@ none".
   owner grades it.
 - `regression: yes` puts the question in the regression set. Proposed for
   any substantive correction; the owner confirms.
+- `settled-by` names what settles the question as graded: section titles
+  rather than numbers, which move, ruling references, card names for card
+  text. `owner's grade` covers only what judgement settles; a fact a
+  correction rests on names its source beside it. When a `/sync` or an
+  evidence test shows one of them changed, the entry goes back to the owner,
+  who re-grades it or retires it. Retiring sets `status: retired` and
+  `regression: no`: the entry stays as a record. A served example drawn from
+  an entry the owner re-grades or retires is removed. The rules entries
+  answered by `vtes-skill` get their `settled-by` when they seed the
+  evidence tests.
+- No entry is served or shown to an answering model with its answer: only
+  its question. The one exception is an excerpt the owner promotes to a
+  served example (principle 8, `/calibrate` "Graded session" step 7).
 - An entry is a record: once written, only its front matter changes. The
   `vtes-skill` entries name that repository's files (`LESSONS.md`,
   `references/`); their lessons are now in `knowledge/guide/`.

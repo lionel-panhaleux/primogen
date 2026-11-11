@@ -4,6 +4,7 @@ mode: advice
 answered-by: vtes-skill eb6dcd4
 status: graded
 regression: yes
+settled-by: owner's grade; rulebook, Object of the Game (Deck construction: one group or two consecutive) and Combat (one strike per round); card text of Sword of Nuln, Theft of Vitae, Magic of the Smith, Path of Death and the Soul, Eulogio Sánchez de los Reyes (group and Path)
 ---
 
 ## Question

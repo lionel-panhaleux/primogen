@@ -1,9 +1,12 @@
-# Worked examples
+# The codex strategist's graded cases
 
 Deck analyses and one piece of advice by the codex-of-the-damned strategist,
-graded by the owner in 2026-07. Each keeps what held up and what the owner
-corrected; the corrections are folded into `theory.md` and the procedures.
-They show the bar, not the current meta.
+graded by the owner in 2026-07: what held up and what the owner corrected.
+The corrections are folded into `knowledge/guide/`, whose file names the
+cases cite. A record, never served: its meta judgements are those of
+2026-07. Cases A to E name their tournament deck, seeds for the
+deck-analysis graded session; cases C and F turn on rules facts, seeds for
+the evidence tests too.
 
 **A — Lutz Politics (Kelly Schultz, NAC 2023, TWDA 10735).** Stealth bleed & vote, Malkavian
 G4-5 Inner Circles. Held up: the ramp (Info Highway/Zillah ×5 each), Minion Tap over post-errata

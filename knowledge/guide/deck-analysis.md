@@ -34,5 +34,3 @@ is why these cards, in these numbers, in that year. Theory and vocabulary:
 7. **Verdict.** Strengths; weaknesses, each naming the matchup and the
    mechanism; what the pilot must do well to win (lunge timing, deals, jam
    management).
-
-Worked cases: `examples.md`.

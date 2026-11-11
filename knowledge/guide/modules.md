@@ -27,7 +27,7 @@ defense and economy come first (except when analyzing an actual combat deck).
 - **Tap → Voter Cap pump** — Minion Tap, Voter Captivation (superior), Dmitra Ilyanova / Honor the
   Elders-style refills. Tap each big vampire to 2-3 blood, refill via passed referendums, tap
   again. At 7-8× Voter Cap this is bloat heavy enough to be the deck's whole defense (all-forward
-  politics, cf. `examples.md`, case A). [22 decks: Voter Cap + Perfect Paragon + Awe + Minion Tap]
+  politics). [22 decks: Voter Cap + Perfect Paragon + Awe + Minion Tap]
 - **Vote bloat** — Consanguineous Boon (breed decks), Parity Shift (Princes/Justicars), Ancient
   Influence + Political Stranglehold (big caps), Benefit Performance, Amici Noctis. Pool gain at
   referendum scale; virtually every political deck carries some.
@@ -248,7 +248,7 @@ defense and economy come first (except when analyzing an actual combat deck).
   ×4 marks one target for the whole swarm to descend on in series, beating S:CE/dodge by
   attrition. Fame + Dragonbound convert torpor to pool; Vagabond Mystic heals the swarm; light
   Changeling bleed is the secondary long-game clock. War-Ghoul-adjacent (Tzimisce, Fame/Dragonbound,
-  AUS defense) but a distinct engine. [1 deck: TWDA 12149 “Compromise” — see `examples.md`, case D]
+  AUS defense) but a distinct engine. [1 deck: TWDA 12149 “Compromise”]
 - **Ally hate & counter-hate** — Entrancement / Xeper, Sultan of Lepers (steal), Scourge of the
   Enochians (vs breed too), FBI SAD (punish), The Uncoiling / Direct Intervention (counter the
   counters). The metagame layer around any ally strategy.

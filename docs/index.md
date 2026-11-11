@@ -33,5 +33,5 @@ reasoning die with their task. Every page is reachable from here.
   ask; nothing on the board is context.
 - The harness: [`../AGENTS.md`](../AGENTS.md), `.claude/skills/` (`intake`,
   `ship`, `upkeep`, `sync`, `calibrate`), `.claude/agents/reviewer.md`.
-- [`../calibration/`](../calibration/README.md): the owner-graded corpus and
-  its regression set.
+- [`../calibration/`](../calibration/README.md): the owner-graded corpus,
+  its regression set, and the codex strategist's graded cases.

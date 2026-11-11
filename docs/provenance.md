@@ -19,9 +19,9 @@ compares them with upstream and records the commit below.
 - `guide/`: what the model reads to do a task. `theory.md` and the
   procedures (`rules-answer.md`, `deck-analysis.md`, `deck-advice.md`,
   `card-comparison.md`, `meta-reading.md`) come from the `vtes` skill, the
-  codex-of-the-damned strategist and their owner-graded lessons.
-  `examples.md` is the strategist's graded cases. `modules.md` is the module
-  catalog the owner canonized on 2026-08-25.
+  codex-of-the-damned strategist and their owner-graded lessons; the
+  strategist's graded cases stay in `calibration/codex-cases.md`, unserved.
+  `modules.md` is the module catalog the owner canonized on 2026-08-25.
 - `classification.json`: the owner's archetype labels for the
   tournament-winning decks since 2021-07 (the 2026-07 pass), forked from
   codex-of-the-damned @ `18be59e`. The input of the archetype tools.

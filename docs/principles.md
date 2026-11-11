@@ -27,8 +27,10 @@ violating one silently is not.
    line in the result, so a model can say a question is unsettled.
 7. **Computed facts before prose.** For a deck, the server computes what can
    be computed; the model interprets.
-8. **Worked examples over rule lists.** Graded cases are returned as examples
-   of the bar.
+8. **Worked examples over rule lists.** A served example is an excerpt of
+   one of primogen's own answers the owner graded clean, dated with its data,
+   and re-checked by every regression re-run. Older graded material is
+   evaluation data, never served: it ages, and a model anchors on it.
 9. **Few task-shaped tools, bounded payloads, actionable errors, stable ids
    and links** ([Anthropic, Writing tools for agents](https://www.anthropic.com/engineering/writing-tools-for-agents)).
 10. **Advice lays out options.** The competitors for a slot with the evidence
@@ -65,7 +67,7 @@ violating one silently is not.
   changes in the owner's gist: fix upstream, then `/sync`.
   [provenance.md](provenance.md) says which file is which.
 - **Authored here**: the guide (the theory, the procedure for each task,
-  the module vocabulary and card-to-module tags, the worked examples), the
+  the module vocabulary and card-to-module tags, the served examples), the
   archetype labels, the game terms and their translations.
 
 ## Code
