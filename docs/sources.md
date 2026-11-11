@@ -1,8 +1,8 @@
 # Sources: the public VTES data stack
 
 Who owns which fact, and how it reaches primogen. Read from each service's
-repository and public pages on 2026-11-10; a claim about a service is checked
-against that service before it is relied on.
+repository and public pages on 2026-11-10 and 2026-11-11; a claim about a
+service is checked against that service before it is relied on.
 
 ## The sources
 
@@ -12,10 +12,12 @@ against that service before it is relied on.
 | `vtes-biased/vtes-rulings` (`rulings.yaml`, `groups.yaml`, `references.yaml`) | The rulings database: the durable source of truth for rulings, the card groups they apply to, the URL of each reference | Pushed by the rulings site on each approval | Public repository |
 | `rulings.krcg.org` | Curation of the rulings database by the rulemongers; proposals under discussion | Live | Pages public; a read API under `/api` (undocumented, public access unchecked) |
 | `usenet.krcg.org` (`vtes-biased/newsgroup-archive`) | The rulings archive: 14,417 threads in which a rules director took part, 1994 to today (the newsgroup, the V:EKN forum, BoardGameGeek) | Nightly forum sweep at 04:17 UTC | Pages and a search index; every thread in one file, `usenet.krcg.org/archive.json.gz` (below) |
-| `vtes-biased/vtes-advanced-rules` | The 2024 rulebook text and the advanced rules | By hand | Public repository |
+| `vtes-biased/vtes-advanced-rules` | The 2024 rulebook text and the advanced rules | By hand; primogen copies them with `/sync` ([provenance.md](provenance.md)) | Public repository |
 | `api.archon.vekn.net` | Tournaments, published decklists, members and ratings, community links | Export rebuilt within 15 minutes of a change | App token (below) |
 | `engine.krcg.org` | Rules enforcement for the cards it covers; bots | On each engine release | Public API |
 | `api.krcg.org` | Card search and decklist conversion | Live | Public API |
+| `gist.github.com/lionel-panhaleux/a4a9cad2e492af7c45c50a1cea7e6cf6` | The history of card and rules changes: each errata and rules change, dated, linking its announcement | By hand, by the owner; primogen copies it with `/sync` ([provenance.md](provenance.md)) | Public gist |
+| `vekn.net` (`/tournament-rules`, `/judges-guide`, `/code-of-ethics`) | The official tournament rules, judges' guide and code of ethics | When the VEKN publishes a revision | Public pages |
 
 ## The rulings chain
 

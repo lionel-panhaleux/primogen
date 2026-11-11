@@ -48,16 +48,25 @@ violating one silently is not.
   director has verified. Within them, a reading no official source settles is
   marked as a reading. The rules director is not asked to confirm them.
 - **Archive posts**: by a sitting rules director, or by a player.
+- **The history of card and rules changes**: the owner's dated digest of the
+  official announcements. Each entry links its announcement, which settles
+  it.
 
 ## Knowledge files
 
 - `knowledge/` is product: it is what users are served. A change to it is
   reviewed like code, and every card or rules claim in it is checked against
-  the sources, never written from memory.
-- **Synced files are never hand-edited.** Rulebook, advanced rules and
-  rulings are authored upstream; fix upstream and sync.
-- **Strategy knowledge is authored here** (theory, modules, card-to-module
-  tags, meta notes, calibration lessons).
+  the sources, never written from memory. One exception: the game terms'
+  translations, kept unchecked as a consistency reference and labelled so in
+  the file (owner, 2026-11-11: a fixed reference beats guessing a term in
+  every answer).
+- **Synced files are never hand-edited.** The rulebook and the advanced
+  rules are authored in `vtes-advanced-rules`, the history of card and rules
+  changes in the owner's gist: fix upstream, then `/sync`.
+  [provenance.md](provenance.md) says which file is which.
+- **Authored here**: the guide (the theory, the procedure for each task,
+  the module vocabulary and card-to-module tags, the worked examples), the
+  archetype labels, the game terms and their translations.
 
 ## Code
 

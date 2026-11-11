@@ -8,7 +8,6 @@ date or an outside event is not a line.
 
 ---
 
-- **The knowledge moves in from `vtes-skill`** [M:cards]: its `references/` to `knowledge/` (rules synced, strategy authored), its provenance map to a docs page, its calibration corpus and regression set to `calibration/`, its sync and calibrate loops as skills here; `references/community/` and the raw usenet mailboxes are left behind. Done when `vtes-skill`'s README points here and nothing in primogen reads that repository. Docs: a provenance page, index.md, principles.md "Knowledge files".
 - **A card and its rulings from a shell** [M:cards]: the Go module, the data bundle built from `static.krcg.org` and `vtes-rulings`, `vtes_cards` behind `primogen query` and over stdio. Done when `primogen query cards "Freak Drive"` returns the text, the requirements and every ruling with its `rulings.krcg.org` link and its archive link, and a test on pinned real data covers an exact name, a translated name and an unknown name. Docs: product.md "Tools", operations.md (the commands).
 - **The hosted server, refreshing itself** [M:cards]: Streamable HTTP, the refresh scheduler and the bundle swap of operations.md "Data refresh", the published bundle, the deploy on `server-setup`. Done when an MCP client connected to `https://mcp.krcg.org/mcp` gets a card, a local install downloads the bundle, and the data date advances after an upstream change with nobody touching the server. Docs: operations.md.
 - **What each client does with the server** [M:cards]: Claude, ChatGPT, Gemini and one local client, hands-on: whether the server's instructions reach the model, how prompts appear, what a tool result looks like to the user. Done when product.md "Connecting" carries a table of the findings and the server's instructions and results are adjusted to the weakest client. Docs: product.md.
@@ -17,4 +16,4 @@ date or an outside event is not a line.
 - **Is the rulings site's read API public?** [M:rules] (in `rulings-website`): call `/api/card/<id>`, `/api/search`, `/api/group`, `/api/reference` without login. Done when sources.md says what answers, and the site's own docs describe the API if it is public. Docs: sources.md.
 - **A rules answer's evidence in one call** [M:rules]: the section index over rulebook, advanced rules, tournament rules and judges' guide; `vtes_rules_case`, `vtes_rules_search`, `vtes_rules_read`, `vtes_rulings_archive`; the evidence tests seeded from the calibration corpus, the codex cases, the `rules-qa` items as questions and the engine's rulings ledger. Done when the evidence tests pass and the owner has graded a rules session. Docs: product.md "Tools" and "Evaluation".
 
-<!-- completed-since-upkeep: 2 -->
+<!-- completed-since-upkeep: 3 -->

@@ -24,8 +24,8 @@ An MCP server with no LLM on the server side. It returns evidence and
 computed facts; the user's model writes the answer. One Go binary serves the
 hosted endpoint and local installs.
 
-Primogen supersedes the `vtes-skill` repository: its knowledge, sync and
-calibration move here. It owns the TWDA analytics (clustering, archetype
+Primogen supersedes the `vtes-skill` repository, whose knowledge, sync and
+calibration moved here ([provenance.md](provenance.md)). It owns the TWDA analytics (clustering, archetype
 classification, best cards), ported to Go from codex-of-the-damned, which
 then consumes primogen's output.
 
@@ -44,7 +44,7 @@ Names are provisional until the first one ships.
 | `vtes_card_stats` | Play rates, co-occurrence, competitors for the same slot, overall or within an archetype. |
 | `vtes_events` | With Archon login only: tournaments, standings, rankings, ratings. |
 | `vtes_engine_check` | A described position and a proposed play, answered by the engine at `engine.krcg.org` with the legal options; says plainly when a card is outside the engine's pool. |
-| `vtes_guide` | The procedure for a task (rules answer, deck analysis, advice, card comparison, meta reading), the theory of the game, the module vocabulary. |
+| `vtes_guide` | The procedure for a task (rules answer, deck analysis, advice, card comparison, meta reading), the theory of the game, the module vocabulary, the game terms in a language with their label (translations unchecked, not an authority). |
 
 Every tool has a concise default and a detailed mode, says how to narrow when
 it truncates, and dates the data behind its answer. `primogen query` calls

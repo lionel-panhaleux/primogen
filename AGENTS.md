@@ -38,6 +38,11 @@ Context lives in the docs, asks live on the board.
 - **`/ship`**: one line in, one change out: code or knowledge, the docs pages
   named at intake, the board line deleted; then the `reviewer` agent, fresh
   context, before the commit is final.
+- **`/sync`**: the synced knowledge files checked against their upstreams
+  (`vtes-advanced-rules`, the owner's gist of card changes), every diff read
+  before it lands.
+- **`/calibrate`**: an owner-graded session recorded in `calibration/`, or a
+  regression re-run after a revision.
 - **`/upkeep`**: every 20 completed lines or monthly: docs review, board
   eviction, the retrospective that alone changes this harness.
 
@@ -68,5 +73,6 @@ trailer; upkeep reads them.
 
 ## Right now
 
-Nothing is built. The design is decided and recorded in `docs/`; the board
-holds the first lines.
+No code yet. The design is decided and recorded in `docs/`; the knowledge
+and the calibration corpus have moved in from `vtes-skill`; the board holds
+the next lines.
