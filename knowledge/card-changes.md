@@ -494,7 +494,7 @@ The promo vampires _Dan Murdock_ and _Mariana Gilbert_ are legal to play.
 - Reform Body: Can be played in combat (as a combat card) by either combatant, acting or reacting/blocking. Can also be played (as a reaction card) from Torpor, even though only Ready vampires can play reaction cards by default.
 
 # 1998-08-01
-[DCI 19980801](https://groups.google.com/g/rec.games.trading-cards.jyhad/c/E7fFdAhjpdg/m/PyyXsTkzQZYJ)
+[DCI 19980801](https://usenet.krcg.org/t/E7fFdAhjpdg/#m0)
 
 Tournament rules: **No Repeat Action (NRA)** and **No Vote Pushing (NVP)**
 
