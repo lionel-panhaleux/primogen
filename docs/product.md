@@ -135,10 +135,14 @@ list, which the Gemini API answers with a 400
   among the rulings naming it (`vtes_rules_case`'s detail). The
   evidence keyword search does not reach is listed as a known miss, with
   why; a miss not listed fails, and so does a listed one found again. The
-  three listed are kept (owner, 2026-11-12): one judges' guide section no
-  word of its question shares, and two multi-point `rules-qa` items cited
-  for one point; embeddings are weighed only if graded sessions show
-  retrieval missing.
+  three listed first are kept (owner, 2026-11-12): one judges' guide
+  section no word of its question shares, and two multi-point `rules-qa`
+  items cited for one point; embeddings are weighed only if graded sessions
+  show retrieval missing. Since the graded session of 2026-11-12: a rules
+  director's posts no ruling cites, waiting on `vtes_rules_case` reaching
+  the archive (the board), and two judges' guide sections a judge's
+  question shares no word with (Game Rule Violation, Rolling Back the Game
+  State), the retrieval miss that decision waits on.
 - **Owner-graded sessions** on Claude, per milestone, with a regression set
   re-run after each revision (`calibration/`).
 - **Other models** are spot-checked by hand, not graded.

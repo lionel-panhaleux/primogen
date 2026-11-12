@@ -73,10 +73,11 @@ trailer; upkeep reads them.
 
 ## Right now
 
-`vtes_cards` hosted at `https://mcp.krcg.org/mcp` and refreshing itself (not
-announced yet), and from a local install (`primogen stdio`) downloading the
-published bundle. The four rules tools (`vtes_rules_case`,
-`vtes_rules_search`, `vtes_rules_read`, `vtes_rulings_archive`) are in the
-code and reach the hosted server at its next deploy. From a checkout: `primogen build`, then
+`vtes_cards` and the four rules tools (`vtes_rules_case`,
+`vtes_rules_search`, `vtes_rules_read`, `vtes_rulings_archive`) hosted at
+`https://mcp.krcg.org/mcp` and refreshing themselves (not announced yet), and
+from a local install (`primogen stdio`) downloading the published bundle. The
+first owner-graded rules session on them is in `calibration/corpus/`
+(2026-11-12). From a checkout: `primogen build`, then
 `primogen query` or `primogen stdio` with `-bundle data/bundle.json.gz`.
 The board holds the next lines.

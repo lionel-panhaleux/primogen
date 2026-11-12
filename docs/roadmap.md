@@ -40,6 +40,10 @@ owner's decision.
 
 ## Later, in this order unless the owner reorders
 
+- A pass over the rulings database, with primogen's tools finding what the
+  rules directors settled and no ruling holds, the curated rulings kept by
+  the rulemongers (owner, 2026-11-12). Until then the tools work around
+  what it misses.
 - The legality check on the engine (`vtes_engine_check`), which needs a
   position-check endpoint in zero-vtes.
 - The meta: the Go port of the TWDA analytics, `vtes_meta`,
