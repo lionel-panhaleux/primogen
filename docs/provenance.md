@@ -10,7 +10,7 @@ compares them with upstream and records the commit below.
 
 | File | Upstream | Path | Copied at |
 |---|---|---|---|
-| `rules/advanced-rules.md` | `vtes-biased/vtes-advanced-rules` | `docs/advanced-rules.md` | `5c844a5`, 2026-11-11 |
+| `rules/advanced-rules.md` | `vtes-biased/vtes-advanced-rules` | `docs/advanced-rules.md` | `1d1c191`, 2026-11-12 |
 | `card-changes.md` | the owner's gist `a4a9cad2e492af7c45c50a1cea7e6cf6` | `VTES History of changes.md` | `f1be31f`, 2026-11-11 |
 
 ## Authored here

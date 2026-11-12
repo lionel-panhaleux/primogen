@@ -2330,10 +2330,13 @@ Immunity stops the damage, not the play: the source may still use an effect that
 {Charnas the Imp}. Immunity to a class of source reaches environmental damage from that source, a retainer's damage
 included.[^4-5-19]
 
-Prevented damage was still inflicted, so a secondary effect keyed to inflicting damage fires anyway, e.g. {Improvised
-Flamethrower}, {Weighted Walking Stick}; it does not fire where the damage was reduced away or never inflicted. A
-strike's secondary effect conditioned on its damage landing survives prevention but not a dodge, e.g.
-{Fleshcraft}.[^4-5-20]
+Prevented damage, like damage a minion is immune to, is inflicted but not successfully inflicted. An effect keyed to
+damage successfully inflicted needs damage left unprevented, e.g. {Pulled Fangs}, {Target Vitals}. An effect keyed to
+damage inflicted fires anyway, e.g. {Improvised Flamethrower}, {Weighted Walking Stick}, whose "(even if prevented)" is
+reminder text. Older cards printed "inflicts" for "successfully inflicts": a ruling reading a card's "inflicts" so
+stands until a reprint updates the text, e.g. {Twisting the Knife}, {Blade Clot}; without such a ruling the printed
+"inflicts" counts prevented damage, e.g. {Haymaker} *(reading)*. Damage reduced away or dodged is not inflicted at
+all.[^4-5-20]
 
 A strike that sends a vampire to torpor leaves that vampire wounded; {Undying Tenacity} defers the torpor to the end of
 combat but not the wound, e.g. {Coma}.[^4-5-21]
@@ -2359,9 +2362,9 @@ minion's weapon strikes inflict damage normally that round.[^4-6-2]
 
 #### 4.6.2 Dodge against prevention
 
-Preventing the damage leaves the strike resolved, so the rest of the strike's effect still applies. Dodging means the
-strike never resolved and none of it applies. {Fleshcraft} prevented still places the card; {Fleshcraft} dodged does
-not.[^4-6-3] See [§4.5](#45-prevention-and-immunity) for prevention.
+Preventing the damage leaves the strike resolved, so the rest of the strike's effect still applies unless it requires
+damage successfully inflicted ([§4.5.5](#455-immunity)). Dodging means the strike never resolved and none of it
+applies. {Fleshcraft} prevented still places the card; {Fleshcraft} dodged does not.[^4-6-3]
 
 #### 4.6.3 What survives a dodge
 
@@ -3587,6 +3590,10 @@ exemplar cards.
   always carries one. [§3.2.1](#321-adding-what-is-not-needed), [§2.2](#22-as-the-action-is-announced-effects)
 - **"gets X" vs "+X"** — an absolute value sets (copies do not stack, and a set can reduce); "+X" adds to whichever base
   is current. [§1.15](#115-cumulative-and-stacking-effects), [§4.4.1](#441-how-much-damage)
+- **"inflicts" vs "successfully inflicts"** — "successfully inflicts" counts only damage left unprevented and not
+  ignored; "inflicts" also counts damage prevented or ignored through immunity, a printed "(even if prevented)" being
+  reminder text, except on older cards a ruling reads as "successfully inflicts". Neither counts damage dodged or
+  reduced away. [§4.5.5](#455-immunity)
 - **"is considered the acting minion"** — only such text rewrites the designation; entering the combat does not, a later
   writer supersedes an earlier, and the designation reverts when the writer leaves play.
   [§3.10.2](#3102-is-considered-the-acting-minion)
@@ -6061,9 +6068,16 @@ exemplar cards.
     20211127]](https://usenet.krcg.org/t/vekn-76687/#m9)
     — {Charnas the Imp}, group "Retainer doing damage" (G00016).
 
-[^4-5-20]: [[LSJ 20040802]](https://usenet.krcg.org/t/b6V_OGl-TgE/#m1) [[LSJ
-    20100519]](https://usenet.krcg.org/t/criytfhw97o/#m1) [[LSJ 19990106-2]](https://usenet.krcg.org/t/6dDhJmBlpXY/#m0)
-    — {Improvised Flamethrower}, {Weighted Walking Stick}, {Fleshcraft}, {Bonecraft}.
+[^4-5-20]: [[RBK damage-resolution]](https://www.vekn.net/rulebook#damage-resolution) [[LSJ
+    20020215]](https://usenet.krcg.org/t/FArran2SmSQ/#m1) [[ANK 20171226]](https://usenet.krcg.org/t/vekn-76349/#m8)
+    [[ANK 20210324-1]](https://usenet.krcg.org/t/vekn-79087/#m12) [[ANK
+    20210324-2]](https://usenet.krcg.org/t/vekn-79087/#m15) [[LSJ 20040802]](https://usenet.krcg.org/t/b6V_OGl-TgE/#m1)
+    [[LSJ 20100519]](https://usenet.krcg.org/t/criytfhw97o/#m1) [[LSJ
+    20010627]](https://usenet.krcg.org/t/NhNCVCCDyU0/#m5) [[LSJ 20080820]](https://usenet.krcg.org/t/G-TY3oNSBkE/#m1) —
+    {Improvised Flamethrower}, {Weighted Walking Stick}, {Shoulder Drop}, {Drink the Blood of Ahriman}, {Pulled Fangs},
+    {Target Vitals}, {Twisting the Knife}, {Blade Clot}, {Haymaker}. LSJ's "'Inflict' normally means 'successfully
+    inflicts'" (LSJ 20040802, LSJ 20080820) describes the older wording, which the cards he ruled on keep; {Haymaker}
+    awaits a Rules Director ruling (owner, 2026-11-12).
 
 [^4-5-21]: [[LSJ 20090622-2]](https://usenet.krcg.org/t/1zt1SZb2TIk/#m1) — {Coma}, {Rowan Ring}, {Rabbat, The Sewer
     Goddess}, {Seren Sukardi}.
