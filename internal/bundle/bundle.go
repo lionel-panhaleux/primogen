@@ -30,6 +30,8 @@ type Bundle struct {
 	RulesAnswer string
 	// GameTerms are the game's terms in English, from knowledge/game-terms.json.
 	GameTerms []string
+	// Shorthand is the players' shorthand of knowledge/shorthand.json.
+	Shorthand []string
 }
 
 // Source dates what the bundle read: a commit, a file date, the newest post.

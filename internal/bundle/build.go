@@ -79,10 +79,10 @@ func Build(ctx context.Context, up Upstream, archive *Archive) (*Bundle, []strin
 	if err != nil {
 		return nil, nil, err
 	}
-	var history, advanced, procedure, terms []byte
+	var history, advanced, procedure, terms, shorthand []byte
 	for name, body := range map[string]*[]byte{
 		"card-changes.md": &history, "rules/advanced-rules.md": &advanced,
-		"guide/rules-answer.md": &procedure, "game-terms.json": &terms,
+		"guide/rules-answer.md": &procedure, "game-terms.json": &terms, "shorthand.json": &shorthand,
 	} {
 		if *body, err = read(name); err != nil {
 			return nil, nil, err
@@ -91,6 +91,10 @@ func Build(ctx context.Context, up Upstream, archive *Archive) (*Bundle, []strin
 	gameTerms, err := readGameTerms(terms)
 	if err != nil {
 		return nil, nil, err
+	}
+	var short struct{ Shorthand []string }
+	if err := json.Unmarshal(shorthand, &short); err != nil {
+		return nil, nil, fmt.Errorf("shorthand.json: %w", err)
 	}
 	archonCommit, err := lastCommit(ctx, up, archonDocuments)
 	if err != nil {
@@ -125,6 +129,7 @@ func Build(ctx context.Context, up Upstream, archive *Archive) (*Bundle, []strin
 		Posts:       map[string]Post{},
 		RulesAnswer: string(procedure),
 		GameTerms:   gameTerms,
+		Shorthand:   short.Shorthand,
 	}
 	for i, k := range raw {
 		b.Cards[i] = k.card()

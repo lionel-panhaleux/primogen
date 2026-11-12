@@ -124,8 +124,9 @@ func newCasePack(d *data, in caseInput) *casePack {
 // findCards answers the cards a text names, in its order: an English name,
 // then, in the words no name took, the words opening or ending one printed
 // name and no other, judged by their words that are no stopword; neither a
-// game term (a discipline, a clan, a title) nor a phrase the rulebook uses, a
-// single word only capitalized, a name in the possessive read without its 's.
+// game term nor players' shorthand nor a phrase the rulebook uses, a single
+// word only capitalized and no word of the rulebook, a name in the possessive
+// read without its 's.
 // It answers apart, by name, the cards it may name: a single word opening a
 // sentence, a capitalized phrase of the rulebook, a single word of a name
 // beside another capitalized word, words opening or ending a few names, words
@@ -187,6 +188,10 @@ func (d *data) findCards(text string) (found []*bundle.Card, maybe []string) {
 				inName := pass == 1 && single && (i > 0 && !ends(words[i-1], ".!?:,") && capitalized(words[i-1]) ||
 					i+n < len(words) && !ends(words[i+n-1], ".!?:,") && capitalized(words[i+n]))
 				prose := d.rules.inRulebook(name, within) || d.rules.inRulebook(base, within)
+				if pass == 1 && single {
+					w := bundle.Fold(core[0])
+					prose = prose || d.rules.inRulebook(w, within) || d.rules.inRulebook(strings.TrimSuffix(w, "'s"), within)
+				}
 				matched = n
 				switch {
 				case single && !capital:

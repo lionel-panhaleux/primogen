@@ -261,6 +261,11 @@ func TestQueryRules(t *testing.T) {
 		{args: []string{"case", "Can the malkavian block? Can my Toreador's vote count twice? Can The Mole's ability be used twice?"}, want: []string{
 			"Found in the question: The Mole.",
 		}, not: []string{"## The Malkavian Seven Miseries", "## Toreador's Bane", "## Mole's Tunneling"}},
+		// a word of the game names no card: players' shorthand, a trait printed on vampires, a word the rulebook uses
+		{args: []string{"case", "Is that NRA?"}, want: []string{"No card given or found in the question"}, not: []string{"may also name"}},
+		{args: []string{"case", "Is the Hunter's action blocked?"}, want: []string{"No card given or found in the question"}, not: []string{"may also name"}},
+		{args: []string{"case", "Can the Seraph's bleed be bounced?"}, want: []string{"No card given or found in the question"}, not: []string{"may also name"}},
+		{args: []string{"case", "Is the Death of my vampire final?"}, want: []string{"No card given or found in the question"}, not: []string{"may also name"}},
 		{args: append([]string{"case", "How do these interact?"}, ten...), want: []string{"## " + ten[9], "less close to the question: vtes_cards gives them all"}, max: 40000},
 		{args: append([]string{"-detail", "case", "How do these interact?"}, ten...), want: []string{"## " + ten[9]}, max: 80000},
 		{args: []string{"read", "rulebook:4-detailed-turn-sequence", "advanced:3", "advanced:4", "advanced:1", "advanced:2"}, want: []string{"Cut here, too long to read at once"}, max: 40000},

@@ -27,10 +27,15 @@ compares them with upstream and records the commit below.
   tournament-winning decks since 2021-07 (the 2026-07 pass), forked from
   codex-of-the-damned @ `18be59e`. The input of the archetype tools.
 - `game-terms.json`: the game terms in English (the 2024 rulebook's, plus
-  the two 2025 terms) and their translations in six languages, from
+  the two 2025 terms and Seraph, a trait printed on Black Hand vampires)
+  and their translations in six languages, from
   `vtes-skill` @ `65b5c3e`. The translations are unchecked, the exception
   [principles.md](principles.md) "Knowledge files" records; the file says so
   itself.
+- `shorthand.json`: players' shorthand for words of the game that the game
+  terms do not list ("NRA", which the advanced rules print in §3.5's title;
+  "hunter"), which `vtes_rules_case` takes for no card's name. Kept apart
+  from the game terms, it grows when a question finds a card by such a word.
 
 ## Left behind
 

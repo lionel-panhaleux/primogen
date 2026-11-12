@@ -71,7 +71,8 @@ violating one silently is not.
   [provenance.md](provenance.md) says which file is which.
 - **Authored here**: the guide (the theory, the procedure for each task,
   the module vocabulary and card-to-module tags, the served examples), the
-  archetype labels, the game terms and their translations.
+  archetype labels, the game terms and their translations, the players'
+  shorthand.
 
 ## Code
 

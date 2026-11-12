@@ -1,0 +1,3 @@
+{"_meta": {"description": "Players' shorthand for words of the game that game-terms.json does not list (NRA: the advanced rules print it in §3.5's title). vtes_rules_case takes none of them, nor their possessive, for a card's name or a part of one. Authored here, apart from game-terms.json."},
+"shorthand": ["hunter", "NRA"]
+}
