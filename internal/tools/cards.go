@@ -80,10 +80,26 @@ func addCards(s *mcp.Server, l *Live) {
 type cardIndex struct {
 	english, translated map[string][]*bundle.Card
 	names               []string
+	// part maps the words opening or ending a printed name, not all of it nor
+	// cut at a stopword, to the cards printed with that name.
+	part map[string][]*bundle.Card
 }
 
 func newCardIndex(cards []bundle.Card) *cardIndex {
-	ix := &cardIndex{english: map[string][]*bundle.Card{}, translated: map[string][]*bundle.Card{}}
+	ix := &cardIndex{english: map[string][]*bundle.Card{}, translated: map[string][]*bundle.Card{}, part: map[string][]*bundle.Card{}}
+	addPart := func(words []string, edge string, c *bundle.Card) {
+		k := bundle.Fold(strings.Join(words, " "))
+		if k != "" && !stopwords[bundle.Fold(edge)] && !slices.Contains(ix.part[k], c) {
+			ix.part[k] = append(ix.part[k], c)
+		}
+	}
+	for i := range cards {
+		words := nameWords(cards[i].PrintedName)
+		for j := 1; j < len(words); j++ {
+			addPart(words[:j], words[j-1], &cards[i])
+			addPart(words[j:], words[j], &cards[i])
+		}
+	}
 	add := func(m map[string][]*bundle.Card, name string, c *bundle.Card) {
 		k := bundle.Fold(name)
 		if k == "" || slices.Contains(m[k], c) {

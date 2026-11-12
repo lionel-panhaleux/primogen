@@ -121,48 +121,129 @@ func newCasePack(d *data, in caseInput) *casePack {
 	return p
 }
 
-// findCards answers the cards a text names: an English name that is no game
-// term (a discipline, a clan, a title) and no phrase the rulebook uses, a
-// single word only capitalized. It answers apart, by name, the cards it may
-// name: a single word opening a sentence, a capitalized phrase of the rulebook.
+// findCards answers the cards a text names, in its order: an English name,
+// then, in the words no name took, the words opening or ending one printed
+// name and no other, judged by their words that are no stopword; neither a
+// game term (a discipline, a clan, a title) nor a phrase the rulebook uses, a
+// single word only capitalized, a name in the possessive read without its 's.
+// It answers apart, by name, the cards it may name: a single word opening a
+// sentence, a capitalized phrase of the rulebook, a single word of a name
+// beside another capitalized word, words opening or ending a few names, words
+// of a name none capitalized.
 func (d *data) findCards(text string) (found []*bundle.Card, maybe []string) {
-	words := strings.FieldsFunc(text, func(r rune) bool {
-		return !unicode.IsLetter(r) && !unicode.IsDigit(r) && !strings.ContainsRune("'’-.:,!?&", r)
-	})
-	clean := func(w string) string { return strings.Trim(w, ".,:!?'’") }
-	for i := 0; i < len(words); i++ {
-		matched := 0
-		for n := min(8, len(words)-i); n >= 1 && matched == 0; n-- {
-			parts := make([]string, n)
-			for k := range n {
-				parts[k] = clean(words[i+k])
-			}
-			name := strings.Join(parts, " ")
-			cards := d.ix.english[bundle.Fold(name)]
-			if cards == nil || name == "" || d.rules.terms[bundle.Fold(name)] {
-				continue
-			}
-			capital := unicode.IsUpper([]rune(name)[0])
-			opens := i == 0 || strings.ContainsAny(words[i-1][len(words[i-1])-1:], ".!?:")
-			matched = n
-			switch {
-			case n == 1 && !capital:
-				matched = 0
-			case n == 1 && opens, strings.Contains(d.rules.rulebook, " "+strings.Join(strings.Fields(bundle.Fold(name)), " ")+" "):
-				if capital && !slices.Contains(maybe, cards[0].Name) {
-					maybe = append(maybe, cards[0].Name)
+	words := splitWords(text)
+	taken := make([]bool, len(words))
+	type hit struct {
+		at    int
+		cards []*bundle.Card // found
+		names []string       // suggested
+	}
+	var hits []hit
+	ends := func(w string, marks string) bool { return strings.ContainsAny(w[len(w)-1:], marks) }
+	capitalized := func(w string) bool {
+		w = cleanWord(w)
+		return w != "" && unicode.IsUpper([]rune(w)[0]) && !stopwords[bundle.Fold(w)]
+	}
+	for pass, index := range []map[string][]*bundle.Card{d.ix.english, d.ix.part} {
+		for i := 0; i < len(words); i++ {
+			matched := 0
+			for n := min(8, len(words)-i); n >= 1 && matched == 0; n-- {
+				if slices.Contains(taken[i:i+n], true) {
+					continue
 				}
-			default:
-				for _, c := range cards {
-					if !slices.Contains(found, c) {
-						found = append(found, c)
+				parts := make([]string, n)
+				for k := range n {
+					parts[k] = cleanWord(words[i+k])
+				}
+				name := bundle.Fold(strings.Join(parts, " "))
+				base := strings.TrimSuffix(name, "'s")
+				cards := index[name]
+				if cards == nil {
+					cards = index[base]
+				}
+				if cards == nil || slices.Contains(parts, "") || d.rules.terms[name] || d.rules.terms[base] {
+					continue
+				}
+				core := parts
+				capital := unicode.IsUpper([]rune(parts[0])[0])
+				names, within := []string{cards[0].Name}, []string(nil)
+				if pass == 1 {
+					core = slices.DeleteFunc(slices.Clone(parts), func(w string) bool { return stopwords[bundle.Fold(w)] })
+					if w := bundle.Fold(core[0]); len(core) == 1 && (d.rules.terms[w] || d.rules.terms[strings.TrimSuffix(w, "'s")]) {
+						continue
 					}
+					capital = slices.ContainsFunc(core, capitalized)
+					names = nil
+					for _, c := range cards {
+						if !slices.Contains(names, c.PrintedName) {
+							names = append(names, c.PrintedName)
+						}
+					}
+					within = names
 				}
+				single := len(core) == 1
+				opens := i == 0 || ends(words[i-1], ".!?:")
+				// a single word beside another capitalized one is part of a name given whole
+				inName := pass == 1 && single && (i > 0 && !ends(words[i-1], ".!?:,") && capitalized(words[i-1]) ||
+					i+n < len(words) && !ends(words[i+n-1], ".!?:,") && capitalized(words[i+n]))
+				prose := d.rules.inRulebook(name, within) || d.rules.inRulebook(base, within)
+				matched = n
+				switch {
+				case single && !capital:
+					matched = 0
+				case pass == 1 && (prose || len(names) > maxSuggested):
+					// prose, or naming none: no shorter part of these words is tried
+				case single && opens, inName, len(names) > 1, prose, pass == 1 && !capital:
+					if capital || pass == 1 {
+						hits = append(hits, hit{at: i, names: names})
+					}
+				default:
+					hits = append(hits, hit{at: i, cards: cards})
+				}
+			}
+			for k := range matched {
+				taken[i+k] = true
+			}
+			i += max(0, matched-1)
+		}
+	}
+	slices.SortStableFunc(hits, func(a, b hit) int { return cmp.Compare(a.at, b.at) })
+	for _, h := range hits {
+		for _, c := range h.cards {
+			if !slices.Contains(found, c) {
+				found = append(found, c)
 			}
 		}
-		i += max(0, matched-1)
+		for _, n := range h.names {
+			if !slices.Contains(maybe, n) {
+				maybe = append(maybe, n)
+			}
+		}
 	}
 	return found, maybe
+}
+
+// maxSuggested is the most names words opening or ending them suggest: words
+// fitting more name none.
+const maxSuggested = 4
+
+// splitWords cuts a text into words, keeping the punctuation a card's name
+// holds; cleanWord trims what may end a word but no name.
+func splitWords(text string) []string {
+	return strings.FieldsFunc(text, func(r rune) bool {
+		return !unicode.IsLetter(r) && !unicode.IsDigit(r) && !strings.ContainsRune("'’-.:,!?&", r)
+	})
+}
+
+func cleanWord(w string) string { return strings.Trim(w, ".,:!?'’") }
+
+// nameWords cuts a name as findCards cuts a text.
+func nameWords(name string) []string {
+	words := splitWords(name)
+	for i, w := range words {
+		words[i] = cleanWord(w)
+	}
+	return words
 }
 
 // choosePosts picks the rulings whose original posts the pack quotes: all in

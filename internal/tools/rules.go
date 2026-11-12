@@ -98,9 +98,7 @@ func newRulesIndex(b *bundle.Bundle, cards *cardIndex) *rulesIndex {
 			}
 		}
 	}
-	ix.rulebook = " " + strings.Join(strings.FieldsFunc(bundle.Fold(rulebook.String()), func(r rune) bool {
-		return !unicode.IsLetter(r) && !unicode.IsDigit(r) && r != '\''
-	}), " ") + " "
+	ix.rulebook = proseForm(rulebook.String())
 	ix.search = newBM25(texts, titles)
 	for i := range b.Cards {
 		c := &b.Cards[i]
@@ -290,4 +288,22 @@ func addRules(s *mcp.Server, l *Live) {
 
 func text(s string) *mcp.CallToolResult {
 	return &mcp.CallToolResult{Content: []mcp.Content{&mcp.TextContent{Text: s}}}
+}
+
+// proseForm folds a text as the rulebook is searched for a phrase: words of
+// letters, digits and apostrophes, each between spaces.
+func proseForm(s string) string {
+	return " " + strings.Join(strings.FieldsFunc(bundle.Fold(s), func(r rune) bool {
+		return !unicode.IsLetter(r) && !unicode.IsDigit(r) && r != '\''
+	}), " ") + " "
+}
+
+// inRulebook says whether the rulebook uses a phrase other than within the
+// given names.
+func (ix *rulesIndex) inRulebook(phrase string, names []string) bool {
+	n := strings.Count(ix.rulebook, proseForm(phrase))
+	for _, name := range names {
+		n -= strings.Count(ix.rulebook, proseForm(name))
+	}
+	return n > 0
 }

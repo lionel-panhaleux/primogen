@@ -224,7 +224,7 @@ func TestQueryRules(t *testing.T) {
 		want, not []string
 		max       int // the result's bound, in characters
 	}{
-		{args: []string{"case", "Can I play a Freak Drive after I played superior Kiss of Ra?"}, want: []string{
+		{args: []string{"case", "Can I play a Freak Drive after I played superior kiss of ra?"}, want: []string{
 			"Found in the question: Freak Drive; The Kiss of Ra.",
 			"## Freak Drive", "## The Kiss of Ra",
 			"Breakdown (computed from the text above, which governs):\n- Type: Action Modifier",
@@ -245,6 +245,22 @@ func TestQueryRules(t *testing.T) {
 		{args: []string{"case", "Majesty against Immortal Grapple: who wins? And may my predator block after I play Conditioning?"}, want: []string{
 			"Found in the question: Immortal Grapple; Conditioning.", "The question may also name Majesty: pass them in cards if meant.",
 		}, not: []string{"## Majesty"}},
+		// a card named by the words opening or ending its name (product.md, the vtes_rules_case row)
+		{args: []string{"case", "If I use Tangle Atropos on a bleed, can I bleed again ?"}, want: []string{
+			"Found in the question: Tangle Atropos' Hand.", "## Tangle Atropos' Hand\n",
+		}},
+		{args: []string{"case", "I played Concealed Weapon for a Magnum I had in hand but drew an Ivory Bow to replace, can I change my mind and play the Ivory Bow as the concealed weapon ?"}, want: []string{
+			"Found in the question: Concealed Weapon; .44 Magnum; Ivory Bow.", "## .44 Magnum\n",
+		}},
+		// words opening or ending several names, or one word of a name given whole, only suggest
+		{args: []string{"case", "Can I play the Jar on an ally?"}, want: []string{
+			"The question may also name Canopic Jar; Jar of Skin Eaters; Jar the Soul: pass them in cards if meant.",
+		}, not: []string{"## Canopic Jar"}},
+		{args: []string{"case", "I play Conditioning, my predator plays Eagle Sight to block me. Is this allowed?"}, not: []string{"## Desert Eagle"}},
+		// a part is weighed by its words that are no stopword, a possessive read without its 's
+		{args: []string{"case", "Can the malkavian block? Can my Toreador's vote count twice? Can The Mole's ability be used twice?"}, want: []string{
+			"Found in the question: The Mole.",
+		}, not: []string{"## The Malkavian Seven Miseries", "## Toreador's Bane", "## Mole's Tunneling"}},
 		{args: append([]string{"case", "How do these interact?"}, ten...), want: []string{"## " + ten[9], "less close to the question: vtes_cards gives them all"}, max: 40000},
 		{args: append([]string{"-detail", "case", "How do these interact?"}, ten...), want: []string{"## " + ten[9]}, max: 80000},
 		{args: []string{"read", "rulebook:4-detailed-turn-sequence", "advanced:3", "advanced:4", "advanced:1", "advanced:2"}, want: []string{"Cut here, too long to read at once"}, max: 40000},
