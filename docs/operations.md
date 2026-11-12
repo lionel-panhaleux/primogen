@@ -26,7 +26,8 @@ The server refreshes itself; there is no cron job and no operator.
   at start and again after 06:00 UTC each night; it rebuilds when its newest post
   moved. A failed fetch keeps the archive held, and the cheap sources still
   refresh ([sources.md](sources.md) says how each source refreshes). The
-  archive is held whole in memory for `vtes_rulings_archive` (about 750 MB
+  archive is held whole in memory for `vtes_rulings_archive` and the rules
+  directors' posts of `vtes_rules_case` (about 750 MB
   resident at its peak, measured on a local query, and briefly twice that
   while a nightly fetch replaces it); the bundle keeps only the posts the
   rulings and the advanced rules cite.
@@ -41,8 +42,12 @@ The server refreshes itself; there is no cron job and no operator.
 - Archon data goes into a separate database that is never published.
 - A local install downloads the published bundle on first run and again when
   a newer one exists, checked at most daily, and the archive's bulk file the
-  same way, from `usenet.krcg.org`, the first time `vtes_rulings_archive` is
-  called. Offline, it serves what it has and says how old it is.
+  same way, from `usenet.krcg.org`, the first time a tool needs it
+  (`vtes_rulings_archive`, or `vtes_rules_case` given two cards no ruling
+  names together). Loading it takes about 5 seconds (measured on a local
+  `primogen query`, against a tenth of a second for a call that needs no
+  archive); `primogen stdio` loads it once. Offline, it serves what it has
+  and says how old it is.
 - Each refresh reports what needs a person, on the status page and in the
   journal: the build's warnings (below). Decks that matched no archetype,
   cards with no module tag, evidence tests that started failing, an upstream
@@ -97,7 +102,8 @@ each, the ids archon.vekn.net gives those documents' headings by archon's
 own renderer at that commit, which every link of theirs is checked
 against, the archive cut to
 its ids and titles with the text of the posts the rulings and the advanced
-rules cite), with `knowledge/` as it stands, then query it as a user does,
+rules cite and of the threads the calibration corpus's `settled-by`
+names), with `knowledge/` as it stands, then query it as a user does,
 and run the evidence tests ([product.md](product.md) "Evaluation") on it,
 with zero-vtes's `rules-qa` and rulings ledger pinned beside them. They
 also run the hosted server through its refreshes against that server (the

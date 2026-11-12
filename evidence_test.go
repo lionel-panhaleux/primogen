@@ -39,12 +39,11 @@ type evidence struct {
 // knownMisses are the evidence keyword search does not reach, each with why:
 // a miss not listed fails, and so does a listed one found again.
 var knownMisses = map[string]string{
-	"2026-08-26-shroud-of-decay-stalling.md ### [judges:3.5] ":                     "a lexical gap: \"failing to announce their card effects\" against \"incomplete information about publicly available game elements\"",
-	"rules-qa 13.2 ### [advanced:3.2.3] ":                                          "a three-point item, cited for its third point only",
-	"rules-qa 58.13 ### [advanced:3.5.2] ":                                         "a six-point item on Mask of a Thousand Faces, cited for one point: the masker takes the action's NRA marks",
-	"2026-11-12-govern-superior-without-dom.md ### [judges:2.3] ":                  "a lexical gap: a judge's \"couldn't have played\" against \"Game Rule Violation\"",
-	"2026-11-12-govern-superior-without-dom.md ### [judges:1.4.1] ":                "a lexical gap: \"what do I do\" against \"Rolling Back the Game State\"",
-	"2026-11-12-foreshadowing-conditioning-limit.md usenet.krcg.org/t/vekn-78044/": "settled by the rules director's posts in the archive, which no ruling cites",
+	"2026-08-26-shroud-of-decay-stalling.md ### [judges:3.5] ":      "a lexical gap: \"failing to announce their card effects\" against \"incomplete information about publicly available game elements\"",
+	"rules-qa 13.2 ### [advanced:3.2.3] ":                           "a three-point item, cited for its third point only",
+	"rules-qa 58.13 ### [advanced:3.5.2] ":                          "a six-point item on Mask of a Thousand Faces, cited for one point: the masker takes the action's NRA marks",
+	"2026-11-12-govern-superior-without-dom.md ### [judges:2.3] ":   "a lexical gap: a judge's \"couldn't have played\" against \"Game Rule Violation\"",
+	"2026-11-12-govern-superior-without-dom.md ### [judges:1.4.1] ": "a lexical gap: \"what do I do\" against \"Rolling Back the Game State\"",
 }
 
 func checkEvidence(t *testing.T, b *bundle.Bundle, s *mcp.Server, c evidenceCase) []string {
@@ -87,7 +86,18 @@ func loadTestBundle(t *testing.T) (*bundle.Bundle, *mcp.Server) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	return b, tools.NewServer(tools.NewLive(b))
+	f, err := os.Open("testdata/upstream/archive.json.gz")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer f.Close()
+	a, err := bundle.ReadArchive(f)
+	if err != nil {
+		t.Fatal(err)
+	}
+	live := tools.NewLive(b)
+	live.SetArchive(a)
+	return b, tools.NewServer(live)
 }
 
 // TestEvidenceCorpus reads the owner-graded rules entries, each with what

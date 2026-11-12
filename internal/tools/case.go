@@ -45,6 +45,24 @@ type casePack struct {
 	detail   bool
 	// posts holds the rulings whose original posts the pack may quote, best first.
 	posts []*bundle.Ruling
+	// directorPosts are the rules directors' posts naming two cards no ruling
+	// names together, best first, within their caps; pairPosts counts them
+	// all by pair; archiveErr says why the archive was not searched.
+	directorPosts []directorPost
+	pairPosts     map[[2]*bundle.Card]int
+	archiveErr    error
+}
+
+type directorPost struct {
+	post  bundle.Post
+	pairs [][2]*bundle.Card // the pairs it names
+}
+
+// cards answers the question's cards a post names, in the question's order.
+func (dp directorPost) cards(all []*bundle.Card) []*bundle.Card {
+	return slices.DeleteFunc(slices.Clone(all), func(c *bundle.Card) bool {
+		return !slices.ContainsFunc(dp.pairs, func(pair [2]*bundle.Card) bool { return pair[0] == c || pair[1] == c })
+	})
 }
 
 func addCase(s *mcp.Server, l *Live) {
@@ -54,7 +72,8 @@ func addCase(s *mcp.Server, l *Live) {
 		Description: "Call first for any Vampire: The Eternal Struggle (VTES) rules question: never answer one from memory. " +
 			"Give the question and the cards involved; returns in one call the evidence that settles it: each card's official text and " +
 			"a breakdown of its effects and timing, every ruling with the rules director's original post, the rulings naming these cards " +
-			"together, the governing sections of the rulebook and the advanced rules, what no source covers, and how to answer.",
+			"together, else the rules directors' posts naming them together, the governing sections of the rulebook and the advanced rules, " +
+			"what no source covers, and how to answer.",
 		InputSchema: caseSchema,
 		Annotations: &mcp.ToolAnnotations{ReadOnlyHint: true, IdempotentHint: true, OpenWorldHint: new(false)},
 	}, func(ctx context.Context, _ *mcp.CallToolRequest, in caseInput) (*mcp.CallToolResult, any, error) {
@@ -62,6 +81,13 @@ func addCase(s *mcp.Server, l *Live) {
 			return nil, nil, fmt.Errorf(`give the question and at most %d non-empty card names, e.g. {"question": "Can I play Freak Drive after The Kiss of Ra?", "cards": ["Freak Drive", "The Kiss of Ra"]}`, maxNames)
 		}
 		p := newCasePack(l.p.Load(), in)
+		if len(p.apart()) > 0 {
+			if as, err := l.archiveFor(ctx); err != nil {
+				p.archiveErr = err
+			} else {
+				p.chooseDirectorPosts(as)
+			}
+		}
 		return text(p.write()), nil, nil
 	})
 }
@@ -311,6 +337,130 @@ func (p *casePack) closest(c *bundle.Card, n int) (*bundle.Card, int) {
 	return &short, len(c.Rulings) - n
 }
 
+// apart answers the pairs of the question's cards no ruling names together.
+func (p *casePack) apart() [][2]*bundle.Card {
+	var pairs [][2]*bundle.Card
+	for i, a := range p.cards {
+		for _, b := range p.cards[i+1:] {
+			if !p.namedTogether(a, b) {
+				pairs = append(pairs, [2]*bundle.Card{a, b})
+			}
+		}
+	}
+	return pairs
+}
+
+// chooseDirectorPosts picks the posts by the rules director then sitting whose
+// own words name two cards no ruling names together within a few sentences (a
+// compilation names them apart). Closeness is to the whole post: the question
+// it quotes counts.
+func (p *casePack) chooseDirectorPosts(as *archiveSearch) {
+	perThread, most := 4, 8
+	if p.detail {
+		perThread, most = 10, 25
+	}
+	spelled := map[*bundle.Card][]string{}
+	naming := map[*bundle.Card]map[int]string{}
+	pairsOf := map[int][][2]*bundle.Card{}
+	p.pairPosts = map[[2]*bundle.Card]int{}
+	for _, pair := range p.apart() {
+		for _, c := range pair {
+			if naming[c] == nil {
+				spelled[c] = spellings(c)
+				naming[c] = as.naming(spelled[c])
+			}
+		}
+		for k, own := range naming[pair[0]] {
+			if _, ok := naming[pair[1]][k]; ok && closeTogether(own, spelled[pair[0]], spelled[pair[1]]) {
+				pairsOf[k] = append(pairsOf[k], pair)
+				p.pairPosts[pair]++
+			}
+		}
+	}
+	msg := func(k int) *bundle.Message { return &as.msgs[k].thread.Messages[as.msgs[k].i] }
+	score := map[int]float64{}
+	for k := range pairsOf {
+		seen := map[string]bool{}
+		for _, t := range terms(msg(k).Body) {
+			if !seen[t] {
+				seen[t] = true
+				score[k] += p.q[t]
+			}
+		}
+	}
+	order := slices.Sorted(maps.Keys(pairsOf))
+	slices.SortStableFunc(order, func(a, b int) int {
+		return cmp.Or(cmp.Compare(score[b], score[a]), strings.Compare(msg(b).Date, msg(a).Date))
+	})
+	inThread := map[*bundle.Thread]int{}
+	for _, k := range order {
+		m := as.msgs[k]
+		if len(p.directorPosts) == most {
+			break
+		}
+		if inThread[m.thread] == perThread {
+			continue
+		}
+		inThread[m.thread]++
+		p.directorPosts = append(p.directorPosts, directorPost{post: bundle.Post{
+			Link:   fmt.Sprintf("https://usenet.krcg.org/t/%s/#m%d", m.thread.ID, m.i),
+			Thread: m.thread.Title, Author: msg(k).Author, Date: msg(k).Date, Body: msg(k).Body,
+		}, pairs: pairsOf[k]})
+	}
+}
+
+// spellings answers how a post may name a card, folded: its printed name or
+// another English spelling, without its trademark or a closing parenthesis, a
+// leading "the" optional, and the words before a comma ("Enzo Giovanni"), but
+// not a single one: "Beast" or "Mercy" would be any post's.
+func spellings(c *bundle.Card) []string {
+	var names []string
+	add := func(n string) {
+		if n = bundle.Fold(n); n != "" && !slices.Contains(names, n) {
+			names = append(names, n)
+		}
+	}
+	for _, n := range append([]string{c.PrintedName}, c.Aliases...) {
+		n = reClosingParens.ReplaceAllString(strings.NewReplacer("™", "", "(TM)", "").Replace(n), "")
+		if reInverted.MatchString(n) {
+			continue
+		}
+		add(n)
+		if short, ok := strings.CutPrefix(bundle.Fold(n), "the "); ok {
+			add(short)
+		}
+		if before, _, ok := strings.Cut(n, ","); ok {
+			if strings.Contains(strings.TrimSpace(before), " ") {
+				add(before)
+			}
+		}
+	}
+	return names
+}
+
+var (
+	reClosingParens = regexp.MustCompile(`\s*\([^)]*\)\s*$`)
+	// a name filed by its noun, "Kiss of Ra, The": no post writes it
+	reInverted = regexp.MustCompile(`(?i),\s*(?:the|an?)$`)
+)
+
+// closeTogether says whether a folded text names two cards within a few
+// sentences of each other.
+func closeTogether(text string, a, b []string) bool {
+	for _, na := range a {
+		for _, i := range wordsAt(text, na) {
+			for _, nb := range b {
+				for _, j := range wordsAt(text, nb) {
+					if max(i-j, j-i) <= 300 {
+						return true
+					}
+				}
+			}
+		}
+	}
+	return false
+}
+
 // write writes the pack within its bound: the cards, their rulings (the
 // closest to the question only, when all would not fit), the rulings naming
 // them together, what no source covers and the procedure always; then the
@@ -332,6 +482,25 @@ func (p *casePack) write() string {
 		if b.Len() > 0 {
 			posts[r.Link] = b.String()
 		}
+	}
+	const directorsHead = "# The rules directors' posts on cards no ruling names together\n\n" +
+		"For two of these cards that no ruling names together, the posts by the rules director then sitting naming both within a few sentences, " +
+		"the closest to the question first. Such a post settles what it covers as the cards and rules stood at its date " +
+		"(each card's history of changes says what changed since). Quote it with its link and its author's standing.\n\n"
+	var directors []string
+	keptDirectors := map[int]bool{}
+	for _, dp := range p.directorPosts {
+		var b strings.Builder
+		post, names, needles := dp.post, []string{}, []string{}
+		for _, c := range dp.cards(p.cards) {
+			names = append(names, c.Name)
+			needles = append(needles, spellings(c)...)
+		}
+		if !p.detail && len(ownLines(post.Body)) > postLimit {
+			post.Body = around(post.Body, needles, postLimit)
+		}
+		writePost(&b, post, "Post naming "+strings.Join(names, " and "), "", postLimit)
+		directors = append(directors, b.String()+"\n")
 	}
 	head, sections, tail := p.sections()
 	kept := map[string]bool{}
@@ -366,6 +535,14 @@ func (p *casePack) write() string {
 			}
 		}
 		p.writeTogether(&out)
+		if len(keptDirectors) > 0 {
+			out.WriteString(directorsHead)
+			for i, s := range directors {
+				if keptDirectors[i] {
+					out.WriteString(s)
+				}
+			}
+		}
 		if len(withSections) > 0 {
 			out.WriteString(head)
 			for _, s := range withSections {
@@ -373,7 +550,7 @@ func (p *casePack) write() string {
 			}
 			out.WriteString(tail)
 		}
-		p.writeAbsent(&out)
+		p.writeAbsent(&out, keptDirectors)
 		out.WriteString(strings.TrimSpace(d.b.RulesAnswer))
 		out.WriteString("\n\nAnswer from this evidence, quoting it and citing its links, never from memory. " +
 			"Where nothing here settles a point, say it is unsettled rather than filling the gap.\n\n")
@@ -385,8 +562,9 @@ func (p *casePack) write() string {
 			break
 		}
 	}
-	// the sections first, up to most of what is left, then the posts, then
-	// the sections still out
+	// the sections first, up to most of what is left, then the rules
+	// directors' posts, up to half of what is left, the rulings' posts, the
+	// sections still out, and the directors' posts still out
 	left := total - len(render(nil)) - len(head) - len(tail) - trailer
 	var chosen []string
 	in := 0
@@ -398,6 +576,21 @@ func (p *casePack) write() string {
 		in += len(s)
 	}
 	left -= in
+	keepDirectors := func(within int) int {
+		used := 0
+		for i, s := range directors {
+			need := len(s)
+			if len(keptDirectors) == 0 {
+				need += len(directorsHead)
+			}
+			if !keptDirectors[i] && used+need <= within {
+				keptDirectors[i] = true
+				used += need
+			}
+		}
+		return used
+	}
+	left -= keepDirectors(left / 2)
 	shown := map[string]bool{}
 	for _, full := range p.cards {
 		c, _ := p.closest(full, rulings)
@@ -423,9 +616,11 @@ func (p *casePack) write() string {
 		chosen = append(chosen, s)
 		left -= len(s)
 	}
+	keepDirectors(left)
+	directorsOut := len(directors) - len(keptDirectors)
 	out := render(chosen)
-	if sectionsOut := len(sections) - len(chosen); sectionsOut > 0 || postsOut > 0 {
-		cut := fmt.Sprintf("Left out to keep this result within its size: %d sections and %d rulings' original posts; ", sectionsOut, postsOut)
+	if sectionsOut := len(sections) - len(chosen); sectionsOut > 0 || postsOut > 0 || directorsOut > 0 {
+		cut := fmt.Sprintf("Left out to keep this result within its size: %d sections, %d rulings' original posts and %d rules directors' posts; ", sectionsOut, postsOut, directorsOut)
 		if p.detail {
 			cut += "ask about fewer cards, or read the sections with vtes_rules_read.\n\n"
 		} else {
@@ -602,8 +797,9 @@ func (p *casePack) sections() (head string, sections []string, tail string) {
 	return head, sections, tail
 }
 
-// writeAbsent states what no source covers, so that the answer can say so.
-func (p *casePack) writeAbsent(out *strings.Builder) {
+// writeAbsent states what no source covers, so that the answer can say so,
+// with the rules directors' posts shown, by their index.
+func (p *casePack) writeAbsent(out *strings.Builder, shown map[int]bool) {
 	var lines []string
 	ix := p.d.rules
 	for _, c := range p.cards {
@@ -614,12 +810,47 @@ func (p *casePack) writeAbsent(out *strings.Builder) {
 			lines = append(lines, fmt.Sprintf("No section of the advanced rules names %s.", c.Name))
 		}
 	}
-	for i, a := range p.cards {
-		for _, b := range p.cards[i+1:] {
-			if !p.namedTogether(a, b) {
-				lines = append(lines, fmt.Sprintf("No ruling names %s and %s together.", a.Name, b.Name))
+	apart, none, others := p.apart(), 0, false
+	for _, pair := range apart {
+		line := fmt.Sprintf("No ruling names %s and %s together.", pair[0].Name, pair[1].Name)
+		found, in := p.pairPosts[pair], 0
+		for i, dp := range p.directorPosts {
+			if shown[i] && slices.Contains(dp.pairs, pair) {
+				in++
 			}
 		}
+		switch {
+		case p.archiveErr != nil:
+		case found == 0:
+			none++
+		case found == 1 && in == 1:
+			line += " A post by the rules director then sitting names them within a few sentences: above."
+		case found == 1:
+			line += " A post by the rules director then sitting names them within a few sentences, left out here."
+			others = true
+		case found == in:
+			line += fmt.Sprintf(" %d posts by the rules director then sitting name them within a few sentences: all above.", found)
+		case in == 0:
+			line += fmt.Sprintf(" %d posts by the rules director then sitting name them within a few sentences, left out here.", found)
+			others = true
+		default:
+			line += fmt.Sprintf(" %d posts by the rules director then sitting name them within a few sentences, %d of them above.", found, in)
+			others = true
+		}
+		lines = append(lines, line)
+	}
+	switch {
+	case none > 0 && none == len(apart):
+		lines = append(lines, "No post by the rules director then sitting names two of these cards within a few sentences either (vtes_rulings_archive searches wider).")
+	case none > 0:
+		lines = append(lines, "No post by the rules director then sitting names, within a few sentences, the other cards no ruling names together (vtes_rulings_archive searches wider).")
+	}
+	if others {
+		lines = append(lines, "vtes_rulings_archive, with both names and directors only, gives the rules directors' posts left out here.")
+	}
+	if p.archiveErr != nil {
+		lines = append(lines, fmt.Sprintf("The rulings archive was not searched for a rules director's post naming two of these cards (%s): "+
+			"vtes_rulings_archive, with both names and directors only, searches it.", strings.Join(strings.Fields(p.archiveErr.Error()), " ")))
 	}
 	if len(lines) == 0 {
 		return

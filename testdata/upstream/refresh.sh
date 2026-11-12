@@ -3,7 +3,8 @@
 # head, archon-vibe's rules documents at its head with the ids archon.vekn.net
 # gives them, zero-vtes's rules-qa and rulings ledger, and the archive cut to
 # its ids and titles, with the text of the posts the rulings and the advanced
-# rules cite. Needs curl, jq, node and npm (mise install).
+# rules cite and of the threads the calibration corpus's settled-by names.
+# Needs curl, jq, node and npm (mise install).
 set -eu
 cd "$(dirname "$0")"
 sha=$(curl -fsS -H 'Accept: application/vnd.github.sha' https://api.github.com/repos/vtes-biased/vtes-rulings/commits/main)
@@ -52,8 +53,10 @@ cited=$(
 			sed -E 's|.*/([0-9]+)-[^/#]*#([0-9]+)$|vekn-\1 \2|'
 	} | jq -Rn '[inputs | split(" ")] | group_by(.[0]) | map({key: .[0][0], value: map(.[1])}) | from_entries'
 )
+whole=$(grep -h '^settled-by:' ../../calibration/corpus/*.md | grep -oE 'usenet\.krcg\.org/t/[^/#]+/' |
+	sed -E 's|usenet\.krcg\.org/t/([^/]+)/|\1|' | jq -Rn '[inputs]')
 curl -fsS https://usenet.krcg.org/archive.json.gz | gunzip |
-	jq -c --argjson cited "$cited" '{LastPost, Threads: [.Threads[] | .ThreadId as $t | ($cited[$t] // []) as $c |
+	jq -c --argjson cited "$cited" --argjson whole "$whole" '{LastPost, Threads: [.Threads[] | .ThreadId as $t | ($cited[$t] // []) as $c |
 		{ThreadId, Title, Messages: [.Messages | to_entries[] | .key as $i | .value as $m |
-			if ($c | index("m\($i)")) or ($m.Id != null and ($c | index($m.Id)))
+			if ($whole | index([$t])) or ($c | index("m\($i)")) or ($m.Id != null and ($c | index($m.Id)))
 			then $m | {Id, Author, Date, Body} else {Id: $m.Id} end]}]}' | gzip -9 > archive.json.gz

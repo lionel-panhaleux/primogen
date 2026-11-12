@@ -219,6 +219,13 @@ func TestQueryRules(t *testing.T) {
 	for _, c := range cards[:10] {
 		ten = append(ten, c.Name)
 	}
+	u, _, err := newUpstream()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer u.srv.Close()
+	t.Setenv("HOME", t.TempDir())
+	t.Setenv("XDG_CACHE_HOME", "")
 	for _, tc := range []struct {
 		args      []string // after query -bundle
 		want, not []string
@@ -233,9 +240,16 @@ func TestQueryRules(t *testing.T) {
 			"Original post: L. Scott Johnson, the sitting rules director, 1998-10-28",
 			"# The rules sections",
 			"### [advanced:3.5.3] 3.5.3 Ended and failed",
-			"- No ruling names Freak Drive and The Kiss of Ra together.",
+			"- No ruling names Freak Drive and The Kiss of Ra together.\n- No post by the rules director then sitting names two of these cards within a few sentences either",
 			"# Procedure: a rules answer",
 			"rules of archon-vibe 4bb83ba",
+		}},
+		// a rules director's post naming two cards no ruling names together, the archive fetched at the first call
+		{args: []string{"case", "If you use Foreshadowing Destruction and your prey is over ten, can you add a Conditioning ?"}, want: []string{
+			"# The rules directors' posts on cards no ruling names together",
+			"Post naming Foreshadowing Destruction and Conditioning: Vincent Ripoll (Ankha), the sitting rules director, 2019-10-24, \"About bleed modifiers\", https://usenet.krcg.org/t/vekn-78044/#m3\n",
+			"https://usenet.krcg.org/t/vekn-78044/#m13\n",
+			"- No ruling names Foreshadowing Destruction and Conditioning together. 4 posts by the rules director then sitting name them within a few sentences: all above.\n",
 		}},
 		{args: []string{"case", "Can a minion block twice?"}, want: []string{"No card given or found in the question", "### [rulebook:who-may-attempt-to-block]"}},
 		// a discipline is no card, and cards given are the cards
@@ -280,7 +294,7 @@ func TestQueryRules(t *testing.T) {
 	} {
 		t.Run(strings.Join(tc.args, " "), func(t *testing.T) {
 			var stdout, stderr strings.Builder
-			if err := run(t.Context(), append([]string{"query", "-bundle", testBundle}, tc.args...), &stdout, &stderr); err != nil {
+			if err := run(t.Context(), append([]string{"query", "-bundle", testBundle, "-archive", u.srv.URL + "/archive.json.gz"}, tc.args...), &stdout, &stderr); err != nil {
 				t.Fatal(err, stderr.String())
 			}
 			out := stdout.String()

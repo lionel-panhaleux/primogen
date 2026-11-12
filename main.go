@@ -36,7 +36,8 @@ const usage = `usage:
 Without -bundle, query and stdio use the published bundle in the user cache
 directory: downloaded on first run (from -from, for the tests), and again when
 a newer one exists, checked at most daily. The rulings archive is downloaded
-the same way (from -archive) when vtes_rulings_archive is first called.`
+the same way (from -archive) when a tool first needs it: vtes_rulings_archive,
+or vtes_rules_case given two cards no ruling names together.`
 
 // published is the bundle the hosted server builds, which local installs download.
 const published = "https://mcp.krcg.org/bundle.json.gz"

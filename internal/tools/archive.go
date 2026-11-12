@@ -19,6 +19,9 @@ import (
 type archiveSearch struct {
 	a    *bundle.Archive
 	msgs []archiveMsg
+	// directors indexes the messages by the rules director sitting when they
+	// were written.
+	directors []int
 }
 
 type archiveMsg struct {
@@ -37,11 +40,44 @@ func newArchiveSearch(a *bundle.Archive) *archiveSearch {
 			if m.Body == "" {
 				continue
 			}
+			if bundle.Role(m.Author, m.Date).Seat == bundle.Sitting {
+				s.directors = append(s.directors, len(s.msgs))
+			}
 			s.msgs = append(s.msgs, archiveMsg{th, i, bundle.Fold(ownLines(m.Body)), title})
 		}
 	}
 	return s
 }
+
+// naming answers the rules directors' messages whose own words name a card
+// outside a decklist, with those words folded, the decklist out.
+func (s *archiveSearch) naming(names []string) map[int]string {
+	found := map[int]string{}
+	if len(names) == 0 {
+		return found
+	}
+	for _, k := range s.directors {
+		m := s.msgs[k]
+		if !slices.ContainsFunc(names, func(n string) bool { return countWord(m.own, n) > 0 }) {
+			continue
+		}
+		var prose strings.Builder
+		for line := range strings.Lines(ownLines(m.thread.Messages[m.i].Body)) {
+			if len(line) >= 80 || !reDeckLine.MatchString(line) {
+				prose.WriteString(line)
+			}
+		}
+		own := bundle.Fold(prose.String())
+		if slices.ContainsFunc(names, func(n string) bool { return countWord(own, n) > 0 }) {
+			found[k] = own
+		}
+	}
+	return found
+}
+
+// reDeckLine is a decklist's line, "3x Conditioning" or "Conditioning x3":
+// a card listed, not discussed.
+var reDeckLine = regexp.MustCompile(`(?i)^\s*(?:\d+\s*[x×]?|[x×]\s*\d+)\s+\S|\s[x×]\s*\d+\s*$`)
 
 func ownLines(body string) string {
 	var b strings.Builder
@@ -106,7 +142,8 @@ func addArchive(s *mcp.Server, l *Live) {
 			"Full-text search of the Vampire: The Eternal Struggle (VTES) rulings archive (usenet.krcg.org): the newsgroup " +
 			"from 1994, the V:EKN forum and BoardGameGeek, every thread a rules director took part in. Returns posts with their author, " +
 			"date, whether the author was the sitting rules director then, and the citable link. For a point no ruling settles; " +
-			"a post by a player is not a ruling. vtes_rules_case already quotes the posts the rulings cite.",
+			"a post by a player is not a ruling. vtes_rules_case already quotes the posts the rulings cite, " +
+			"and the rules directors' posts naming two of its cards no ruling names together.",
 		InputSchema: &jsonschema.Schema{
 			Type: "object",
 			Properties: map[string]*jsonschema.Schema{
@@ -239,16 +276,19 @@ func addArchive(s *mcp.Server, l *Live) {
 }
 
 // countWord counts a folded needle in a folded text as whole words.
-func countWord(text, needle string) int {
-	n := 0
+func countWord(text, needle string) int { return len(wordsAt(text, needle)) }
+
+// wordsAt answers where a folded needle stands in a folded text as whole words.
+func wordsAt(text, needle string) []int {
+	var at []int
 	for i := 0; ; {
 		j := strings.Index(text[i:], needle)
 		if j < 0 {
-			return n
+			return at
 		}
 		start, end := i+j, i+j+len(needle)
 		if (start == 0 || !isWordByte(text[start-1])) && (end == len(text) || !isWordByte(text[end])) {
-			n++
+			at = append(at, start)
 		}
 		i = start + 1
 	}
