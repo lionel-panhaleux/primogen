@@ -10,7 +10,6 @@ compares them with upstream and records the commit below.
 
 | File | Upstream | Path | Copied at |
 |---|---|---|---|
-| `rules/rulebook.md` | `vtes-biased/vtes-advanced-rules` | `rulebook2024/content.md` (submodule) | `rulebook2024` @ `0644d3d`, 2026-11-11 |
 | `rules/advanced-rules.md` | `vtes-biased/vtes-advanced-rules` | `docs/advanced-rules.md` | `5c844a5`, 2026-11-11 |
 | `card-changes.md` | the owner's gist `a4a9cad2e492af7c45c50a1cea7e6cf6` | `VTES History of changes.md` | `f1be31f`, 2026-11-11 |
 
@@ -43,9 +42,10 @@ What `vtes-skill` @ `65b5c3e` carried and primogen does not:
   originals.
 - Condensed copies of the tournament rules, the judges' guides (current and
   2004), the code of ethics and the rulebook: paraphrases, where primogen
-  serves verbatim text. Primogen reads the tournament rules and the judges'
-  guide from `vekn.net` at each refresh ([sources.md](sources.md)); the
-  code of ethics and the 2004 judges' guide are not read.
+  serves verbatim text. Primogen reads the rulebook, the tournament rules
+  and the judges' guide from `archon-vibe` at each refresh
+  ([sources.md](sources.md)); the code of ethics and the 2004 judges' guide
+  are not read.
 - Its notes on gaps in the official documents: unverified.
 - The meta tables by year: computed facts, which the meta tools compute
   from the archive (principle 7).

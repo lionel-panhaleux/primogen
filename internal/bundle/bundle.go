@@ -105,6 +105,8 @@ type Reference struct {
 	Archive string
 	// Unarchived marks a newsgroup or forum post the archive should hold and does not.
 	Unarchived bool
+	// Section is the rulebook section a rulebook reference names.
+	Section string
 }
 
 // Change is an entry of the history of card and rules changes.

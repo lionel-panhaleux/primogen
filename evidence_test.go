@@ -176,7 +176,7 @@ func TestEvidenceCodex(t *testing.T) {
 		question: "Does an action modifier requiring an Anarch, or the Become Anarch action, let me play CrimethInc.? And can any vampire recruit Tunnel Runner?",
 		cards:    []string{"CrimethInc.", "Tunnel Runner"},
 		want: []evidence{
-			{doc: bundle.DocRulebook, title: "Become Anarch"},
+			{doc: bundle.DocRulebook, title: "ADVANCED RULES — Become Anarch"},
 			{text: "Only usable after resolution of a successful action requiring an Anarch or making this vampire Anarch."},
 			{text: "Clans its requirement names: Akunanse."},
 		},

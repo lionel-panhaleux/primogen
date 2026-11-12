@@ -454,7 +454,7 @@ func (p *casePack) sections() (head string, sections []string, tail string) {
 				for _, i := range ix.sectionsCiting[ref.Label] {
 					links[i]++
 				}
-				if i, ok := ix.byURL[strings.ToLower(ref.URL)]; ok {
+				if i, ok := ix.byID[ref.Section]; ok {
 					links[i]++
 				}
 			}

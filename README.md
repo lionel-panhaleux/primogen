@@ -22,7 +22,7 @@ sign-in.
 - [KRCG](https://static.krcg.org) for cards data
 - The [rulings database](https://rulings.krcg.org)
 - The [usenet archive](https://usenet.krcg.org)
-- The [rulebook](https://www.vekn.net/rulebook), the [tournament rules](https://www.vekn.net/tournament-rules) and the [judges' guide](https://www.vekn.net/judges-guide) of the V:EKN
+- The [rulebook](https://archon.vekn.net/help/rules), the [tournament rules](https://archon.vekn.net/help/tournament-rules) and the [judges' guide](https://archon.vekn.net/help/judges-guide) of the V:EKN, from [Archon](https://archon.vekn.net)
 - The [advanced rules](https://vtes-biased.github.io/vtes-advanced-rules/)
 
 ## Connect your assistant

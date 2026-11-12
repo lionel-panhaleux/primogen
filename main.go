@@ -84,7 +84,7 @@ func build(ctx context.Context, fs *flag.FlagSet, path *string, args []string, s
 	if err != nil {
 		return err
 	}
-	b, warnings, err := bundle.Build(ctx, up, archive, nil)
+	b, warnings, err := bundle.Build(ctx, up, archive)
 	if err != nil {
 		return err
 	}

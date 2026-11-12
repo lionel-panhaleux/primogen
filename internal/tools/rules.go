@@ -34,7 +34,6 @@ type rulesIndex struct {
 	rulingsNaming  map[int][]namedRuling
 	// sectionsCiting maps a reference label (LSJ 19980212) to the sections whose footnotes cite it.
 	sectionsCiting map[string][]int
-	byURL          map[string]int
 	// rulebook is the rulebook's text folded and terms the game's own words
 	// (disciplines, clans, titles): neither is taken for a card's name.
 	rulebook string
@@ -58,7 +57,6 @@ func newRulesIndex(b *bundle.Bundle, cards *cardIndex) *rulesIndex {
 		sectionsNaming: map[int][]int{},
 		rulingsNaming:  map[int][]namedRuling{},
 		sectionsCiting: map[string][]int{},
-		byURL:          map[string]int{},
 		terms:          map[string]bool{},
 	}
 	for _, t := range b.GameTerms {
@@ -80,9 +78,6 @@ func newRulesIndex(b *bundle.Bundle, cards *cardIndex) *rulesIndex {
 	var rulebook strings.Builder
 	for i, s := range b.Sections {
 		ix.byID[s.ID] = i
-		if _, taken := ix.byURL[strings.ToLower(s.URL)]; !taken {
-			ix.byURL[strings.ToLower(s.URL)] = i
-		}
 		for _, n := range s.Notes {
 			for _, m := range reCited.FindAllStringSubmatch(n, -1) {
 				if l := ix.sectionsCiting[m[1]]; !slices.Contains(l, i) {

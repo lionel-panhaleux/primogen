@@ -1,8 +1,9 @@
 #!/bin/sh
 # Pins the real upstreams for the tests: the card data, vtes-rulings at its
-# head, vekn.net's rulebook, tournament rules and judges' guide, zero-vtes's
-# rules-qa and rulings ledger, and the archive cut to its ids and titles, with
-# the text of the posts the rulings and the advanced rules cite.
+# head, archon-vibe's rules documents at its head with the ids archon.vekn.net
+# gives them, zero-vtes's rules-qa and rulings ledger, and the archive cut to
+# its ids and titles, with the text of the posts the rulings and the advanced
+# rules cite. Needs curl, jq, node and npm (mise install).
 set -eu
 cd "$(dirname "$0")"
 sha=$(curl -fsS -H 'Accept: application/vnd.github.sha' https://api.github.com/repos/vtes-biased/vtes-rulings/commits/main)
@@ -11,9 +12,34 @@ for f in rulings groups references; do
 	curl -fsS --create-dirs -o "vtes-rulings/$sha/$f.yaml" "https://raw.githubusercontent.com/vtes-biased/vtes-rulings/$sha/rulings/$f.yaml"
 done
 curl -fsS -o vtes.json https://static.krcg.org/data/v4/vtes.json
-for page in rulebook tournament-rules judges-guide; do
-	curl -fsS -A primogen --create-dirs -o "vekn/$page.html" "https://www.vekn.net/$page"
+# the last commits touching archon-vibe's documents and its renderer
+last() { curl -fsS "https://api.github.com/repos/vtes-biased/archon-vibe/commits?per_page=1&path=$1" | jq -r '.[0].sha'; }
+archon=$(last frontend/src/lib/help-content)
+renderer=$(last frontend/src/lib/markdown.ts)
+rm -rf archon-vibe && echo "$archon" > archon-commit && echo "$renderer" > archon-renderer
+raw="https://raw.githubusercontent.com/vtes-biased/archon-vibe/$archon/frontend"
+for f in vtes-rules tournament-rules judges-guide; do
+	curl -fsS --create-dirs -o "archon-vibe/$archon/$f.md" "$raw/src/lib/help-content/$f.md"
 done
+# the ids archon.vekn.net gives them, by its renderer of that commit; the
+# sanitizer it runs after does not touch ids
+render=$(mktemp -d)
+curl -fsS "https://raw.githubusercontent.com/vtes-biased/archon-vibe/$renderer/frontend/src/lib/markdown.ts" |
+	sed 's|^import DOMPurify from "dompurify";|const DOMPurify = { sanitize: (h: string, _o?: unknown) => h };|' > "$render/markdown.ts"
+cat > "$render/ids.ts" <<'TS'
+import { readFileSync } from "node:fs";
+import { basename } from "node:path";
+import { renderDocument } from "./markdown.ts";
+const ids: Record<string, string[]> = {};
+for (const path of process.argv.slice(2)) {
+  ids[basename(path, ".md")] = [...renderDocument(readFileSync(path, "utf8")).matchAll(/ id="([^"]+)"/g)].map((m) => m[1]!);
+}
+console.log(JSON.stringify(ids));
+TS
+marked=$(curl -fsS "https://raw.githubusercontent.com/vtes-biased/archon-vibe/$renderer/frontend/package.json" | jq -r '.dependencies.marked')
+(cd "$render" && npm init -y >/dev/null && npm pkg set type=module && npm install --silent --no-audit --no-fund "marked@$marked")
+node "$render/ids.ts" archon-vibe/"$archon"/*.md | jq . > "archon-vibe/$archon/ids.json"
+rm -rf "$render"
 for f in docs/rules-qa.md data/rulings-v5.csv; do
 	curl -fsS --create-dirs -o "zero-vtes/$f" "https://raw.githubusercontent.com/lionel-panhaleux/zero-vtes/main/$f"
 done

@@ -32,38 +32,35 @@ type Upstream struct {
 	KnowledgeDir  string
 	KnowledgeHead string
 	KnowledgeFile string
-	// vekn.net's pages
-	TournamentRules string
-	JudgesGuide     string
-	Rulebook        string
+	// archon-vibe, whose help pages are the rulebook, the tournament rules and
+	// the judges' guide: the last commit touching a path, and files at one
+	ArchonCommits string // the last commit touching a path, formatted with the path
+	ArchonFile    string
 }
 
 var KRCG = Upstream{
-	Cards:           "https://static.krcg.org/data/v4/vtes.json",
-	RulingsHead:     "https://api.github.com/repos/vtes-biased/vtes-rulings/commits/main",
-	RulingsFile:     "https://raw.githubusercontent.com/vtes-biased/vtes-rulings/%s/rulings/%s",
-	Archive:         "https://usenet.krcg.org/archive.json.gz",
-	KnowledgeHead:   "https://api.github.com/repos/lionel-panhaleux/primogen/commits/main",
-	KnowledgeFile:   "https://raw.githubusercontent.com/lionel-panhaleux/primogen/%s/knowledge/%s",
-	TournamentRules: "https://www.vekn.net/tournament-rules",
-	JudgesGuide:     "https://www.vekn.net/judges-guide",
-	Rulebook:        rulebookURL,
+	Cards:         "https://static.krcg.org/data/v4/vtes.json",
+	RulingsHead:   "https://api.github.com/repos/vtes-biased/vtes-rulings/commits/main",
+	RulingsFile:   "https://raw.githubusercontent.com/vtes-biased/vtes-rulings/%s/rulings/%s",
+	Archive:       "https://usenet.krcg.org/archive.json.gz",
+	KnowledgeHead: "https://api.github.com/repos/lionel-panhaleux/primogen/commits/main",
+	KnowledgeFile: "https://raw.githubusercontent.com/lionel-panhaleux/primogen/%s/knowledge/%s",
+	ArchonCommits: "https://api.github.com/repos/vtes-biased/archon-vibe/commits?per_page=1&path=%s",
+	ArchonFile:    "https://raw.githubusercontent.com/vtes-biased/archon-vibe/%s/frontend/src/lib/help-content/%s",
 }
 
 // The names of Bundle.Sources, which Probe answers in the same terms.
 const (
-	SourceCards      = "cards of static.krcg.org"
-	SourceRulings    = "vtes-rulings"
-	SourceKnowledge  = "knowledge"
-	SourceArchive    = "rulings archive to"
-	SourceTournament = "tournament rules of vekn.net"
-	SourceJudges     = "judges' guide of vekn.net"
+	SourceCards     = "cards of static.krcg.org"
+	SourceRulings   = "vtes-rulings"
+	SourceKnowledge = "knowledge"
+	SourceArchive   = "rulings archive to"
+	SourceArchon    = "rules of archon-vibe"
 )
 
 // Build reads every upstream but the archive, fetched apart by FetchArchive.
-// vekn.net's pages failing, the previous bundle's copy of them stands in,
-// when there is one. The warnings name what needs a person.
-func Build(ctx context.Context, up Upstream, archive *Archive, previous *Bundle) (*Bundle, []string, error) {
+// The warnings name what needs a person.
+func Build(ctx context.Context, up Upstream, archive *Archive) (*Bundle, []string, error) {
 	var warnings []string
 	warn := func(format string, a ...any) { warnings = append(warnings, fmt.Sprintf(format, a...)) }
 	var raw []krcgCard
@@ -82,9 +79,9 @@ func Build(ctx context.Context, up Upstream, archive *Archive, previous *Bundle)
 	if err != nil {
 		return nil, nil, err
 	}
-	var history, rulebook, advanced, procedure, terms []byte
+	var history, advanced, procedure, terms []byte
 	for name, body := range map[string]*[]byte{
-		"card-changes.md": &history, "rules/rulebook.md": &rulebook, "rules/advanced-rules.md": &advanced,
+		"card-changes.md": &history, "rules/advanced-rules.md": &advanced,
 		"guide/rules-answer.md": &procedure, "game-terms.json": &terms,
 	} {
 		if *body, err = read(name); err != nil {
@@ -95,24 +92,22 @@ func Build(ctx context.Context, up Upstream, archive *Archive, previous *Bundle)
 	if err != nil {
 		return nil, nil, err
 	}
-	tournament, tournamentVersion, err := fetchVEKNOr(ctx, up.TournamentRules, DocTournament, SourceTournament, previous, warn)
+	archonCommit, err := lastCommit(ctx, up, archonDocuments)
 	if err != nil {
 		return nil, nil, err
 	}
-	judges, judgesVersion, err := fetchVEKNOr(ctx, up.JudgesGuide, DocJudges, SourceJudges, previous, warn)
-	if err != nil {
+	if renderer, err := lastCommit(ctx, up, archonRendererPath); err != nil {
 		return nil, nil, err
+	} else if !strings.HasPrefix(renderer, archonRenderer) {
+		warn("archon's renderer (%s) changed at %s, after the %s whose ids archon.go reproduces: "+
+			"the links of the rulebook, the tournament rules and the judges' guide may miss (testdata/upstream/refresh.sh, then TestArchonLinks)",
+			archonRendererPath, renderer[:7], archonRenderer)
 	}
-	anchors := map[string]bool{}
-	for _, u := range db.references {
-		if a, ok := strings.CutPrefix(u, rulebookURL+"#"); ok {
-			anchors[strings.ToLower(a)] = true
+	var rulebook, tournament, judges []byte
+	for name, body := range map[string]*[]byte{"vtes-rules.md": &rulebook, "tournament-rules.md": &tournament, "judges-guide.md": &judges} {
+		if *body, err = fetch(ctx, fmt.Sprintf(up.ArchonFile, archonCommit, name), ""); err != nil {
+			return nil, nil, err
 		}
-	}
-	if page, err := fetchAnchors(ctx, up.Rulebook); err != nil {
-		warn("the rulebook's page: %v; its sections link only the anchors the rulings cite", err)
-	} else {
-		maps.Copy(anchors, page)
 	}
 
 	b := &Bundle{
@@ -122,11 +117,11 @@ func Build(ctx context.Context, up Upstream, archive *Archive, previous *Bundle)
 			{SourceRulings, db.commit[:7]},
 			{SourceKnowledge, knowledgeVersion},
 			{SourceArchive, archive.LastPost},
-			{SourceTournament, tournamentVersion},
-			{SourceJudges, judgesVersion},
+			{SourceArchon, archonCommit[:7]},
 		},
-		Cards:       make([]Card, len(raw)),
-		Sections:    slices.Concat(parseRulebook(rulebook), parseAdvanced(advanced), tournament, judges),
+		Cards: make([]Card, len(raw)),
+		Sections: slices.Concat(parseArchon(rulebook, DocRulebook, true), parseAdvanced(advanced),
+			parseArchon(tournament, DocTournament, false), parseArchon(judges, DocJudges, false)),
 		Posts:       map[string]Post{},
 		RulesAnswer: string(procedure),
 		GameTerms:   gameTerms,
@@ -134,10 +129,10 @@ func Build(ctx context.Context, up Upstream, archive *Archive, previous *Bundle)
 	for i, k := range raw {
 		b.Cards[i] = k.card()
 	}
-	linkRulebook(b.Sections, anchors)
 	b.attachRulings(db, archive, warn)
 	b.attachChanges(history, warn)
 	b.keepPosts(archive, warn)
+	b.linkRulebook(warn)
 	return b, warnings, nil
 }
 
@@ -161,42 +156,13 @@ func Probe(ctx context.Context, up Upstream) ([]Source, error) {
 	if err != nil {
 		return nil, err
 	}
-	probed := []Source{{SourceCards, cards}, {SourceRulings, rulings[:7]}, {SourceKnowledge, version}}
-	// a vekn.net page that fails is left out: it moves nothing
-	for _, p := range []struct{ name, url, doc string }{{SourceTournament, up.TournamentRules, DocTournament}, {SourceJudges, up.JudgesGuide, DocJudges}} {
-		if _, v, err := fetchVEKN(ctx, p.url, p.doc); err == nil {
-			probed = append(probed, Source{p.name, v})
-		}
+	archon, err := lastCommit(ctx, up, archonDocuments)
+	if err != nil {
+		return nil, err
 	}
-	return probed, nil
-}
-
-// fetchVEKNOr reads a vekn.net page, or keeps the previous bundle's copy of it
-// when the page fails or holds under half its sections (a changed template).
-func fetchVEKNOr(ctx context.Context, u, doc, source string, previous *Bundle, warn func(string, ...any)) ([]Section, string, error) {
-	sections, version, err := fetchVEKN(ctx, u, doc)
-	if previous == nil {
-		return sections, version, err
-	}
-	var kept []Section
-	for _, s := range previous.Sections {
-		if s.Doc == doc {
-			kept = append(kept, s)
-		}
-	}
-	if err == nil && len(sections) < len(kept)/2 {
-		err = fmt.Errorf("%s: %d sections, where the live bundle has %d", u, len(sections), len(kept))
-	}
-	if err == nil || len(kept) == 0 {
-		return sections, version, err
-	}
-	for _, s := range previous.Sources {
-		if s.Name == source {
-			version = s.Version
-		}
-	}
-	warn("%v: the live bundle's copy is kept", err)
-	return kept, version, nil
+	return []Source{
+		{SourceCards, cards}, {SourceRulings, rulings[:7]}, {SourceKnowledge, version}, {SourceArchon, archon[:7]},
+	}, nil
 }
 
 // readGameTerms answers the English terms of game-terms.json, every key of
@@ -230,6 +196,31 @@ func knowledge(ctx context.Context, up Upstream) (string, func(string) ([]byte, 
 }
 
 var reCommit = regexp.MustCompile(`^[0-9a-f]{40}$`)
+
+const (
+	archonDocuments    = "frontend/src/lib/help-content"
+	archonRendererPath = "frontend/src/lib/markdown.ts"
+	// archonRenderer is the commit of archon's renderer whose ids archon.go reproduces
+	archonRenderer = "9248307"
+)
+
+// lastCommit asks GitHub's API for the last commit touching a path of
+// archon-vibe, so that a push elsewhere in the app moves nothing.
+func lastCommit(ctx context.Context, up Upstream, path string) (string, error) {
+	u := fmt.Sprintf(up.ArchonCommits, path)
+	body, err := fetch(ctx, u, "")
+	if err != nil {
+		return "", err
+	}
+	var commits []struct{ SHA string }
+	if err := json.Unmarshal(body, &commits); err != nil {
+		return "", fmt.Errorf("%s: %w", u, err)
+	}
+	if len(commits) == 0 || !reCommit.MatchString(commits[0].SHA) {
+		return "", fmt.Errorf("%s: no commit", u)
+	}
+	return commits[0].SHA, nil
+}
 
 // headCommit asks GitHub's API for a branch's commit, as a bare SHA.
 func headCommit(ctx context.Context, u string) (string, error) {
@@ -365,6 +356,29 @@ func (b *Bundle) attachRulings(db *rulingsDB, archive *Archive, warn func(string
 }
 
 var reArchiveLink = regexp.MustCompile(`https://usenet\.krcg\.org/t/[^/\s)]+/#[\w-]+`)
+
+// linkRulebook joins each ruling's rulebook reference, an anchor of
+// vekn.net's page, to the rulebook section it names.
+func (b *Bundle) linkRulebook(warn func(string, ...any)) {
+	keys := rulebookSections(b.Sections)
+	missed := map[string]bool{}
+	for i := range b.Cards {
+		for j := range b.Cards[i].Rulings {
+			refs := b.Cards[i].Rulings[j].References
+			for k := range refs {
+				anchor, ok := strings.CutPrefix(refs[k].URL, "https://www.vekn.net/rulebook")
+				if !ok {
+					continue
+				}
+				anchor = strings.TrimLeft(anchor, "#/")
+				if refs[k].Section = keys[rulebookKey(anchor)]; refs[k].Section == "" && !missed[refs[k].Label] {
+					missed[refs[k].Label] = true
+					warn("reference %s: no section of the rulebook answers %s", refs[k].Label, refs[k].URL)
+				}
+			}
+		}
+	}
+}
 
 // keepPosts copies from the archive every post a ruling or the advanced rules
 // cite, which the evidence for a question quotes.

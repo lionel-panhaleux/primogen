@@ -1,6 +1,7 @@
 [tools]
 go = "1.27"
 jq = "1.8"
+node = "26"
 uv = "0.13"
 
 [tasks.deploy]

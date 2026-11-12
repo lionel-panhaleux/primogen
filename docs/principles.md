@@ -63,9 +63,11 @@ violating one silently is not.
   translations, kept unchecked as a consistency reference and labelled so in
   the file (owner, 2026-11-11: a fixed reference beats guessing a term in
   every answer).
-- **Synced files are never hand-edited.** The rulebook and the advanced
-  rules are authored in `vtes-advanced-rules`, the history of card and rules
-  changes in the owner's gist: fix upstream, then `/sync`.
+- **Synced files are never hand-edited.** The advanced rules are authored in
+  `vtes-advanced-rules`, the history of card and rules changes in the
+  owner's gist: fix upstream, then `/sync`. The rulebook, the tournament
+  rules and the judges' guide are read live from `archon-vibe`, like the
+  card data.
   [provenance.md](provenance.md) says which file is which.
 - **Authored here**: the guide (the theory, the procedure for each task,
   the module vocabulary and card-to-module tags, the served examples), the

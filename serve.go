@@ -145,7 +145,7 @@ func (r *refresher) build(ctx context.Context, now time.Time, live *bundle.Bundl
 			return nil, stale
 		}
 	}
-	b, warnings, err := bundle.Build(ctx, r.up, r.archive, live)
+	b, warnings, err := bundle.Build(ctx, r.up, r.archive)
 	if err != nil {
 		return nil, errors.Join(stale, err)
 	}

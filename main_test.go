@@ -11,7 +11,6 @@ import (
 	"net/http/httptest"
 	"os"
 	"path/filepath"
-	"regexp"
 	"slices"
 	"strings"
 	"sync"
@@ -54,7 +53,7 @@ func buildTestBundle(path string) error {
 	if err != nil {
 		return err
 	}
-	b, warnings, err := bundle.Build(context.Background(), up, archive, nil)
+	b, warnings, err := bundle.Build(context.Background(), up, archive)
 	if err != nil {
 		return err
 	}
@@ -79,14 +78,13 @@ func newUpstream() (*upstream, bundle.Upstream, error) {
 	u.srv = httptest.NewServer(u)
 	srv := u.srv
 	return u, bundle.Upstream{
-		Cards:           srv.URL + "/vtes.json",
-		RulingsHead:     srv.URL + "/commit",
-		RulingsFile:     srv.URL + "/vtes-rulings/%s/%s",
-		Archive:         srv.URL + "/archive.json.gz",
-		KnowledgeDir:    "knowledge",
-		TournamentRules: srv.URL + "/vekn/tournament-rules.html",
-		JudgesGuide:     srv.URL + "/vekn/judges-guide.html",
-		Rulebook:        srv.URL + "/vekn/rulebook.html",
+		Cards:         srv.URL + "/vtes.json",
+		RulingsHead:   srv.URL + "/commit",
+		RulingsFile:   srv.URL + "/vtes-rulings/%s/%s",
+		Archive:       srv.URL + "/archive.json.gz",
+		KnowledgeDir:  "knowledge",
+		ArchonCommits: srv.URL + "/archon-commits?path=%s",
+		ArchonFile:    srv.URL + "/archon-vibe/%s/%s",
 	}, err
 }
 
@@ -101,6 +99,19 @@ func (u *upstream) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		u.archives++
 	case "/primogen-commit":
 		io.WriteString(w, u.knowledge)
+		return
+	case "/archon-commits":
+		// the last commit touching the documents, or the renderer
+		pin := "archon-commit"
+		if r.URL.Query().Get("path") == "frontend/src/lib/markdown.ts" {
+			pin = "archon-renderer"
+		}
+		sha, err := os.ReadFile(filepath.Join("testdata/upstream", pin))
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		fmt.Fprintf(w, `[{"sha": %q}]`, strings.TrimSpace(string(sha)))
 		return
 	}
 	if name, ok := strings.CutPrefix(r.URL.Path, "/primogen/"+u.knowledge+"/knowledge/"); ok {
@@ -224,7 +235,7 @@ func TestQueryRules(t *testing.T) {
 			"### [advanced:3.5.3] 3.5.3 Ended and failed",
 			"- No ruling names Freak Drive and The Kiss of Ra together.",
 			"# Procedure: a rules answer",
-			"tournament rules of vekn.net Version updated 21th September 2025",
+			"rules of archon-vibe 4bb83ba",
 		}},
 		{args: []string{"case", "Can a minion block twice?"}, want: []string{"No card given or found in the question", "### [rulebook:who-may-attempt-to-block]"}},
 		// a discipline is no card, and cards given are the cards
@@ -303,30 +314,48 @@ func TestQueryArchive(t *testing.T) {
 	}
 }
 
-// TestRulebookLinks checks a rulebook section links an anchor vekn.net's page
-// has, or a chapter's page, and that a section's id is its own.
-func TestRulebookLinks(t *testing.T) {
+// TestArchonLinks checks a section of the rulebook, the tournament rules or
+// the judges' guide links an id archon.vekn.net's page has, by archon's own
+// renderer, and that a section's id is its own.
+func TestArchonLinks(t *testing.T) {
 	b, err := bundle.Load(testBundle)
 	if err != nil {
 		t.Fatal(err)
 	}
-	page, err := os.ReadFile("testdata/upstream/vekn/rulebook.html")
+	commit, err := os.ReadFile("testdata/upstream/archon-commit")
 	if err != nil {
 		t.Fatal(err)
 	}
-	ids := map[string]bool{}
-	for _, m := range regexp.MustCompile(`id="([^"]+)"`).FindAllStringSubmatch(string(page), -1) {
-		ids[strings.ToLower(m[1])] = true
+	raw, err := os.ReadFile(filepath.Join("testdata/upstream/archon-vibe", strings.TrimSpace(string(commit)), "ids.json"))
+	if err != nil {
+		t.Fatal(err)
 	}
+	var ids map[string][]string
+	if err := json.Unmarshal(raw, &ids); err != nil {
+		t.Fatal(err)
+	}
+	pages := map[string]string{"rules": "vtes-rules", "tournament-rules": "tournament-rules", "judges-guide": "judges-guide"}
 	seen := map[string]bool{}
+	linked := 0
 	for _, s := range b.Sections {
-		if a, ok := strings.CutPrefix(s.URL, "https://www.vekn.net/rulebook#"); ok && s.Doc == bundle.DocRulebook && !ids[a] {
-			t.Errorf("%s links #%s, which the page does not have", s.ID, a)
+		if page, id, ok := strings.Cut(strings.TrimPrefix(s.URL, "https://archon.vekn.net/help/"), "#"); ok && s.Doc != bundle.DocAdvanced {
+			linked++
+			if !slices.Contains(ids[pages[page]], id) {
+				t.Errorf("%s links %s, an id archon.vekn.net's page does not have", s.ID, s.URL)
+			}
 		}
 		if seen[s.ID] {
 			t.Errorf("two sections have the id %s", s.ID)
 		}
 		seen[s.ID] = true
+	}
+	if linked < 400 {
+		t.Errorf("%d sections link an id of archon.vekn.net, want most of them", linked)
+	}
+	for _, w := range testWarnings {
+		if strings.HasPrefix(w, "archon's renderer") {
+			t.Error(w)
+		}
 	}
 }
 
