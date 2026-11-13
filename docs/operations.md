@@ -69,7 +69,8 @@ Go, jq, node and uv come from mise: `mise install` in the checkout reads
   the history of changes naming no card exactly or under no dated heading,
   left out of the bundle: the fix is in the gist, then `/sync`; a post the
   advanced rules cite that the archive does not hold, or a ruling's rulebook
-  reference no section of the rulebook answers: the fix is upstream; and
+  reference no section of the rulebook opens: the fix is upstream, unless
+  archon gives that id to a paragraph `archon.go` opens no section at; and
   archon's renderer changed past the commit `archon.go` reproduces: re-pin
   the fixtures (`testdata/upstream/refresh.sh`), then `TestArchonLinks`
   says whether the links still land.

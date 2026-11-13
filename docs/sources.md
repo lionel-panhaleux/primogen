@@ -18,7 +18,7 @@ service is checked against that service before it is relied on.
 | `engine.krcg.org` | Rules enforcement for the cards it covers; bots | On each engine release | Public API |
 | `api.krcg.org` | Card search and decklist conversion | Live | Public API |
 | `gist.github.com/lionel-panhaleux/a4a9cad2e492af7c45c50a1cea7e6cf6` | The history of card and rules changes: each errata and rules change, dated (one section, 1995-10, by its month), linking its announcement (a newsgroup or forum post at its `usenet.krcg.org` copy) | By hand, by the owner; primogen copies it with `/sync` ([provenance.md](provenance.md)) | Public gist |
-| `vekn.net` (`/rulebook`, `/tournament-rules`, `/judges-guide`) | Other copies of the same documents, worded apart in places; Archon's are the official, maintained ones (owner, 2026-11-12); the rulebook's anchors are what the rulings database's `RBK` references link to, which primogen matches to archon's sections by their words (`rulebookKey`) | When the VEKN publishes a revision | Public pages; primogen reads none |
+| `vekn.net` (`/rulebook`, `/tournament-rules`, `/judges-guide`) | Other copies of the same documents, worded apart in places; Archon's are the official, maintained ones (owner, 2026-11-12); the rulebook's anchors are what the advanced rules' `[RBK …]` citations link to, and what the rulings database's `RBK` labels were named after | When the VEKN publishes a revision | Public pages; primogen reads none |
 
 ## The rulings chain
 
@@ -33,8 +33,14 @@ Each ruling ends with reference ids (`[LSJ 20040518]`), which
 the archive (`usenet.krcg.org/t/<thread>/#m<n>`, the anchor positional); a
 forum reference points at `vekn.net/forum/<category>/<topic>-<slug>#<post>`,
 which the archive holds as `usenet.krcg.org/t/vekn-<topic>/#<post>` (the
-`newsgroup-archive` README). Rules Team rulings on `blackchantry.com` and
-rulebook references are not in the archive.
+`newsgroup-archive` README). Rules Team rulings on `blackchantry.com` are
+not in the archive. A rulebook reference (`RBK <label>`, a closed set of 140
+the rulings site offers and never adds to) links an id archon's renderer
+gives `archon.vekn.net/help/rules` (a heading, a box or a bold term), the
+label still the vekn.net anchor or page it linked until November 2026;
+primogen joins it to the section that id opens, and its build warns of a
+cited one no section opens. An id is its element's words slugged: an element
+archon rewords breaks the links to it.
 
 A ruling has no id of its own in the YAML. The rulings site's id is the first
 5 bytes of SHAKE128 over the ruling's text (`[REMINDER]` stripped, each card

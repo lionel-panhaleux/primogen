@@ -2,7 +2,6 @@ package bundle
 
 import (
 	"regexp"
-	"slices"
 	"strings"
 )
 
@@ -218,41 +217,4 @@ func parseArchon(md []byte, doc string, terms bool) []Section {
 		s.Text = strings.ReplaceAll(s.Text, "](#", "]("+page+"#")
 	}
 	return sb.sections
-}
-
-// rulebookKey is how a rulebook anchor is matched across sites: vekn.net drops
-// the step number archon.vekn.net keeps, and words some headings otherwise
-// ("IMPORTANT TERMS IN THE GAME" is #important-terms-of-the-game).
-func rulebookKey(anchor string) string {
-	words := strings.Split(strings.ToLower(anchor), "-")
-	for len(words) > 1 && strings.Trim(words[0], "0123456789") == "" {
-		words = words[1:]
-	}
-	return strings.Join(slices.DeleteFunc(words, func(w string) bool {
-		return slices.Contains([]string{"of", "in", "an", "a", "the", "and"}, w)
-	}), "-")
-}
-
-var reSee = regexp.MustCompile(`\s*\(See [^)]*\)\s*$`)
-
-// rulebookSections maps the rulebook's sections by rulebookKey, the first
-// section a key matches answering: by its anchor, its id, its title, the
-// title without its "(See …)", and a box's subtitle, which archon.vekn.net
-// itself links to its box.
-func rulebookSections(sections []Section) map[string]string {
-	keys := map[string]string{}
-	for _, s := range sections {
-		if s.Doc != DocRulebook {
-			continue
-		}
-		_, anchor, _ := strings.Cut(s.URL, "#")
-		_, subtitle, _ := strings.Cut(s.Title, " — ")
-		for _, a := range []string{anchor, strings.TrimPrefix(s.ID, DocRulebook+":"), archonSlug(s.Title),
-			archonSlug(reSee.ReplaceAllString(s.Title, "")), archonSlug(subtitle)} {
-			if k := rulebookKey(a); a != "" && keys[k] == "" {
-				keys[k] = s.ID
-			}
-		}
-	}
-	return keys
 }

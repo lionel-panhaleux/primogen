@@ -557,8 +557,14 @@ func (p *casePack) write() string {
 		return out.String()
 	}
 	const trailer = 800 // what is left out, and the data line
+	// fewer rulings shown in full until the closest section fits the three
+	// quarters of what is left the sections are given
+	need := trailer
+	if len(sections) > 0 {
+		need += len(head) + len(tail) + len(sections[0])*4/3
+	}
 	for _, n := range []int{0, 25, 15, 10, 6, 3, 1} {
-		if rulings = n; len(render(nil))+trailer <= total {
+		if rulings = n; len(render(nil))+need <= total {
 			break
 		}
 	}

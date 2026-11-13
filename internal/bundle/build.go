@@ -362,23 +362,27 @@ func (b *Bundle) attachRulings(db *rulingsDB, archive *Archive, warn func(string
 
 var reArchiveLink = regexp.MustCompile(`https://usenet\.krcg\.org/t/[^/\s)]+/#[\w-]+`)
 
-// linkRulebook joins each ruling's rulebook reference, an anchor of
-// vekn.net's page, to the rulebook section it names.
+// linkRulebook joins each ruling's rulebook reference, an id of
+// archon.vekn.net's rules page, to the section that id opens.
 func (b *Bundle) linkRulebook(warn func(string, ...any)) {
-	keys := rulebookSections(b.Sections)
+	opens := map[string]string{}
+	for _, s := range b.Sections {
+		// a section the page gives no id of its own links the one it is in, which comes first
+		if s.Doc == DocRulebook && opens[s.URL] == "" {
+			opens[s.URL] = s.ID
+		}
+	}
 	missed := map[string]bool{}
 	for i := range b.Cards {
 		for j := range b.Cards[i].Rulings {
 			refs := b.Cards[i].Rulings[j].References
 			for k := range refs {
-				anchor, ok := strings.CutPrefix(refs[k].URL, "https://www.vekn.net/rulebook")
-				if !ok {
+				if !strings.HasPrefix(refs[k].Label, "RBK ") {
 					continue
 				}
-				anchor = strings.TrimLeft(anchor, "#/")
-				if refs[k].Section = keys[rulebookKey(anchor)]; refs[k].Section == "" && !missed[refs[k].Label] {
+				if refs[k].Section = opens[refs[k].URL]; refs[k].Section == "" && !missed[refs[k].Label] {
 					missed[refs[k].Label] = true
-					warn("reference %s: no section of the rulebook answers %s", refs[k].Label, refs[k].URL)
+					warn("reference %s: no section of the rulebook opens at %s", refs[k].Label, refs[k].URL)
 				}
 			}
 		}

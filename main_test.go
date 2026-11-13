@@ -394,6 +394,33 @@ func TestArchonLinks(t *testing.T) {
 	}
 }
 
+// TestRulebookReferencesOpen checks every rulebook reference a ruling cites
+// opens a section of the rulebook, its evidence.
+func TestRulebookReferencesOpen(t *testing.T) {
+	b, err := bundle.Load(testBundle)
+	if err != nil {
+		t.Fatal(err)
+	}
+	cited := 0
+	for _, c := range b.Cards {
+		for _, r := range c.Rulings {
+			for _, ref := range r.References {
+				if strings.HasPrefix(ref.Label, "RBK ") && ref.Section != "" {
+					cited++
+				}
+			}
+		}
+	}
+	if cited < 250 {
+		t.Errorf("%d rulebook references cited with their section, want about 300, a group's ruling once per card", cited)
+	}
+	for _, w := range testWarnings {
+		if strings.HasPrefix(w, "reference RBK ") {
+			t.Error(w)
+		}
+	}
+}
+
 func TestHistoryFullyFiled(t *testing.T) {
 	for _, w := range testWarnings {
 		if strings.HasPrefix(w, "card-changes.md") {
