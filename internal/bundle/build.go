@@ -24,6 +24,7 @@ import (
 // Upstream says where Build reads.
 type Upstream struct {
 	Cards       string // vtes.json
+	Sets        string // expansions.json, the names and release dates the cards' printings refer to by code
 	RulingsHead string // answers the vtes-rulings commit to read, as a bare SHA
 	RulingsFile string // a file at that commit, formatted with the SHA and the file name
 	Archive     string // the archive's bulk file
@@ -39,7 +40,8 @@ type Upstream struct {
 }
 
 var KRCG = Upstream{
-	Cards:         "https://static.krcg.org/data/v4/vtes.json",
+	Cards:         "https://static.krcg.org/data/vtes.json",
+	Sets:          "https://static.krcg.org/data/v5/expansions.json",
 	RulingsHead:   "https://api.github.com/repos/vtes-biased/vtes-rulings/commits/main",
 	RulingsFile:   "https://raw.githubusercontent.com/vtes-biased/vtes-rulings/%s/rulings/%s",
 	Archive:       "https://usenet.krcg.org/archive.json.gz",
@@ -70,6 +72,12 @@ func Build(ctx context.Context, up Upstream, archive *Archive) (*Bundle, []strin
 	}
 	if len(raw) == 0 {
 		return nil, nil, fmt.Errorf("%s: no cards", up.Cards)
+	}
+	var sets []krcgSet
+	if body, err := fetch(ctx, up.Sets, ""); err != nil {
+		return nil, nil, err
+	} else if err := json.Unmarshal(body, &sets); err != nil {
+		return nil, nil, fmt.Errorf("%s: %w", up.Sets, err)
 	}
 	db, err := fetchRulings(ctx, up)
 	if err != nil {
@@ -133,8 +141,14 @@ func Build(ctx context.Context, up Upstream, archive *Archive) (*Bundle, []strin
 		Shorthand:   short.Shorthand,
 		Catalog:     string(catalog),
 	}
+	setByCode := map[string]krcgSet{}
+	for _, s := range sets {
+		setByCode[s.Code] = s
+	}
 	for i, k := range raw {
-		b.Cards[i] = k.card()
+		if b.Cards[i], err = k.card(setByCode); err != nil {
+			return nil, nil, fmt.Errorf("%s: %w", up.Cards, err)
+		}
 	}
 	b.attachRulings(db, archive, warn)
 	b.attachChanges(history, warn)
@@ -292,6 +306,7 @@ var (
 	reReminder        = regexp.MustCompile(`(?i)\s*\[REMINDER\]\s*$`)
 	reCard            = regexp.MustCompile(`\{(\d+)\|[^}]*\}`)
 	reBareCard        = regexp.MustCompile(`\{[^}|]*\}`)
+	reCardMark        = regexp.MustCompile(`<([^<>\n]+)>`) // krcg 5 marks the cards a text names
 )
 
 // attachRulings files each ruling under the card it names, and a group's
@@ -440,65 +455,173 @@ func rulingLink(card int, text string) string {
 	return fmt.Sprintf("https://rulings.krcg.org/index.html?uid=%d#r-%s", card, base32.StdEncoding.EncodeToString(sum))
 }
 
+// krcgCard is a card of krcg 5's model (krcg/models.py): a crypt card or a
+// library card, by its kind.
 type krcgCard struct {
-	ID           int      `json:"id"`
-	Name         string   `json:"name"`
-	SortName     string   `json:"_name"`
-	PrintedName  string   `json:"printed_name"`
-	NameVariants []string `json:"name_variants"`
-	Aka          []string `json:"aka"`
-	URL          string   `json:"url"`
-	Types        []string `json:"types"`
-	Clans        []string `json:"clans"`
-	Disciplines  []string `json:"disciplines"`
-	Combo        bool     `json:"combo"`
-	Multidisc    bool     `json:"multidisc"`
-	Capacity     int      `json:"capacity"`
-	Group        string   `json:"group"`
-	Title        string   `json:"title"`
-	Path         string   `json:"path"`
-	BloodCost    string   `json:"blood_cost"`
-	PoolCost     string   `json:"pool_cost"`
-	Conviction   string   `json:"conviction_cost"`
-	BurnOption   bool     `json:"burn_option"`
-	CardText     string   `json:"card_text"`
-	I18n         map[string]struct {
-		Name     string `json:"name"`
-		CardText string `json:"card_text"`
-	} `json:"_i18n"`
-	Sets map[string][]struct {
-		ReleaseDate string `json:"release_date"`
-	} `json:"sets"`
-	OrderedSets []string `json:"ordered_sets"`
-	Legality    string   `json:"legality"`
-	Banned      string   `json:"banned"`
+	ID           int    `json:"id"`
+	Kind         string `json:"kind"`
+	PrintedName  string `json:"printed_name"`
+	Unicity      string `json:"unicity_suffix"`
+	Suffix       string `json:"suffix"`
+	NameVariants []struct {
+		Name string `json:"name"`
+	} `json:"name_variants"`
+	URL   string   `json:"url"`
+	Types []string `json:"types"`
+	Text  string   `json:"text"`
+	I18n  map[string]struct {
+		Name string `json:"name"`
+		Text string `json:"text"`
+	} `json:"i18n"`
+	Prints []struct {
+		Set struct {
+			Code string `json:"code"`
+		} `json:"set"`
+		Occurrences []struct {
+			Type   string `json:"type"`
+			Bundle string `json:"bundle"`
+			Date   string `json:"date"`
+		} `json:"occurrences"`
+	} `json:"prints"`
+	Legal  string `json:"legal"`
+	Banned string `json:"banned"`
+
+	Advanced    bool     `json:"advanced"`
+	Clan        string   `json:"clan"`
+	Path        string   `json:"path"`
+	Capacity    int      `json:"capacity"`
+	Group       string   `json:"group"`
+	Disciplines []string `json:"disciplines"`
+	Title       string   `json:"title"`
+
+	Cost *struct {
+		Type  string          `json:"type"`
+		Value json.RawMessage `json:"value"` // a number, or "X"
+	} `json:"cost"`
+	BurnOption            bool     `json:"burn_option"`
+	ClanRequirement       []string `json:"clan_requirement"`
+	PathRequirement       []string `json:"path_requirement"`
+	DisciplineRequirement *struct {
+		Type        string   `json:"type"` // Mono, Combo, or Choice
+		Disciplines []string `json:"disciplines"`
+	} `json:"discipline_requirement"`
 }
 
-func (k krcgCard) card() Card {
+type krcgSet struct {
+	Code        string `json:"code"`
+	Name        string `json:"name"`
+	ReleaseDate string `json:"release_date"`
+	Bundles     map[string]struct {
+		Name        string `json:"name"`
+		ReleaseDate string `json:"release_date"`
+	} `json:"bundles"`
+}
+
+func (k krcgCard) card(sets map[string]krcgSet) (Card, error) {
 	c := Card{
-		ID: k.ID, Name: k.Name, PrintedName: k.PrintedName, Image: k.URL,
-		Types: k.Types, Clans: k.Clans, Disciplines: k.Disciplines, Combo: k.Combo, Multidisc: k.Multidisc,
-		Capacity: k.Capacity, Group: k.Group, Title: k.Title, Path: k.Path,
-		BloodCost: k.BloodCost, PoolCost: k.PoolCost, ConvictionCost: k.Conviction, BurnOption: k.BurnOption,
-		Text: k.CardText, Legal: k.Legality, Banned: k.Banned,
+		ID: k.ID, Name: k.PrintedName, PrintedName: k.PrintedName, Image: k.URL, Types: k.Types,
+		Text: reCardMark.ReplaceAllString(k.Text, "$1"), Legal: k.Legal, Banned: k.Banned,
 	}
-	for _, a := range slices.Concat([]string{k.SortName}, k.NameVariants, k.Aka) {
-		if a != "" && a != k.Name && a != k.PrintedName && !slices.Contains(c.Aliases, a) {
+	if k.Suffix != "" {
+		c.Name += " (" + k.Suffix + ")"
+	}
+	switch k.Kind {
+	case "Crypt":
+		if k.Clan != "" {
+			c.Clans = []string{k.Clan}
+		}
+		c.Disciplines, c.Capacity, c.Group, c.Title, c.Path = k.Disciplines, k.Capacity, k.Group, k.Title, k.Path
+	case "Library":
+		c.Clans, c.Path, c.BurnOption = k.ClanRequirement, strings.Join(k.PathRequirement, ", "), k.BurnOption
+		if d := k.DisciplineRequirement; d != nil {
+			c.Combo, c.Multidisc = d.Type == "Combo", d.Type == "Choice"
+			for _, disc := range d.Disciplines {
+				if disc == "fli" { // as the card text writes it
+					disc = "FLIGHT"
+				}
+				c.Disciplines = append(c.Disciplines, disc)
+			}
+		}
+		if k.Cost != nil {
+			value := strings.Trim(string(k.Cost.Value), `"`)
+			switch k.Cost.Type {
+			case "Blood":
+				c.BloodCost = value
+			case "Pool":
+				c.PoolCost = value
+			case "Conviction":
+				c.ConvictionCost = value
+			default:
+				return c, fmt.Errorf("card %d: cost type %q", k.ID, k.Cost.Type)
+			}
+		}
+	default:
+		return c, fmt.Errorf("card %d: kind %q, not krcg 5's model", k.ID, k.Kind)
+	}
+	var translated []string
+	for _, lang := range slices.Sorted(maps.Keys(k.I18n)) {
+		t := k.I18n[lang]
+		c.Translations = append(c.Translations, Translation{lang, t.Name, reCardMark.ReplaceAllString(t.Text, "$1")})
+		if t.Name != k.PrintedName {
+			translated = append(translated, t.Name)
+		}
+	}
+	names := []string{k.PrintedName}
+	if k.Unicity != "" {
+		names = append(names, k.PrintedName+" ("+k.Unicity+")")
+	}
+	for _, v := range k.NameVariants {
+		names = append(names, v.Name)
+	}
+	add := func(a string) {
+		if a != c.Name && a != c.PrintedName && !slices.Contains(c.Aliases, a) {
 			c.Aliases = append(c.Aliases, a)
 		}
 	}
-	for _, lang := range slices.Sorted(maps.Keys(k.I18n)) {
-		t := k.I18n[lang]
-		c.Translations = append(c.Translations, Translation{lang, t.Name, t.CardText})
-	}
-	for _, set := range k.OrderedSets {
-		p := Printing{Set: set}
-		if prints := k.Sets[set]; len(prints) > 0 {
-			p.Date = prints[0].ReleaseDate
+	for _, n := range names {
+		// krcg gives some spellings only with the suffix: "Lucinde (G3)"
+		bare := n
+		for _, suffix := range []string{k.Suffix, k.Unicity} {
+			if suffix != "" {
+				bare = strings.TrimSuffix(bare, " ("+suffix+")")
+			}
 		}
-		c.Sets = append(c.Sets, p)
+		// the variants include the translated names, which stay behind every English one
+		if n == "" || slices.Contains(translated, bare) {
+			continue
+		}
+		add(n)
+		add(bare)
+		if k.Advanced {
+			add(bare + " (ADV)")
+		}
 	}
-	return c
+	for _, p := range k.Prints {
+		set, ok := sets[p.Set.Code]
+		if !ok {
+			return c, fmt.Errorf("card %d: set %q is not in the sets", k.ID, p.Set.Code)
+		}
+		printing := Printing{Set: set.Name, Date: set.ReleaseDate}
+		// a printing only in singles or in precons released apart is dated by them
+		var dates, bundles []string
+		for _, o := range p.Occurrences {
+			date := o.Date
+			if o.Type == "Precon" {
+				date = set.Bundles[o.Bundle].ReleaseDate
+				bundles = append(bundles, set.Bundles[o.Bundle].Name)
+			}
+			dates = append(dates, date)
+		}
+		if len(dates) > 0 && !slices.Contains(dates, "") {
+			printing.Date = slices.Min(dates)
+			if len(bundles) == len(dates) {
+				printing.Set += " (" + strings.Join(bundles, ", ") + ")"
+			}
+		}
+		c.Sets = append(c.Sets, printing)
+	}
+	slices.SortStableFunc(c.Sets, func(a, b Printing) int { return strings.Compare(a.Date, b.Date) })
+	return c, nil
 }
 
 var client = &http.Client{Timeout: 10 * time.Minute}

@@ -94,7 +94,13 @@ func (b *Bundle) attachChanges(history []byte, warn func(string, ...any)) {
 		c.Text = strings.TrimSpace(c.Text)
 		// A change older than a card's first printing cannot concern it.
 		matched = slices.DeleteFunc(slices.Clone(matched), func(card *Card) bool {
-			return change.Date < card.Legal[:min(len(card.Legal), len(change.Date))]
+			first := ""
+			for _, p := range card.Sets {
+				if p.Date != "" && (first == "" || p.Date < first) {
+					first = p.Date
+				}
+			}
+			return change.Date < first[:min(len(first), len(change.Date))]
 		})
 		if len(matched) == 0 {
 			warn("card-changes.md %s: no card named in %q", change.Date, line)

@@ -12,7 +12,8 @@ rm -rf vtes-rulings && echo "$sha" > commit
 for f in rulings groups references; do
 	curl -fsS --create-dirs -o "vtes-rulings/$sha/$f.yaml" "https://raw.githubusercontent.com/vtes-biased/vtes-rulings/$sha/rulings/$f.yaml"
 done
-curl -fsS -o vtes.json https://static.krcg.org/data/v4/vtes.json
+curl -fsS -o vtes.json https://static.krcg.org/data/vtes.json
+curl -fsS -o expansions.json https://static.krcg.org/data/v5/expansions.json
 # the last commits touching archon-vibe's documents and its renderer
 last() { curl -fsS "https://api.github.com/repos/vtes-biased/archon-vibe/commits?per_page=1&path=$1" | jq -r '.[0].sha'; }
 archon=$(last frontend/src/lib/help-content)

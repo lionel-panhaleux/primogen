@@ -1,14 +1,15 @@
 # Sources: the public VTES data stack
 
 Who owns which fact, and how it reaches primogen. Read from each service's
-repository and public pages on 2026-11-10 and 2026-11-11; a claim about a
+repository and public pages on 2026-11-10 and 2026-11-11, the card data on
+2026-11-14; a claim about a
 service is checked against that service before it is relied on.
 
 ## The sources
 
 | Source | Owns | Refreshes | Access |
 |---|---|---|---|
-| `static.krcg.org/data/v4` (`vtes.json`, `twda.json`) | Cards with their rulings; the tournament winning deck archive | `data/v4`, which primogen reads, is a snapshot frozen on 2026-06-28 (krcg-static `62cab1c`) and lacks every card since; `data/vtes.json`, in the krcg 5 model, every 6 hours and at once when a ruling is approved. The `Last-Modified` of both moves at each deploy | Public files |
+| `static.krcg.org/data` (`vtes.json`, `v5/expansions.json`, `twda.json`) | Cards with their rulings, each with the day it became tournament legal (30 days after its release before 2025-09-21: krcg's `vekn_csv.py`); the sets their printings name by code; the tournament winning deck archive | `vtes.json` and `twda.json` point at `data/v5`, in the krcg 5 model (`krcg/models.py`), rebuilt every 6 hours and at once when a ruling is approved; `data/v4`, the krcg 4 model, is a snapshot frozen on 2026-06-28 (krcg-static `62cab1c`). The `Last-Modified` of each file moves at each rebuild | Public files |
 | `vtes-biased/vtes-rulings` (`rulings.yaml`, `groups.yaml`, `references.yaml`) | The rulings database: the durable source of truth for rulings, the card groups they apply to, the URL of each reference | Pushed by the rulings site on each approval | Public repository |
 | `rulings.krcg.org` | Curation of the rulings database by the rulemongers; proposals under discussion | Live | Pages public; a public read API (below) |
 | `usenet.krcg.org` (`vtes-biased/newsgroup-archive`) | The rulings archive: 14,418 threads, 1994 to today (the newsgroup, the V:EKN forum, BoardGameGeek), each one a rules director took part in, or that a ruling or the history of changes cites (the 1998-08-01 DCI floor rules) | Nightly forum sweep at 04:17 UTC | Pages and a search index; every thread in one file, `usenet.krcg.org/archive.json.gz` (below) |

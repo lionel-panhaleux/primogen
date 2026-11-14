@@ -82,6 +82,7 @@ func newUpstream() (*upstream, bundle.Upstream, error) {
 	srv := u.srv
 	return u, bundle.Upstream{
 		Cards:         srv.URL + "/vtes.json",
+		Sets:          srv.URL + "/expansions.json",
 		RulingsHead:   srv.URL + "/commit",
 		RulingsFile:   srv.URL + "/vtes-rulings/%s/%s",
 		Archive:       srv.URL + "/archive.json.gz",
@@ -188,6 +189,11 @@ func TestQueryCards(t *testing.T) {
 			"- 2018-07-19, RTR 20180719 (https://www.blackchantry.com/2018/07/18/rules-team-rulings-rtr-19-07-2018/): Gaining blood is now optional.\n",
 		}},
 		{args: []string{"-detail", "cards", "Freak Drive"}, want: []string{"Printings: Jyhad 1994-08-16", "Translation (fr), Pulsion monstrueuse:"}},
+		// a printing only in a precon released apart from its set is dated by the precon
+		{args: []string{"-detail", "cards", "Backroom Deal"}, want: []string{"> [ACTION MODIFIER] +1 stealth.", "Printings: Fifth Edition (Secrets of New York) 2026-10-31."}},
+		{args: []string{"cards", "Aabbt Kindred"}, want: []string{"unless Nefertiti is ready"}},
+		// krcg gives these spellings only with the group, or not at all
+		{args: []string{"cards", "Lucinde", "Theo Bell (ADV)"}, want: []string{"## Lucinde, Alastor (G3)\n", "## Theo Bell (G2 ADV)\n"}, not: []string{"No card is named"}},
 		{args: []string{"cards", "Pulsion monstrueuse"}, want: []string{"## Freak Drive", "#r-KHOYNPJM"}},
 		{args: []string{"cards", "Freak Drvie"}, want: []string{`No card is named "Freak Drvie"; this is Freak Drive`, "## Freak Drive"}},
 		{args: []string{"cards", "Blood Doll Supreme"}, want: []string{`No card is named "Blood Doll Supreme". Closest names: Blood Doll;`}, not: []string{"## ", "Answer from these texts"}},
