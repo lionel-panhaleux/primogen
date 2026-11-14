@@ -37,7 +37,7 @@ The server refreshes itself; there is no cron job and no operator.
   calls. The saved file is the published bundle, the server's
   `/bundle.json.gz`.
 - A failed build leaves the previous bundle serving. It shows on the status
-  page, the server's `/`, and in the data date of every answer, which
+  page, the server's `/status`, and in the data date of every answer, which
   stops advancing.
 - Archon data goes into a separate database that is never published.
 - A local install downloads the published bundle on first run and again when
@@ -49,7 +49,10 @@ The server refreshes itself; there is no cron job and no operator.
   archive); `primogen stdio` loads it once. Offline, it serves what it has
   and says how old it is.
 - Each refresh reports what needs a person, on the status page and in the
-  journal: the build's warnings (below). Decks that matched no archetype,
+  journal: the build's warnings (below), and every link of the catalog
+  (`knowledge/llms.txt`) that does not answer a GET: no answer within 30
+  seconds, a 404, a 410 or a server error (an endpoint that refuses a GET or
+  wants a token answers). Decks that matched no archetype,
   cards with no module tag, evidence tests that started failing, an upstream
   rules diff waiting for sync and an archive whose newest post is old join
   them once primogen can compute them.
@@ -84,8 +87,9 @@ Go, jq, node and uv come from mise: `mise install` in the checkout reads
   writes, as "Data refresh" says (`-from` and `-archive` change where the
   bundle and the archive are downloaded from, for the tests).
 - `primogen serve` is the hosted server: the tools over Streamable HTTP at
-  `/mcp` (stateless, JSON responses), the published bundle and the status
-  page, refreshed as "Data refresh" says, keeping current the file given
+  `/mcp` (stateless, JSON responses), the published bundle, the catalog of
+  the KRCG stack at `/` and `/llms.txt`, and the status page at `/status`,
+  refreshed as "Data refresh" says, keeping current the file given
   with `-bundle`. It builds one first if there is none, and reads
   `knowledge/` from GitHub unless given `-knowledge`.
 - `mise run deploy` (`--dry` only shows) cross-compiles the binary for
@@ -108,7 +112,8 @@ names), with `knowledge/` as it stands, then query it as a user does,
 and run the evidence tests ([product.md](product.md) "Evaluation") on it,
 with zero-vtes's `rules-qa` and rulings ledger pinned beside them. They
 also run the hosted server through its refreshes against that server (the
-card data changed, a push to `main`, a quiet night, then the card data cut),
+card data changed, a link of the catalog dead, a push to `main`, a quiet
+night, then the card data cut, the catalog's links answered by that server),
 as an MCP client and a local install see it.
 `testdata/upstream/refresh.sh` pins them again (it runs archon's renderer,
 code fetched from GitHub, under node: a session asks the owner first); the expectations are then

@@ -8,6 +8,4 @@ date or an outside event is not a line.
 
 ---
 
-- **`mcp.krcg.org` lists the KRCG stack for developers and their agents**: the root and `/llms.txt` serve one catalog, authored in `knowledge/`, of the public services (the MCP endpoint and the published bundle, `static.krcg.org`, `api.krcg.org`, the rulings site's read API, the archive's bulk file, the engine, Archon's API and its token rule, the upstream repositories), each linking its own live specification; the status page moves to `/status`. Done when `curl https://mcp.krcg.org/` and `/llms.txt` return the catalog, every URL in it answers at each refresh (a dead one is a warning on the status page), and a fresh agent given only `https://mcp.krcg.org` finds the card data and the MCP endpoint. Docs: product.md "Connecting" (authored, linking each live specification, links checked at every refresh, replaces "generated from the live specifications"), operations.md, provenance.md, roadmap.md (the `llms.txt` item leaves "Later").
-
-<!-- completed-since-upkeep: 16 -->
+<!-- completed-since-upkeep: 17 -->

@@ -9,6 +9,7 @@ import (
 	"log/slog"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -71,6 +72,7 @@ type upstream struct {
 	modified  time.Time
 	knowledge string // the commit of primogen's main, its files those of knowledge/
 	archives  int    // fetches of the archive's bulk file
+	dead      string // the one link of the catalog that does not answer
 }
 
 func newUpstream() (*upstream, bundle.Upstream, error) {
@@ -101,6 +103,11 @@ func (u *upstream) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	case "/primogen-commit":
 		io.WriteString(w, u.knowledge)
 		return
+	case "/link":
+		if r.URL.Query().Get("u") == u.dead {
+			http.NotFound(w, r)
+		}
+		return
 	case "/archon-commits":
 		// the last commit touching the documents, or the renderer
 		pin := "archon-commit"
@@ -127,6 +134,27 @@ func (u *upstream) set(cards []byte, modified time.Time) {
 	defer u.mu.Unlock()
 	u.cards, u.modified = cards, modified
 }
+
+// links sends every request to the upstream, which answers for every link
+// of the catalog but the dead one.
+func (u *upstream) links() *http.Client {
+	return &http.Client{Transport: roundTrip(func(req *http.Request) (*http.Response, error) {
+		out := req.Clone(req.Context())
+		out.URL, _ = url.Parse(u.srv.URL + "/link?u=" + url.QueryEscape(req.URL.String()))
+		out.Host = ""
+		return http.DefaultTransport.RoundTrip(out)
+	})}
+}
+
+func (u *upstream) kill(link string) {
+	u.mu.Lock()
+	defer u.mu.Unlock()
+	u.dead = link
+}
+
+type roundTrip func(*http.Request) (*http.Response, error)
+
+func (f roundTrip) RoundTrip(req *http.Request) (*http.Response, error) { return f(req) }
 
 func (u *upstream) push(commit string) {
 	u.mu.Lock()
@@ -467,6 +495,7 @@ func TestServe(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	r.links = u.links()
 	var downloads atomic.Int32
 	h := r.handler()
 	hosted := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
@@ -557,8 +586,14 @@ func TestServe(t *testing.T) {
 			}
 		}
 	}
-	expect("status page", get("/"), "Data: cards of static.krcg.org 2026-11-01 00:00 UTC", "Last refresh")
+	expect("status page", get("/status"), "Data: cards of static.krcg.org 2026-11-01 00:00 UTC", "Last refresh")
+	for _, path := range []string{"/", "/llms.txt"} {
+		expect("catalog", get(path), "# KRCG\n", "(https://mcp.krcg.org/mcp)", "(https://static.krcg.org/data/vtes.json)")
+	}
 	r.refresh(ctx, r.fetched)
+	if status := get("/status"); strings.Contains(status, "does not answer") {
+		t.Errorf("a link of the catalog does not answer:\n%s", status)
+	}
 	cs = connect()
 	res, err := cs.CallTool(ctx, &mcp.CallToolParams{Name: "vtes_rulings_archive", Arguments: map[string]any{"query": "Freak Drive", "directors": true}})
 	cs.Close()
@@ -578,13 +613,19 @@ func TestServe(t *testing.T) {
 	u.set(u.cards, time.Date(2026, 11, 2, 12, 34, 0, 0, time.UTC))
 	r.refresh(ctx, base)
 	expect("after a change", card(), "cards of static.krcg.org 2026-11-02 12:34 UTC")
-	expect("status page", get("/"), "ok.")
+	expect("status page", get("/status"), "ok.")
 	if u.archives != 1 {
 		t.Errorf("%d fetches of the archive before the night, want 1", u.archives)
 	}
 	age()
 	out, _ = local(published)
 	expect("local run a day later", out, "cards of static.krcg.org 2026-11-02 12:34 UTC")
+
+	// a link of the catalog that died
+	u.kill("https://api.krcg.org/openapi.json")
+	r.refresh(ctx, base)
+	expect("status page", get("/status"), "ok.", "does not answer: https://api.krcg.org/openapi.json: 404 Not Found")
+	u.kill("")
 
 	// a push to primogen's main
 	u.push(strings.Repeat("b", 40))
@@ -614,7 +655,7 @@ func TestServe(t *testing.T) {
 	u.set(one, time.Date(2026, 11, 3, 0, 0, 0, 0, time.UTC))
 	r.refresh(ctx, night.Add(time.Hour))
 	expect("after a refused refresh", card(), "cards of static.krcg.org 2026-11-02 12:34 UTC")
-	expect("status page", get("/"), "FAILED, the bundle above keeps serving", "cards, the live one")
+	expect("status page", get("/status"), "FAILED, the bundle above keeps serving", "cards, the live one")
 
 	// offline, a local install serves what it has and says how old it is
 	age()

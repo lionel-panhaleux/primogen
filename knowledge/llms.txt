@@ -1,0 +1,50 @@
+# KRCG
+
+> The public services for Vampire: The Eternal Struggle (VTES) around krcg.org: card data, the rulings, the rulings archive, the rules, tournaments, a rules engine, and Primogen, an MCP server that grounds an assistant's answers in them. All free to read without an account, except Archon's API.
+
+To answer VTES questions in an assistant, add the MCP endpoint below. To build a program, start from the card data. Each line links the service's own specification, which settles what this page summarizes. Card texts and images are Paradox Interactive's, used under the Dark Pack agreement. Primogen checks every link here each hour: a dead one shows on its status page.
+
+## Primogen
+
+- [MCP endpoint](https://mcp.krcg.org/mcp): Streamable HTTP, no sign-in. Cards with their rulings, the evidence for a rules question, the rules searched or read by section, the rulings archive searched. `tools/list` describes each tool.
+- [Primogen's README](https://github.com/lionel-panhaleux/primogen#readme): the tools, adding the server to Claude, Claude Code or Gemini, running it locally over stdio.
+- [Data bundle](https://mcp.krcg.org/bundle.json.gz): everything the tools serve but the rulings archive (its bulk file is below), as gzipped JSON, rebuilt when a source moves; its format is the `Bundle` type of [bundle.go](https://github.com/lionel-panhaleux/primogen/blob/main/internal/bundle/bundle.go).
+- [Status](https://mcp.krcg.org/status): the data's dates, the last refresh, what needs a person.
+
+## Cards and decks
+
+- [Card data](https://static.krcg.org/data/vtes.json): every card with its text, costs, printings, translations and rulings, in the krcg 5 model ([models.py](https://github.com/lionel-panhaleux/krcg/blob/main/krcg/models.py)). The krcg 4 format, at [v4/vtes.json](https://static.krcg.org/data/v4/vtes.json), is a snapshot frozen on 2026-06-28: it lacks every card since.
+- [TWDA](https://static.krcg.org/data/twda.json): the Tournament Winning Deck Archive, in the same model.
+- [static.krcg.org](https://static.krcg.org/): the card images (`/card/<name>.jpg`), the clan, discipline and icon images, the fonts.
+- [KRCG API](https://api.krcg.org/docs): a card by id or name (translated names too), name completion, card search, the TWDA filtered, decklist conversion (twd, txt, lackey, jol, vdb, JSON), decks fetched from VDB, Amaranth or VTES Decks; the [OpenAPI schema](https://api.krcg.org/openapi.json).
+
+## Rulings
+
+- [Rulings database](https://github.com/vtes-biased/vtes-rulings): the official rulings as YAML (`rulings/rulings.yaml`, `groups.yaml`, `references.yaml`), its format in the README; pushed on each approval.
+- [Rulings site API](https://rulings.krcg.org/docs): read without login: `/api/card/{id}`, `/api/search?query=`, `/api/group`, `/api/group/{id}`, `/api/reference`; the other endpoints are the rulemongers'. The [OpenAPI schema](https://rulings.krcg.org/openapi.json).
+- [Rulings archive](https://usenet.krcg.org/): the threads the rules directors took part in or the rulings cite, 1994 to today (the newsgroup, the V:EKN forum, BoardGameGeek), a thread at `/t/<id>/`, a post at `#m<n>` or its forum number. All of it in one file, the [bulk file](https://usenet.krcg.org/archive.json.gz), about 57 MB, its format in the [README](https://github.com/vtes-biased/newsgroup-archive#taking-all-of-it).
+- [History of changes](https://gist.github.com/lionel-panhaleux/a4a9cad2e492af7c45c50a1cea7e6cf6): every errata and rules change, dated, each linking its announcement.
+
+## Rules
+
+- [Rulebook](https://archon.vekn.net/help/rules), [tournament rules](https://archon.vekn.net/help/tournament-rules), [judges' guide](https://archon.vekn.net/help/judges-guide): the V:EKN's official documents, rendered from the [markdown in archon-vibe](https://github.com/vtes-biased/archon-vibe/tree/main/frontend/src/lib/help-content).
+- [Advanced rules](https://vtes-biased.github.io/vtes-advanced-rules/): a judge-level synthesis of the rulings by mechanic, curated, not official; as [markdown](https://raw.githubusercontent.com/vtes-biased/vtes-advanced-rules/main/docs/advanced-rules.md).
+
+## Tournaments
+
+- [Archon Public API](https://api.archon.vekn.net/docs): tournaments, decklists, leagues, members and ratings, the whole corpus at `/v1/export`; the [OpenAPI schema](https://api.archon.vekn.net/openapi.json). It needs an app token: an Archon account carrying a VEKN membership and the DEV role (granted by an IC) registers a client app with the `api:read` grant under Developer in its profile, then asks `/oauth/token` with `client_credentials`; a token holds an hour.
+
+## Engine
+
+- [zero-vtes engine](https://engine.krcg.org/docs): a rules-enforcing engine with bots, a game created by one request and played over one WebSocket, no account; [the cards it covers](https://engine.krcg.org/cards), the [OpenAPI schema](https://engine.krcg.org/openapi.json), the types as [JSON Schema](https://engine.krcg.org/schema.json) and [TypeScript](https://engine.krcg.org/protocol.ts).
+
+## Optional
+
+- [krcg](https://github.com/lionel-panhaleux/krcg): the Python library behind the card data and the KRCG API.
+- [krcg-static](https://github.com/lionel-panhaleux/krcg-static), [krcg-api](https://github.com/lionel-panhaleux/krcg-api): static.krcg.org and api.krcg.org.
+- [rulings-website](https://github.com/vtes-biased/rulings-website): rulings.krcg.org.
+- [newsgroup-archive](https://github.com/vtes-biased/newsgroup-archive): usenet.krcg.org.
+- [vtes-advanced-rules](https://github.com/vtes-biased/vtes-advanced-rules): the advanced rules.
+- [archon-vibe](https://github.com/vtes-biased/archon-vibe): Archon.
+- [zero-vtes](https://github.com/lionel-panhaleux/zero-vtes): the engine and its bots.
+- [primogen](https://github.com/lionel-panhaleux/primogen): the MCP server.

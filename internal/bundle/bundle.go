@@ -32,6 +32,8 @@ type Bundle struct {
 	GameTerms []string
 	// Shorthand is the players' shorthand of knowledge/shorthand.json.
 	Shorthand []string
+	// Catalog is knowledge/llms.txt, the KRCG stack for developers and their agents.
+	Catalog string
 }
 
 // Source dates what the bundle read: a commit, a file date, the newest post.

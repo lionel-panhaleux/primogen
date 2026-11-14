@@ -7,7 +7,10 @@ import (
 	"fmt"
 	"log/slog"
 	"net/http"
+	"net/url"
 	"os"
+	"regexp"
+	"slices"
 	"strings"
 	"sync"
 	"time"
@@ -72,16 +75,18 @@ type refresher struct {
 	live    *tools.Live
 	archive *bundle.Archive
 	fetched time.Time
+	links   *http.Client
 
 	mu       sync.Mutex
 	checked  time.Time
 	failure  error
 	warnings []string
+	dead     []string
 }
 
 // newRefresher serves the bundle at path, built first if there is none.
 func newRefresher(ctx context.Context, up bundle.Upstream, path string, log *slog.Logger) (*refresher, error) {
-	r := &refresher{up: up, path: path, log: log}
+	r := &refresher{up: up, path: path, log: log, links: &http.Client{Timeout: 30 * time.Second}}
 	b, err := bundle.Load(path)
 	if errors.Is(err, os.ErrNotExist) {
 		log.Info("no bundle yet: building one", "path", path)
@@ -105,7 +110,60 @@ func (r *refresher) refresh(ctx context.Context, now time.Time) {
 		r.live.Swap(b)
 		r.log.Info("refreshed", "data", tools.DataLine(b))
 	}
+	dead := r.deadLinks(ctx)
+	for _, d := range dead {
+		r.log.Warn("needs a person: " + d)
+	}
+	r.mu.Lock()
+	r.dead = dead
+	r.mu.Unlock()
 	r.done(now, err)
+}
+
+var reLink = regexp.MustCompile(`\]\(([^)\s]+)\)`)
+
+// deadLinks names the links of the live catalog that do not answer: a 405 or
+// a 401 answers, an endpoint refusing a GET or wanting a token.
+func (r *refresher) deadLinks(ctx context.Context) []string {
+	var links []string
+	for _, m := range reLink.FindAllStringSubmatch(r.live.Bundle().Catalog, -1) {
+		if !slices.Contains(links, m[1]) {
+			links = append(links, m[1])
+		}
+	}
+	dead := make([]string, len(links))
+	var wg sync.WaitGroup
+	for i, link := range links {
+		wg.Go(func() {
+			if u, err := url.Parse(link); err != nil || !u.IsAbs() {
+				dead[i] = "not an absolute URL"
+				return
+			}
+			req, err := http.NewRequestWithContext(ctx, http.MethodGet, link, nil)
+			if err != nil {
+				dead[i] = err.Error()
+				return
+			}
+			req.Header.Set("User-Agent", "primogen")
+			resp, err := r.links.Do(req)
+			if err != nil {
+				dead[i] = err.(*url.Error).Err.Error()
+				return
+			}
+			resp.Body.Close()
+			if c := resp.StatusCode; c == http.StatusNotFound || c == http.StatusGone || c >= 500 {
+				dead[i] = resp.Status
+			}
+		})
+	}
+	wg.Wait()
+	var out []string
+	for i, d := range dead {
+		if d != "" {
+			out = append(out, fmt.Sprintf("a link of the catalog, knowledge/llms.txt, does not answer: %s: %s", links[i], d))
+		}
+	}
+	return out
 }
 
 func (r *refresher) done(now time.Time, err error) {
@@ -189,14 +247,21 @@ func (r *refresher) handler() http.Handler {
 	mux.HandleFunc("GET /bundle.json.gz", func(w http.ResponseWriter, req *http.Request) {
 		http.ServeFile(w, req, r.path)
 	})
-	mux.HandleFunc("GET /{$}", r.status)
+	mux.HandleFunc("GET /{$}", r.catalog)
+	mux.HandleFunc("GET /llms.txt", r.catalog)
+	mux.HandleFunc("GET /status", r.status)
 	return mux
+}
+
+func (r *refresher) catalog(w http.ResponseWriter, _ *http.Request) {
+	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+	w.Write([]byte(r.live.Bundle().Catalog))
 }
 
 // status is the page a person reads: what is served, and what needs them.
 func (r *refresher) status(w http.ResponseWriter, _ *http.Request) {
 	r.mu.Lock()
-	checked, failure, warnings := r.checked, r.failure, r.warnings
+	checked, failure, warnings := r.checked, r.failure, slices.Concat(r.warnings, r.dead)
 	r.mu.Unlock()
 	var out strings.Builder
 	fmt.Fprintf(&out, "Primogen %s, an MCP server for Vampire: The Eternal Struggle: add the /mcp endpoint to your assistant.\n\n", tools.Version())

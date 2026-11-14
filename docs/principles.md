@@ -72,7 +72,7 @@ violating one silently is not.
 - **Authored here**: the guide (the theory, the procedure for each task,
   the module vocabulary and card-to-module tags, the served examples), the
   archetype labels, the game terms and their translations, the players'
-  shorthand.
+  shorthand, the catalog of the KRCG stack.
 
 ## Code
 

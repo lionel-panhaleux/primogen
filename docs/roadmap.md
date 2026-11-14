@@ -50,6 +50,5 @@ owner's decision.
   `vtes_card_stats`; codex-of-the-damned reads primogen's output.
 - Members: Archon login, tournaments, full-field meta, rankings, community
   links.
-- `llms.txt`, the front door of the KRCG stack.
 - Bot-based deck testing, once the engine covers the pool and the bot is
   strong enough.

@@ -79,10 +79,11 @@ func Build(ctx context.Context, up Upstream, archive *Archive) (*Bundle, []strin
 	if err != nil {
 		return nil, nil, err
 	}
-	var history, advanced, procedure, terms, shorthand []byte
+	var history, advanced, procedure, terms, shorthand, catalog []byte
 	for name, body := range map[string]*[]byte{
 		"card-changes.md": &history, "rules/advanced-rules.md": &advanced,
 		"guide/rules-answer.md": &procedure, "game-terms.json": &terms, "shorthand.json": &shorthand,
+		"llms.txt": &catalog,
 	} {
 		if *body, err = read(name); err != nil {
 			return nil, nil, err
@@ -130,6 +131,7 @@ func Build(ctx context.Context, up Upstream, archive *Archive) (*Bundle, []strin
 		RulesAnswer: string(procedure),
 		GameTerms:   gameTerms,
 		Shorthand:   short.Shorthand,
+		Catalog:     string(catalog),
 	}
 	for i, k := range raw {
 		b.Cards[i] = k.card()

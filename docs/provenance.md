@@ -32,6 +32,9 @@ compares them with upstream and records the commit below.
   `vtes-skill` @ `65b5c3e`. The translations are unchecked, the exception
   [principles.md](principles.md) "Knowledge files" records; the file says so
   itself.
+- `llms.txt`: the catalog of the KRCG stack the hosted server serves at
+  its root ([product.md](product.md) "Connecting"), each line checked
+  against its service's own specification when written.
 - `shorthand.json`: players' shorthand for words of the game that the game
   terms do not list ("NRA", which the advanced rules print in §3.5's title;
   "hunter"), which `vtes_rules_case` takes for no card's name. Kept apart

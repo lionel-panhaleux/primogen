@@ -72,10 +72,13 @@ the same tools from a shell. A tool that ships adds its one line to the README's
   file the first time a tool needs it: `vtes_rulings_archive`, or
   `vtes_rules_case` given two cards no ruling names together. They have
   every tool except the Archon-backed ones.
-- **`mcp.krcg.org/llms.txt`** is the front door of the whole KRCG stack for
-  developers and their agents: a catalog of the public services, their
-  specifications, data formats and recipes, generated from the live
-  specifications.
+- **`mcp.krcg.org`** is the front door of the whole KRCG stack for
+  developers and their agents: its root and `/llms.txt` serve one catalog
+  in the [llms.txt](https://llmstxt.org) format, `knowledge/llms.txt`,
+  authored here: each public service of the stack and its source
+  repository in a line or two, linking its own live specification, which
+  settles the detail. Every link is checked at each
+  refresh; one that does not answer is a warning on the status page.
 
 ### What each client does with a remote server
 
