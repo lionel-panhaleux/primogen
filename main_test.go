@@ -11,6 +11,7 @@ import (
 	"net/http/httptest"
 	"os"
 	"path/filepath"
+	"regexp"
 	"slices"
 	"strings"
 	"sync"
@@ -351,7 +352,8 @@ func TestQueryArchive(t *testing.T) {
 
 // TestArchonLinks checks a section of the rulebook, the tournament rules or
 // the judges' guide links an id archon.vekn.net's page has, by archon's own
-// renderer, and that a section's id is its own.
+// renderer, that a section's id is its own, and that each [RBK …] citation of
+// the advanced rules links an id of the rulebook's page.
 func TestArchonLinks(t *testing.T) {
 	b, err := bundle.Load(testBundle)
 	if err != nil {
@@ -386,6 +388,25 @@ func TestArchonLinks(t *testing.T) {
 	}
 	if linked < 400 {
 		t.Errorf("%d sections link an id of archon.vekn.net, want most of them", linked)
+	}
+	reRBK := regexp.MustCompile(`\[\[RBK\s[^\]]+\]\]\(([^)]*)\)`)
+	cited := 0
+	for _, s := range b.Sections {
+		if s.Doc != bundle.DocAdvanced {
+			continue
+		}
+		for _, text := range append([]string{s.Text}, s.Notes...) {
+			for _, m := range reRBK.FindAllStringSubmatch(text, -1) {
+				cited++
+				id, ok := strings.CutPrefix(m[1], "https://archon.vekn.net/help/rules#")
+				if !ok || !slices.Contains(ids["vtes-rules"], id) {
+					t.Errorf("%s cites %s, not an id archon.vekn.net's rulebook has", s.ID, m[0])
+				}
+			}
+		}
+	}
+	if cited < 150 {
+		t.Errorf("the advanced rules hold %d rulebook citations, want about 160", cited)
 	}
 	for _, w := range testWarnings {
 		if strings.HasPrefix(w, "archon's renderer") {

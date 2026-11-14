@@ -12,8 +12,8 @@ permalink: /
 
 ## About this document
 
-This document supplements the [VTES rulebook](https://www.vekn.net/rulebook). It collects the general principles, corner
-cases and non-obvious interactions established by thirty years of rulings, organized by game mechanic.
+This document supplements the [VTES rulebook](https://archon.vekn.net/help/rules). It collects the general principles,
+corner cases and non-obvious interactions established by thirty years of rulings, organized by game mechanic.
 
 It is written for judges and advanced players: it assumes full fluency with the base rules and terminology, and favors
 precision over accessibility.
@@ -26,7 +26,7 @@ recorded, and an official ruling would supersede it.
 Four principles drive most rulings:
 
 **Card text governs.** Where a card contradicts the rules, the card takes precedence [[RBK
-important-terms-of-the-game]](https://www.vekn.net/rulebook#important-terms-of-the-game). However odd the result,
+important-terms-of-the-game]](https://archon.vekn.net/help/rules#important-terms-in-the-game). However odd the result,
 presume the text applies naturally, as written, in the expected manner ([§1.1](#11-card-text-and-the-rules)).
 
 **You cannot do what you cannot do.** A play barred in whole or in relevant part is not available at all, even just to
@@ -48,7 +48,7 @@ other effects landing before or after, or the action failing change nothing
 ### 1.1 Card text and the rules
 
 **Base rules.** Where a card contradicts the rules, the card takes precedence. [[RBK
-important-terms-of-the-game]](https://www.vekn.net/rulebook#important-terms-of-the-game)
+important-terms-of-the-game]](https://archon.vekn.net/help/rules#important-terms-in-the-game)
 
 #### 1.1.1 Mandatory and optional effects
 
@@ -518,8 +518,9 @@ maneuver.[^1-8-16] Canceling an aim leaves the strike to resolve on its default 
 ### 1.9 Replacement
 
 **Base rules.** A card played from hand is replaced immediately unless card text says otherwise, and the draw comes
-after the "as played" window closes [[RBK playing-a-card]](https://www.vekn.net/rulebook#playing-a-card) [[RBK
-drawing-cards]](https://www.vekn.net/rulebook#drawing-cards). With an empty library you do not draw and play continues.
+after the "as played" window closes [[RBK playing-a-card]](https://archon.vekn.net/help/rules#playing-a-card) [[RBK
+drawing-cards]](https://archon.vekn.net/help/rules#drawing-cards). With an empty library you do not draw and play
+continues.
 
 #### 1.9.1 When the replacement is drawn
 
@@ -669,7 +670,7 @@ owner's ash heap when burned, breaking all control effects, e.g. {The Capuchin};
 returns to its owner's ash heap and is not removed from the game unless an effect says so, e.g. {Grasp the Ghostly}. A
 retrieval worded "your ash heap" means the ash heap you own — it does not matter who first controlled the card, e.g.
 {Père Lachaise, France}. Effects may reach any player's ash heap, and an action targeting one is always undirected
-([[RBK important-terms-of-the-game]](https://www.vekn.net/rulebook#important-terms-of-the-game)).[^1-11-6]
+([[RBK important-terms-of-the-game]](https://archon.vekn.net/help/rules#important-terms-in-the-game)).[^1-11-6]
 
 ### 1.12 Cards and counters on other cards
 
@@ -914,7 +915,7 @@ it.[^2-1-7]
 
 **Base rules.** A card worded "only usable as the action is announced" must be played before any regular action modifier
 or reaction card [[RBK
-summary-of-the-course-of-an-action]](https://www.vekn.net/rulebook#summary-of-the-course-of-an-action).
+summary-of-the-course-of-an-action]](https://archon.vekn.net/help/rules#summary-of-the-course-of-an-action).
 
 The window opens once the action card has been played and closes as soon as the first regular action modifier or
 reaction card is played, by any player. No as-announced card may follow it.[^2-2-1]
@@ -997,7 +998,7 @@ action but not of its resolution; the window before it is [§3.7.8.1](#3781-the-
 ### 2.4 Simultaneous effects and ordering
 
 **Base rules.** When two or more effects apply at the same moment, the acting Methuselah plays and orders first, then
-the impulse passes ([[RBK sequencing]](https://www.vekn.net/rulebook#sequencing)).
+the impulse passes ([[RBK sequencing]](https://archon.vekn.net/help/rules#advanced-rules-sequencing)).
 
 #### 2.4.1 Ordering within a window
 
@@ -1195,7 +1196,7 @@ of the target Methuselahs, e.g. {Weigh the Heart}.[^3-1-19]
 
 **Base rules.** Stealth may be added only while the action is being blocked by a minion with enough intercept to stop
 it; intercept only by a blocking minion whose intercept is below the acting minion's stealth. [[RBK
-stealth-and-intercept]](https://www.vekn.net/rulebook#stealth-and-intercept)
+stealth-and-intercept]](https://archon.vekn.net/help/rules#stealth-and-intercept)
 
 #### 3.2.1 Adding what is not needed
 
@@ -1217,7 +1218,7 @@ on the action, X fixed at the time the card is played; stealth added afterwards 
 #### 3.2.3 Duration and re-evaluation
 
 Modifications last for the duration of the action [[RBK
-stealth-and-intercept]](https://www.vekn.net/rulebook#stealth-and-intercept). An option to add, granted during the
+stealth-and-intercept]](https://archon.vekn.net/help/rules#stealth-and-intercept). An option to add, granted during the
 action, likewise stays open until resolution, e.g. {Marciana Giovanni, Investigator}.[^3-2-5]
 
 Having intercept is not permission to block. {Marciana Giovanni, Investigator} may lock to grant herself the option, and
@@ -1316,7 +1317,7 @@ declined get no fresh opportunity when the action continues as if unblocked.[^3-
 ### 3.4 Resolution, success and effect
 
 **Base rules.** An action that survives all block attempts is successful; its cost is then paid and its effects take
-place. [[RBK resolve-the-action]](https://www.vekn.net/rulebook#resolve-the-action)
+place. [[RBK resolve-the-action]](https://archon.vekn.net/help/rules#3-resolve-the-action)
 
 #### 3.4.1 A successful action need not do anything
 
@@ -1375,8 +1376,8 @@ card cannot then be used on it.[^3-4-15]
 
 **Base rules.** A minion cannot perform an action with the same action card, from hand or in play, more than once each
 turn, even if it unlocks; a minion cannot bleed more than once each turn. [[RBK
-action-card-or-card-in-play]](https://www.vekn.net/rulebook#action-card-or-card-in-play) [[RBK
-bleed]](https://www.vekn.net/rulebook#bleed)
+action-card-or-card-in-play]](https://archon.vekn.net/help/rules#action-card-or-card-in-play) [[RBK
+bleed]](https://archon.vekn.net/help/rules#bleed)
 
 #### 3.5.1 Reached resolution
 
@@ -1461,7 +1462,7 @@ repetition one.
 
 **Base rules.** A successful block locks the blocker and sends both minions into combat; the action card is set aside
 out of play until the action resolves. Once a Methuselah declines to make further block attempts, that decision is
-final. [[RBK summary-of-the-course-of-an-action]](https://www.vekn.net/rulebook#summary-of-the-course-of-an-action)
+final. [[RBK summary-of-the-course-of-an-action]](https://archon.vekn.net/help/rules#summary-of-the-course-of-an-action)
 
 #### 3.6.1 What continuation restores
 
@@ -1515,9 +1516,9 @@ The rulebook actions, one subsection each. Rules that are not specific to an act
 
 **Base rules.** A bleed's default amount is 1 and its default target is your prey; if the action succeeds with an amount
 of 1 or more the bleed is successful, the target burns that much pool, and the acting minion's controller takes the
-Edge. [[RBK bleed]](https://www.vekn.net/rulebook#bleed) The "(limited)" rule caps increases only: one limited action
-modifier may increase the bleed amount per action, while modifiers printed as not counting against the limit, and all
-reductions, are unrestricted.
+Edge. [[RBK bleed]](https://archon.vekn.net/help/rules#bleed) The "(limited)" rule caps increases only: one limited
+action modifier may increase the bleed amount per action, while modifiers printed as not counting against the limit, and
+all reductions, are unrestricted.
 
 ##### 3.7.1.1 Bleed amount
 
@@ -1546,7 +1547,7 @@ An effect capping the pool a target burns does not change the bleed amount; it a
 Redirection changes the target of the bleed, so the new target is the target for every purpose: a reaction keyed to a
 bleed against you is usable by whoever the bleed ends up against, not only by the Methuselah it was declared against,
 e.g. {Elder Intervention}.[^3-7-1-8] Block attempts reopen. [[RBK
-summary-of-the-course-of-an-action]](https://www.vekn.net/rulebook#summary-of-the-course-of-an-action)
+summary-of-the-course-of-an-action]](https://archon.vekn.net/help/rules#summary-of-the-course-of-an-action)
 
 The new Methuselah must be a legal target for that bleed. A restriction on whom a minion may bleed also bars redirecting
 that minion's bleed to the protected Methuselah, e.g. {Minor Boon}.[^3-7-1-9]
@@ -1559,8 +1560,8 @@ Mandatory bleeds are [§3.9](#39-mandatory-actions)'s.
 #### 3.7.2 Hunt
 
 **Base rules.** The rulebook hunt action is undirected, at +1 stealth, and gains the acting vampire blood from the blood
-bank equal to their hunt amount, by default 1 [[RBK hunt]](https://www.vekn.net/rulebook#hunt). Cards also grant hunt
-actions of their own.
+bank equal to their hunt amount, by default 1 [[RBK hunt]](https://archon.vekn.net/help/rules#hunt). Cards also grant
+hunt actions of their own.
 
 ##### 3.7.2.1 A successful hunt and a successful hunt action are different conditions
 
@@ -1612,7 +1613,7 @@ an alternative satisfies a mandatory hunt, e.g. {Undying Thirst} permits diabler
 
 **Base rules.** Equipping from hand is an undirected +1 stealth action and pays the card's cost; equipping from another
 minion you control is free, and the equipment taken is announced with the action. [[RBK
-equip]](https://www.vekn.net/rulebook#equip)
+equip]](https://archon.vekn.net/help/rules#equip)
 
 ##### 3.7.3.1 What counts as an equip action
 
@@ -1881,9 +1882,9 @@ action instead, and it cannot be continued. Both, e.g. {Warsaw Station}.[^3-7-7-
 #### 3.7.8 Diablerie and the blood hunt
 
 **Base rules.** The steps of diablerie resolve as one unit and cannot be interrupted; effects are played before or
-after, never between them [[RBK diablerie]](https://www.vekn.net/rulebook#diablerie). The blood hunt referendum is
+after, never between them [[RBK diablerie]](https://archon.vekn.net/help/rules#diablerie). The blood hunt referendum is
 automatic, is not an action, cannot be blocked, and takes no action modifiers or reaction cards [[RBK
-the-blood-hunt]](https://www.vekn.net/rulebook#the-blood-hunt).
+the-blood-hunt]](https://archon.vekn.net/help/rules#the-blood-hunt).
 
 ##### 3.7.8.1 The window before the blood hunt
 
@@ -1924,19 +1925,19 @@ unblocked it resolves successfully with no diablerie, e.g. {Warsaw Station}.
 
 ##### 3.7.8.4 Who may commit diablerie
 
-Only a ready vampire may commit diablerie [[RBK diablerie]](https://www.vekn.net/rulebook#diablerie). An ally granted
-the use of a card still cannot, e.g. {Shadow Court Satyr} with {Amaranth}.[^3-7-8-7] A vampire barred from diablerie
-({Humanitas}, Blood Cursed) cannot be compelled to it, so {Undying Thirst} does nothing to him. Cards compelling
-diablerie impose a mandatory action.
+Only a ready vampire may commit diablerie [[RBK diablerie]](https://archon.vekn.net/help/rules#diablerie). An ally
+granted the use of a card still cannot, e.g. {Shadow Court Satyr} with {Amaranth}.[^3-7-8-7] A vampire barred from
+diablerie ({Humanitas}, Blood Cursed) cannot be compelled to it, so {Undying Thirst} does nothing to him. Cards
+compelling diablerie impose a mandatory action.
 
 A blocker of a leave-torpor action gets the opportunity to diablerize the acting vampire [[RBK
-leave-torpor]](https://www.vekn.net/rulebook#leave-torpor); when that opportunity is lost is
+leave-torpor]](https://archon.vekn.net/help/rules#leave-torpor-see-torpor); when that opportunity is lost is
 [§3.7.7.2](#3772-a-blocked-leave-torpor)'s.
 
 ### 3.8 Actions provided by cards
 
 **Base rules.** A minion cannot take the action of a given action card, from hand or in play, more than once each turn,
-even if it unlocks [[RBK action-card-or-card-in-play]](https://www.vekn.net/rulebook#action-card-or-card-in-play).
+even if it unlocks [[RBK action-card-or-card-in-play]](https://archon.vekn.net/help/rules#action-card-or-card-in-play).
 
 #### 3.8.1 One source, one action
 
@@ -1969,7 +1970,7 @@ political action card do not see it and it cannot be discarded for a vote.
 
 A provided action that resembles a rulebook action is not that action, and only the cost the card prints is paid: {Go
 Anarch} makes the vampire Anarch with no blood paid, unlike the rulebook become-Anarch action [[RBK
-become-anarch]](https://www.vekn.net/rulebook#become-anarch).
+become-anarch]](https://archon.vekn.net/help/rules#advanced-rules-become-anarch).
 
 ### 3.9 Mandatory actions
 
@@ -2102,7 +2103,7 @@ there.[^4-1-10]
 ### 4.2 Range
 
 **Base rules.** Range is determined once per round, defaults to close, and a minion needs a card or effect to gain a
-maneuver. [[RBK determine-range]](https://www.vekn.net/rulebook#determine-range)
+maneuver. [[RBK determine-range]](https://archon.vekn.net/help/rules#2-determine-range)
 
 #### 4.2.1 Setting the range
 
@@ -2123,9 +2124,9 @@ available in it.[^4-2-6]
 #### 4.2.2 The before-range window
 
 Effects usable "before range is determined" must be played before the acting minion decides whether to maneuver. [[RBK
-before-range]](https://www.vekn.net/rulebook#before-range) An effect that changes the range in this window takes effect
-at once, so range-dependent plays immediately follow the new range: once {Fear of the Void Below} [dai] has made long
-the round's default, a close-range card such as {Disarm} cannot be played.[^4-2-4]
+before-range]](https://archon.vekn.net/help/rules#1-before-range) An effect that changes the range in this window takes
+effect at once, so range-dependent plays immediately follow the new range: once {Fear of the Void Below} [dai] has made
+long the round's default, a close-range card such as {Disarm} cannot be played.[^4-2-4]
 
 Damage inflicted in this window is resolved in it. Both minions may play prevention and non-prevention before-range
 effects, and simultaneous before-range damage is prevented and mended together, e.g. {Outside the Hourglass}
@@ -2154,12 +2155,12 @@ bar it, e.g. {Earthshock} against the retainer of a minion with [FLIGHT].[^4-2-1
 #### 4.3.1 Choosing a strike
 
 Using the maneuver from a strike card or weapon chooses that minion's initial strike [[RBK
-determine-range]](https://www.vekn.net/rulebook#determine-range); a few cards let him instead strike with the weapon he
-maneuvered with, e.g. {Blessed Blade}.[^4-3-1] A strike card played in determine range for its maneuver counts as
-played; a card merely granting the ability to strike does not, e.g. {.44 Magnum}.[^4-3-2] A cost an opponent imposes on
-striking is incurred at that point, and it is a cost of the strike, not of the card played, e.g. {Lucian, the Perfect}
-against a {Thrown Gate} played for its maneuver.[^4-3-19] A restriction on playing strike cards reaches strike cards
-played in determine range for their maneuver, e.g. {Thoughts Betrayed} [DOM].[^4-3-20]
+determine-range]](https://archon.vekn.net/help/rules#2-determine-range); a few cards let him instead strike with the
+weapon he maneuvered with, e.g. {Blessed Blade}.[^4-3-1] A strike card played in determine range for its maneuver counts
+as played; a card merely granting the ability to strike does not, e.g. {.44 Magnum}.[^4-3-2] A cost an opponent imposes
+on striking is incurred at that point, and it is a cost of the strike, not of the card played, e.g. {Lucian, the
+Perfect} against a {Thrown Gate} played for its maneuver.[^4-3-19] A restriction on playing strike cards reaches strike
+cards played in determine range for their maneuver, e.g. {Thoughts Betrayed} [DOM].[^4-3-20]
 
 An aim or other strike modifier is played in the strike step even when the strike was committed during determine range,
 and cannot be played once the strike can no longer be chosen, e.g. {Target Vitals} after {Immortal Grapple}. A minion
@@ -2235,7 +2236,7 @@ Rounds}.[^4-4-2]
 
 The source is read off the card's own wording. Text naming a minion — "this vampire inflicts …" — is minion-inflicted;
 text naming the weapon is weapon damage; text naming no one is environmental.[[RBK
-damage-resolution]](https://www.vekn.net/rulebook#damage-resolution)
+damage-resolution]](https://archon.vekn.net/help/rules#5-damage-resolution)
 
 - A strike that lands its damage after combat is still minion-inflicted strike damage: strike modifiers and damage
   reduction reach it, e.g. {Catatonic Fear}, {Outside the Hourglass}, {Riposte}; whether it survives combat continuing
@@ -2322,9 +2323,9 @@ is prevented first, acting player first; all damage applies at once afterwards.[
 #### 4.5.5 Immunity
 
 Damage from a source a minion is immune to is inflicted unsuccessfully — no mend, no wound, no destruction ([[RBK
-damage-resolution]](https://www.vekn.net/rulebook#damage-resolution)). Immunity holds against unpreventable damage and
-outside combat, e.g. {Bloodform}.[^4-5-17] Unlike prevention, immunity to non-aggravated damage does cover aggravated
-damage the minion treats as normal, e.g. {Ex Nihilo} with {Skin of Night}.[^4-5-18]
+damage-resolution]](https://archon.vekn.net/help/rules#5-damage-resolution)). Immunity holds against unpreventable
+damage and outside combat, e.g. {Bloodform}.[^4-5-17] Unlike prevention, immunity to non-aggravated damage does cover
+aggravated damage the minion treats as normal, e.g. {Ex Nihilo} with {Skin of Night}.[^4-5-18]
 
 Immunity stops the damage, not the play: the source may still use an effect that would damage an immune minion, e.g.
 {Charnas the Imp}. Immunity to a class of source reaches environmental damage from that source, a retainer's damage
@@ -2395,7 +2396,7 @@ against a strike made with first strike, while the other half resolves normally 
 
 **Base rules.** A strike: combat ends always resolves first, before a strike done with first strike, and it ends combat
 before any other strike or strike resolution effect resolves [[RBK
-strike-effects]](https://www.vekn.net/rulebook#strike-effects). A dodge does not stop it.
+strike-effects]](https://archon.vekn.net/help/rules#strike-effects). A dodge does not stop it.
 
 #### 4.7.1 An unresolved strike does nothing
 
@@ -2466,7 +2467,7 @@ combat.[^4-8-9]
 ### 4.9 End of round, end of combat, and new combats
 
 **Base rules.** The end-of-round step follows the press step and occurs even when combat ends prematurely. [[RBK
-end-of-round]](https://www.vekn.net/rulebook#end-of-round)
+end-of-round]](https://archon.vekn.net/help/rules#7-end-of-round)
 
 #### 4.9.1 The end-of-round window
 
@@ -2530,11 +2531,11 @@ combat does not occur if the action ends first.[^4-9-15] Extending the current c
 {Telepathic Tracking}. Nor is replacing the block's combat: a slave may still take a blocked clan member's place while
 a combat is queued, e.g. by {Hedonism}.[^4-9-26]
 
-A vampire in torpor cannot enter combat [[RBK leave-torpor]](https://www.vekn.net/rulebook#leave-torpor), and a
-combat-starting effect cannot reach a minion in torpor or on his way there, whatever the card's wording: neither {Hidden
-Lurker} nor {Blissful Agony} [VAL] may be played on a vampire going to torpor. A queued combat one of whose combatants
-is in torpor when it would begin does not happen at all. An effect forbidding further combat bars combat-starting cards,
-e.g. {Heaven's Gate}.[^4-9-16]
+A vampire in torpor cannot enter combat [[RBK
+leave-torpor]](https://archon.vekn.net/help/rules#leave-torpor-see-torpor), and a combat-starting effect cannot reach a
+minion in torpor or on his way there, whatever the card's wording: neither {Hidden Lurker} nor {Blissful Agony} [VAL]
+may be played on a vampire going to torpor. A queued combat one of whose combatants is in torpor when it would begin
+does not happen at all. An effect forbidding further combat bars combat-starting cards, e.g. {Heaven's Gate}.[^4-9-16]
 
 Per-combat conditions reset. A cost keyed to entering combat is paid again ({Blithe Acceptance}). Permissions tied to
 the blocked combat do not carry over ({Sniper Rifle}, {Scry the Hearthstone}). Cards replaced only after combat are
@@ -2590,7 +2591,7 @@ the bearer nor environmental.
 A weapon already committed as the strike but unavailable when that strike resolves makes the strike have no effect —
 burned by an opponent's effect, or contested because a {Disguised Weapon} equipped a second copy of the same unique
 weapon.[^4-10-8] Up to that point the weapon is still usable [[RBK
-strike-effects]](https://www.vekn.net/rulebook#strike-effects).
+strike-effects]](https://archon.vekn.net/help/rules#strike-effects).
 
 Once a weapon's strike has resolved, its self-burn and bearer damage happen as printed, even if combat continues or a
 new combat begins, e.g. {Smoke Grenade}.[^4-10-9]
@@ -2716,7 +2717,7 @@ minion as part of its effect, nothing need be unlocked and no cost is paid, e.g.
 ### 5.3 Torpor
 
 **Base rules.** A torpid vampire is controlled but not ready; it unlocks normally, cannot block, play reaction cards or
-vote, and acts only to leave torpor [[RBK torpor]](https://www.vekn.net/rulebook#torpor).
+vote, and acts only to leave torpor [[RBK torpor]](https://archon.vekn.net/help/rules#torpor).
 
 #### 5.3.1 Going to torpor
 
@@ -2772,9 +2773,9 @@ subject was chosen while ready keeps applying in torpor, and stops only if that 
 Rack}.
 
 A change of controller does not change torpor: a stolen or defecting vampire stays in torpor [[RBK
-8-glossaries]](https://www.vekn.net/rulebook#8-glossaries).[^5-3-15] Allies have no torpor state: an effect that would
-send an ally to torpor burns it instead, and one sending vampires to torpor leaves an opposing ally unaffected.[^5-3-16]
-Incapacitation is the imbued analogue, and abilities stay usable there too, e.g. {Abjure}.
+8-glossaries]](https://archon.vekn.net/help/rules#8-glossaries).[^5-3-15] Allies have no torpor state: an effect that
+would send an ally to torpor burns it instead, and one sending vampires to torpor leaves an opposing ally
+unaffected.[^5-3-16] Incapacitation is the imbued analogue, and abilities stay usable there too, e.g. {Abjure}.
 
 ### 5.4 Burning minions
 
@@ -2868,9 +2869,9 @@ resolves the action fully, and the oust order is [§6.5.2](#652-when-the-oust-re
 #### 5.5.4 Entering play and acting
 
 A recruited ally cannot act the turn it enters play; one brought into play by other means can [[RBK
-recruit-ally]](https://www.vekn.net/rulebook#recruit-ally). The keyword decides it: cards that make a minion **recruit**
-an ally leave it unable to act that turn, e.g. {The Summoning}, {Piper}; cards that **put** it in play do not, e.g.
-{Summon History}, {Khazar's Diary (Endless Night)}.[^5-5-7]
+recruit-ally]](https://archon.vekn.net/help/rules#recruit-ally). The keyword decides it: cards that make a minion
+**recruit** an ally leave it unable to act that turn, e.g. {The Summoning}, {Piper}; cards that **put** it in play do
+not, e.g. {Summon History}, {Khazar's Diary (Endless Night)}.[^5-5-7]
 
 An ally whose text lets it act the turn it is recruited still acts only in your minion phase, so recruiting it on an
 opponent's turn gives it no action, e.g. {Nocturn}, {Infernal Servitor}.[^5-5-8]
@@ -2937,7 +2938,7 @@ ending a combat between a monster and a mortal, reads only that line.
 #### 5.7.2 Slaves
 
 A slave locking to take a blocked clan member's place cancels the combat, unlocks the acting vampire, and enters a new
-combat with the blocker ([[RBK traits]](https://www.vekn.net/rulebook#traits)). The slave becomes the combatant but
+combat with the blocker ([[RBK traits]](https://archon.vekn.net/help/rules#traits)). The slave becomes the combatant but
 never the acting minion ([§3.10](#310-changing-the-acting-minion)).[^5-7-2] It cannot play a card whose use requires it
 to be acting, e.g. {Shadow Boxing} at [OBF][POT], and the blocker cannot play a card requiring the opposing minion to be
 the acting vampire, e.g. {Obedience}. Effects naming the canceled combat are dead, e.g. {Sniper Rifle} cannot set the
@@ -2961,8 +2962,8 @@ after that resolution, e.g. {Seraph's Second}.
 #### 5.7.5 Imbued
 
 Imbued are mortal allies with life rather than blood, and their cost is their starting life ([[RBK
-appendix-imbued-rules]](https://www.vekn.net/rulebook#appendix-imbued-rules)). Effects reading a minion's cost read that
-starting life, e.g. {Keystone Kine} at [obf]; effects reading a cost to *recruit* read zero, since an Imbued is
+appendix-imbued-rules]](https://archon.vekn.net/help/rules#appendix-imbued-rules)). Effects reading a minion's cost read
+that starting life, e.g. {Keystone Kine} at [obf]; effects reading a cost to *recruit* read zero, since an Imbued is
 influenced, not recruited, e.g. {Kindred Segregation}.[^5-7-5]
 
 An Imbued in the uncontrolled region takes no blood, e.g. {Dreams of the Sphinx}.[^5-7-6] An effect moving a crypt card
@@ -3137,7 +3138,7 @@ keyed to the trait, e.g. {Grey Thorne}, {Vivienne Géroux} do not benefit from {
 
 **Base rules.** Ownership fixes which library, hand and ash heap a card belongs to. Control fixes who plays it, who
 chooses, and what an oust removes. [[RBK
-important-terms-of-the-game]](https://www.vekn.net/rulebook#important-terms-of-the-game)
+important-terms-of-the-game]](https://archon.vekn.net/help/rules#important-terms-in-the-game)
 
 #### 6.1.1 Zones belong to the owner
 
@@ -3156,7 +3157,7 @@ A card leaves play to its **owner's** ash heap, hand or library, whoever control
 #### 6.1.2 Control decides what an oust removes
 
 An oust removes what the ousted Methuselah **controlled**. Cards he owns but does not control stay in play. [[RBK
-important-terms-of-the-game]](https://www.vekn.net/rulebook#important-terms-of-the-game)
+important-terms-of-the-game]](https://archon.vekn.net/help/rules#important-terms-in-the-game)
 
 Only printed text keeps control elsewhere. {Shackles of Enkidu} goes on the opposing minion but stays with the
 controller of the vampire that used it, and changes hands with that vampire. Taking control of a card already in play is
@@ -3178,7 +3179,7 @@ reaches it, e.g. {The Shard, London}. That Methuselah pays.
 
 A vampire in the uncontrolled region, or yielded in a contest, is not controlled and his abilities do not apply, e.g.
 {Byzar}.[^6-1-4] He is not in play either — in play means controlled, and card effects reach the uncontrolled region
-only when their text names it [[RBK targeting-of-cards]](https://www.vekn.net/rulebook#targeting-of-cards) — so an
+only when their text names it [[RBK targeting-of-cards]](https://archon.vekn.net/help/rules#targeting-of-cards) — so an
 effect keyed to a vampire burned *from play* does not reach him, e.g. {Blessed Resilience}.
 
 Card text naming cards in play is not limited to cards you control unless it says so, e.g. {Spell of Life} burns copies
@@ -3187,7 +3188,7 @@ controlled by anyone.
 ### 6.2 Taking control of minions
 
 **Base rules.** An ousted Methuselah's cards are removed from the game; cards he owns but does not control stay in play.
-[[RBK 5-ending-the-game]](https://www.vekn.net/rulebook/5-ending-the-game)
+[[RBK 5-ending-the-game]](https://archon.vekn.net/help/rules#5-ending-the-game)
 
 #### 6.2.1 When the control change happens
 
@@ -3299,7 +3300,7 @@ card is still in front of him.
 ### 6.4 Leaving and re-entering play
 
 **Base rules.** Contested cards are face down and out of play; a vampire in the uncontrolled region is not in play and
-is not a legal target. [[RBK contested-cards]](https://www.vekn.net/rulebook#contested-cards)
+is not a legal target. [[RBK contested-cards]](https://archon.vekn.net/help/rules#advanced-rules-contested-cards)
 
 #### 6.4.1 Set aside out of play — the card remembers everything
 
@@ -3360,7 +3361,7 @@ A Methuselah obliged to pay more pool than she holds pays all of it and is ouste
 zero, e.g. {Life Boon}. A mandatory cost is paid even when paying ousts you.[^6-5-4]
 
 Withdrawal fails on any pool loss, including pool spent as a cost, and a later gain does not repair it [[RBK
-5-ending-the-game]](https://www.vekn.net/rulebook/5-ending-the-game).
+5-ending-the-game]](https://archon.vekn.net/help/rules#5-ending-the-game).
 
 #### 6.5.2 When the oust resolves
 
@@ -3411,8 +3412,8 @@ Nitocris}.[^6-5-12]
 
 **Base rules.** You receive one master phase action per master phase, unused actions are lost, and you choose the order
 in which your master phase actions and any other master-phase effects happen [[RBK
-master-phase]](https://www.vekn.net/rulebook#master-phase). An out-of-turn master card spends an action from your next
-master phase [[RBK master-cards]](https://www.vekn.net/rulebook#master-cards).
+master-phase]](https://archon.vekn.net/help/rules#2-master-phase). An out-of-turn master card spends an action from your
+next master phase [[RBK master-cards]](https://archon.vekn.net/help/rules#master-cards).
 
 #### 6.6.1 Master phase action accounting
 
@@ -3423,13 +3424,13 @@ as it is played still grants it, e.g. {Agent of Power}.[^6-6-8]
 
 An additional master phase action handed to a Methuselah by a card effect is not that Methuselah's trifle bonus. A
 trifle they play afterwards still grants its one, e.g. {Wash}.[^6-6-3] The one-per-phase cap counts only actions gained
-from trifles [[RBK trifle]](https://www.vekn.net/rulebook#trifle).
+from trifles [[RBK trifle]](https://archon.vekn.net/help/rules#trifle).
 
 #### 6.6.2 Out-of-turn masters
 
 One out-of-turn master card between two of your master phases, regardless of how many master phase actions you have
-[[RBK master-cards]](https://www.vekn.net/rulebook#master-cards). An ability that grants access to out-of-turn masters,
-or that pays for an extra master phase action, does not raise the cap, e.g. {Synesios}.[^6-6-4]
+[[RBK master-cards]](https://archon.vekn.net/help/rules#master-cards). An ability that grants access to out-of-turn
+masters, or that pays for an extra master phase action, does not raise the cap, e.g. {Synesios}.[^6-6-4]
 
 An out-of-turn master played during your own turn under a card's own permission counts against your **next** master
 phase, and bars a second out-of-turn master until then, e.g. {Proxy Kissed}.
@@ -3440,7 +3441,7 @@ card's text sends it from hand to the ash heap rather than into play, e.g. {Vox 
 #### 6.6.3 Master cards on minions
 
 A master card in play is controlled by the Methuselah who played it, even when it sits on another Methuselah's minion
-[[RBK master-cards]](https://www.vekn.net/rulebook#master-cards). Who takes or declines a choice its effect offers
+[[RBK master-cards]](https://archon.vekn.net/help/rules#master-cards). Who takes or declines a choice its effect offers
 follows the card's wording, not control of the card, e.g. {Perfectionist}
 ([§1.1.1](#111-mandatory-and-optional-effects)).
 
@@ -3506,7 +3507,7 @@ blood is lost.
 
 **Base rules.** Default hand size is seven. Whenever an effect changes your hand size, or adds or removes cards from
 your hand, you immediately discard down or draw up to match [[RBK
-drawing-cards]](https://www.vekn.net/rulebook#drawing-cards).
+drawing-cards]](https://archon.vekn.net/help/rules#drawing-cards).
 
 #### 6.8.1 Hand size
 
@@ -3646,7 +3647,7 @@ exemplar cards.
 
 [^1-1-5]: [[PIB 20150418]](https://usenet.krcg.org/t/vekn-70589/#m1) [[ANK
     20210309-3]](https://usenet.krcg.org/t/vekn-79065/#m4) [[RBK
-    important-terms-of-the-game]](https://www.vekn.net/rulebook#important-terms-of-the-game) — {Third Tradition:
+    important-terms-of-the-game]](https://archon.vekn.net/help/rules#important-terms-in-the-game) — {Third Tradition:
     Progeny}; group "Master on vampire who can use it" (G00161), {Perfectionist}, {Corporal Reservoir}.
 
 [^1-1-6]: [[LSJ 20100723]](https://usenet.krcg.org/t/0u5KQWiutdg/#m1) [[PIB
@@ -3680,7 +3681,7 @@ exemplar cards.
     49.5]](https://github.com/lionel-panhaleux/zero-vtes/blob/main/docs/rules-qa.md#batch-49--reign-of-stanislava-25th-anniversary-and-sabbat-paths-scoping-2026-10-05)
     — {Open War}.
 
-[^1-1-14]: [[RBK crypt-cards]](https://www.vekn.net/rulebook#crypt-cards).
+[^1-1-14]: [[RBK crypt-cards]](https://archon.vekn.net/help/rules#crypt-cards).
 
 [^1-1-13]: Owner's reading, no official ruling: [[rules-qa
     64.9]](https://github.com/lionel-panhaleux/zero-vtes/blob/main/docs/rules-qa.md#batch-64--legacy-cards-for-twda-decks-rounds-45-the-gangrel-decks-implemented-readings-2026-10-11-owner-2026-10-14-647-648-confirmed-2026-10-20-the-rest-646-restated)
@@ -3691,7 +3692,7 @@ exemplar cards.
     20190207]](https://usenet.krcg.org/t/vekn-77344/#m22) [[ANK
     20220617]](https://usenet.krcg.org/t/vekn-79835/#m2) [[ANK
     20200729]](https://usenet.krcg.org/t/vekn-78776/#m1)
-    [[RBK wording-templates]](https://www.vekn.net/rulebook#wording-templates) — group "Once each turn" (G00014),
+    [[RBK wording-templates]](https://archon.vekn.net/help/rules#wording-templates) — group "Once each turn" (G00014),
     {Maila}, {Qawiyya el-Ghaduba}, {Nonu Dis}, {Carver's Meat Packing and Storage}.
 
 [^1-2-17]: Owner's reading, no official ruling: [[rules-qa
@@ -3705,8 +3706,8 @@ exemplar cards.
     20050215]](https://usenet.krcg.org/t/nxlYFsU10Uo/#m1) [[ANK
     20230116]](https://usenet.krcg.org/t/vekn-80266/#m1)
     [[LSJ 20010111]](https://usenet.krcg.org/t/d3WSV1UXBV0/#m5) [[RBK
-    wording-templates]](https://www.vekn.net/rulebook#wording-templates) — {Andre LeRoux}, {Courier}, {Nahir}, {Nonu
-    Dis}, {NSA Trio}, {Phased Motion Detector}, {Angelica, The Canonicus}.
+    wording-templates]](https://archon.vekn.net/help/rules#wording-templates) — {Andre LeRoux}, {Courier}, {Nahir},
+    {Nonu Dis}, {NSA Trio}, {Phased Motion Detector}, {Angelica, The Canonicus}.
 
 [^1-2-3]: [[LSJ 20020814]](https://usenet.krcg.org/t/gt8wQhk76lA/#m1) [[ANK
     20180307-2]](https://usenet.krcg.org/t/vekn-76451/#m1)
@@ -3719,7 +3720,7 @@ exemplar cards.
 [^1-2-4]: [[ANK
     20230316]](https://usenet.krcg.org/t/vekn-80385/#m2)
     [[ANK 20221102-2]](https://usenet.krcg.org/t/vekn-80130/#m1) [[RBK
-    wording-templates]](https://www.vekn.net/rulebook#wording-templates) — {Amulet of Temporal Perception}, groups
+    wording-templates]](https://archon.vekn.net/help/rules#wording-templates) — {Amulet of Temporal Perception}, groups
     "Weapon once per combat" (G00045) and "Weapon once per round" (G00046), {Haqim's Law: Retribution}.
 
 [^1-2-5]: [[LSJ 20040127]](https://usenet.krcg.org/t/2b3SFZyo3ik/#m6) [[ANK
@@ -3733,8 +3734,9 @@ exemplar cards.
 
 [^1-2-15]: [[ANK
     20190117-1]](https://usenet.krcg.org/t/vekn-77308/#m3) [[RBK
-    bleed]](https://www.vekn.net/rulebook#bleed) [[RBK
-    additional-strikes]](https://www.vekn.net/rulebook#additional-strikes) — {Mask of a Thousand Faces}.
+    bleed]](https://archon.vekn.net/help/rules#bleed) [[RBK
+    additional-strikes]](https://archon.vekn.net/help/rules#advanced-rules-additional-strikes) — {Mask of a Thousand
+    Faces}.
 
 [^1-2-18]: Owner's reading, no official ruling: [[rules-qa
     29.8]](https://github.com/lionel-panhaleux/zero-vtes/blob/main/docs/rules-qa.md#batch-29--combat-cards-wave-2) —
@@ -3749,8 +3751,8 @@ exemplar cards.
 [^1-2-7]: [[ANK
     20220705]](https://usenet.krcg.org/t/vekn-79895/#m1)
     [[LSJ 20100705]](https://usenet.krcg.org/t/Dm_Zqyjdx8s/) [[RBK
-    wording-templates]](https://www.vekn.net/rulebook#wording-templates) — groups "Unconditional referendum ability"
-    (G00039) and "Non-locking referendum ability" (G00040).
+    wording-templates]](https://archon.vekn.net/help/rules#wording-templates) — groups "Unconditional referendum
+    ability" (G00039) and "Non-locking referendum ability" (G00040).
 
 [^1-2-9]: [[LSJ 20040518]](https://usenet.krcg.org/t/4emymfUPwAM/#m5) [[ANK
     20210309-2]](https://usenet.krcg.org/t/vekn-79005/#m7) [[LSJ
@@ -3762,7 +3764,7 @@ exemplar cards.
     [[rules-qa
     71.16]](https://github.com/lionel-panhaleux/zero-vtes/blob/main/docs/rules-qa.md#batch-71--legacy-cards-for-twda-decks-round-11-the-20252026-decks-entering-the-corpus-readings-no-ruling-settles-claude-2026-10-14-owner-2026-10-14-7117120-71227127-confirmed-7121-corrected-7125s-open-part-ruled)
     [[rules-qa 40.1]](https://github.com/lionel-panhaleux/zero-vtes/blob/main/docs/rules-qa.md#batch-40--events) [[RBK
-    discard-phase]](https://www.vekn.net/rulebook#discard-phase) — {Ashur Tablets}, {Fortschritt Library}.
+    discard-phase]](https://archon.vekn.net/help/rules#5-discard-phase) — {Ashur Tablets}, {Fortschritt Library}.
 
 [^1-2-12]: [[RTR 19980623]](https://usenet.krcg.org/t/tSpd9dtTElc/#m0) [[LSJ
     20021122-2]](https://usenet.krcg.org/t/1hL0-URtroc/#m5) [[ANK
@@ -3841,21 +3843,21 @@ exemplar cards.
     19941109]](https://usenet.krcg.org/t/_6CXoKTSLnw/#m0) [[ANK
     20220705]](https://usenet.krcg.org/t/vekn-79895/#m1)
     [[LSJ 20100705]](https://usenet.krcg.org/t/Dm_Zqyjdx8s/) [[LSJ 20001102]](https://usenet.krcg.org/t/LlPyLJjLdx0/#m2)
-    [[RBK important-terms-of-the-game]](https://www.vekn.net/rulebook#important-terms-of-the-game) — {Make an Example},
-    {Montano}, {Toby}, {Paul Forrest, False Prophet}, {Courier}, groups "Unconditional referendum ability" (G00039) and
-    "Non-locking referendum ability" (G00040).
+    [[RBK important-terms-of-the-game]](https://archon.vekn.net/help/rules#important-terms-in-the-game) — {Make an
+    Example}, {Montano}, {Toby}, {Paul Forrest, False Prophet}, {Courier}, groups "Unconditional referendum ability"
+    (G00039) and "Non-locking referendum ability" (G00040).
 
 [^1-5-5]: [[LSJ 20011022]](https://usenet.krcg.org/t/KMg4MwD-Jn0/#m1) [[LSJ
     20100902-2]](https://usenet.krcg.org/t/mFpx91METxM/#m1) [[LSJ
     20010813-2]](https://usenet.krcg.org/t/zkKhvgZy9hA/#m2) [[ANK
     20220705]](https://usenet.krcg.org/t/vekn-79895/#m1)
-    [[LSJ 20100705]](https://usenet.krcg.org/t/Dm_Zqyjdx8s/) [[RBK torpor]](https://www.vekn.net/rulebook#torpor) —
+    [[LSJ 20100705]](https://usenet.krcg.org/t/Dm_Zqyjdx8s/) [[RBK torpor]](https://archon.vekn.net/help/rules#torpor) —
     group "Ability usable in torpor" (G00027), {Marciana Giovanni, Investigator}, {Pariah}, {Tori Longwood}, {Montano}.
 
 [^1-5-6]: [[ANK
     20180517]](https://usenet.krcg.org/t/vekn-76447/#m33) [[RTR
     20180303]](https://usenet.krcg.org/t/vekn-76447/#m0) [[RBK
-    recruit-ally]](https://www.vekn.net/rulebook#recruit-ally) — group "Allies with 'lock this ally to' abilities"
+    recruit-ally]](https://archon.vekn.net/help/rules#recruit-ally) — group "Allies with 'lock this ally to' abilities"
     (G00119), {Abomination}, {Underbridge Stray}, {War Ghoul}, {Paul "Sixofswords29" Moreton}.
 
 [^1-5-14]: [[LSJ 20070301]](https://usenet.krcg.org/t/-CeFWHQ2wXE/#m32) — {The Grandest Trick}.
@@ -3891,7 +3893,7 @@ exemplar cards.
     20171212]](https://usenet.krcg.org/t/vekn-76334/#m14) [[LSJ
     20030202]](https://usenet.krcg.org/t/ox7A8EvaNJo/#m3) [[ANK
     20210124]](https://usenet.krcg.org/t/vekn-79001/#m2) [[RBK
-    requirements-for-playing-cards]](https://www.vekn.net/rulebook#requirements-for-playing-cards) — {Undead
+    requirements-for-playing-cards]](https://archon.vekn.net/help/rules#requirements-for-playing-cards) — {Undead
     Persistence}, {Mental Maze}, {Maxwell}, {The Red Question}.
 
 [^1-6-29]: [[ANK
@@ -4099,8 +4101,8 @@ exemplar cards.
     [[LSJ 20100302-1]](https://usenet.krcg.org/t/jmmm0WRUPvs/#m1) [[PIB
     20111101]](https://usenet.krcg.org/t/vekn-12975/#m2) [[ANK
     20220704]](https://usenet.krcg.org/t/vekn-79890/#m1)
-    [[RBK announce-the-action]](https://www.vekn.net/rulebook#announce-the-action) — group "Cost X" (G00032), {Hidden
-    Strength}, {Compel the Spirit}, {Pressing Flesh}, {Summon History}, {Charming Lobby}.
+    [[RBK announce-the-action]](https://archon.vekn.net/help/rules#1-announce-the-action) — group "Cost X" (G00032),
+    {Hidden Strength}, {Compel the Spirit}, {Pressing Flesh}, {Summon History}, {Charming Lobby}.
 
 [^1-7-12]: [[ANK
     20230620]](https://usenet.krcg.org/t/vekn-80612/#m1)
@@ -4204,8 +4206,8 @@ exemplar cards.
 
 [^1-8-1]: [[LSJ 20061207]](https://usenet.krcg.org/t/nqcrJlhg4Ng/#m2) [[LSJ
     20061013]](https://usenet.krcg.org/t/6w8K3yDtBH0/#m16) [[RTR 20040501]](https://usenet.krcg.org/t/7-mp3Ada86I/#m0)
-    [[RBK playing-a-card]](https://www.vekn.net/rulebook#playing-a-card) — group "Cancel" (G00058), {The Admonitions},
-    {The Barrens}, {Dreams of the Sphinx}, {The Erciyes Fragments}, {Fragment of the Book of Nod}.
+    [[RBK playing-a-card]](https://archon.vekn.net/help/rules#playing-a-card) — group "Cancel" (G00058), {The
+    Admonitions}, {The Barrens}, {Dreams of the Sphinx}, {The Erciyes Fragments}, {Fragment of the Book of Nod}.
 
 [^1-8-2]: [[LSJ 20021011]](https://usenet.krcg.org/t/9WWIzxek9Nc/#m2) [[ANK
     20231028]](https://usenet.krcg.org/t/vekn-80925/#m3) — group "Cancel as a
@@ -4217,7 +4219,7 @@ exemplar cards.
 [^1-8-21]: Owner's reading, no official ruling: [[rules-qa
     64.8]](https://github.com/lionel-panhaleux/zero-vtes/blob/main/docs/rules-qa.md#batch-64--legacy-cards-for-twda-decks-rounds-45-the-gangrel-decks-implemented-readings-2026-10-11-owner-2026-10-14-647-648-confirmed-2026-10-20-the-rest-646-restated)
     — {Predator's Transformation}; the rulebook sets no unlocked condition [[RBK
-    reflex-cards]](https://www.vekn.net/rulebook#reflex-cards).
+    reflex-cards]](https://archon.vekn.net/help/rules#advanced-rules-reflex-cards).
 
 [^1-8-4]: [[LSJ 20031201]](https://usenet.krcg.org/t/Mi_j7sUsZZw/#m1) [[LSJ
     20070214]](https://usenet.krcg.org/t/o_BltcAJ_So/#m2) [[ANK
@@ -4254,7 +4256,8 @@ exemplar cards.
 [^1-8-9]: [[ANK 20190104]](https://usenet.krcg.org/t/vekn-77254/#m11)
     [[LSJ 19980212]](https://usenet.krcg.org/t/fLFLlXZXHqA/#m0) [[ANK
     20200525-2]](https://usenet.krcg.org/t/vekn-78653/#m1) [[RBK
-    cancel-a-card]](https://www.vekn.net/rulebook#cancel-a-card) — group "Cancel" (G00058), {Immortal Grapple}.
+    cancel-a-card]](https://archon.vekn.net/help/rules#advanced-rules-cancellation-effects) — group "Cancel" (G00058),
+    {Immortal Grapple}.
 
 [^1-8-10]: [[ANK 20220411]](https://usenet.krcg.org/t/vekn-79730/#m1)
     [[LSJ 20000424]](https://usenet.krcg.org/t/6pK4rFvqmmg/#m1) [[LSJ
@@ -4280,7 +4283,8 @@ exemplar cards.
 
 [^1-8-15]: [[RTR 20040501]](https://usenet.krcg.org/t/7-mp3Ada86I/#m0) [[LSJ
     20100206]](https://usenet.krcg.org/t/cAGrXqpO-YQ/#m1) [[RBK
-    cancel-a-card]](https://www.vekn.net/rulebook#cancel-a-card) — {Primal Instincts}, {Death Seeker}, {Asguresh}.
+    cancel-a-card]](https://archon.vekn.net/help/rules#advanced-rules-cancellation-effects) — {Primal Instincts}, {Death
+    Seeker}, {Asguresh}.
 
 [^1-8-16]: [[LSJ 20050228-3]](https://usenet.krcg.org/t/UHEZEmX22jA/#m4) [[ANK
     20230111]](https://usenet.krcg.org/t/vekn-80258/#m2)
@@ -4418,11 +4422,11 @@ exemplar cards.
     19960919]](https://usenet.krcg.org/t/_UxVq0Lrg2U/#m3) [[LSJ 20100302-2]](https://usenet.krcg.org/t/b2cW6X-RQMs/#m3)
     [[RTR 19941109]](https://usenet.krcg.org/t/_6CXoKTSLnw/#m0) [[ANK
     20200417]](https://usenet.krcg.org/t/vekn-78568/#m16)
-    [[RBK important-terms-of-the-game]](https://www.vekn.net/rulebook#important-terms-of-the-game) — group "Cards
+    [[RBK important-terms-of-the-game]](https://archon.vekn.net/help/rules#important-terms-in-the-game) — group "Cards
     holding cards" (G00028), {Memory's Fading Glimpse}, {Raw Recruit}, {Betrayer}, {The Capuchin}.
 
 [^1-12-8]: [[LSJ 20080816]](https://usenet.krcg.org/t/FKBTEzLf0_A/#m5) [[RBK
-    contested-cards]](https://www.vekn.net/rulebook#contested-cards) — {Descent into Darkness}.
+    contested-cards]](https://archon.vekn.net/help/rules#advanced-rules-contested-cards) — {Descent into Darkness}.
 
 [^1-12-2]: [[ANK 20180511-1]](https://usenet.krcg.org/t/vekn-76594/#m0) — {Righteous
     Aura}.
@@ -4450,7 +4454,7 @@ exemplar cards.
 
 [^1-13-1]: [[LSJ 20070928-2]](https://usenet.krcg.org/t/duRrP46XygI/#m43) [[LSJ
     20071001-2]](https://usenet.krcg.org/t/XoMeEYJw1ZA/#m10) [[RBK
-    contested-cards]](https://www.vekn.net/rulebook#contested-cards) — {Spell of Life}.
+    contested-cards]](https://archon.vekn.net/help/rules#advanced-rules-contested-cards) — {Spell of Life}.
 
 [^1-13-2]: [[LSJ 20100213]](https://usenet.krcg.org/t/vXDkYrTmkws/#m2) [[LSJ
     19991110]](https://usenet.krcg.org/t/5hDqAMewLtg/#m2) [[LSJ 20030419]](https://usenet.krcg.org/t/A0mvllC-tgs/#m5)
@@ -4462,8 +4466,8 @@ exemplar cards.
     20040722]](https://usenet.krcg.org/t/z3Tfg9PZVNo/#m5) [[LSJ 20010623-2]](https://usenet.krcg.org/t/65IHHAii7ms/#m6)
     [[RTR 20010711]](https://usenet.krcg.org/t/GsI1UyH54jU/#m0) [[LSJ
     20030918]](https://usenet.krcg.org/t/Lae6k2AG-1c/#m5) [[RBK
-    contested-cards]](https://www.vekn.net/rulebook#contested-cards) — {Visit from the Capuchin}, {Chain of Command},
-    {Parmenides}, {Soul Gem of Etrius}.
+    contested-cards]](https://archon.vekn.net/help/rules#advanced-rules-contested-cards) — {Visit from the Capuchin},
+    {Chain of Command}, {Parmenides}, {Soul Gem of Etrius}.
 
 [^1-13-4]: [[LSJ 20080526]](https://usenet.krcg.org/t/zO3l3b76rjQ/#m4) [[LSJ
     20100902]](https://usenet.krcg.org/t/SM2_578Th0U/#m17) [[ANK
@@ -4561,8 +4565,8 @@ exemplar cards.
     20200616]](https://usenet.krcg.org/t/vekn-78687/#m1)
     [[PIB
     20120808]](https://usenet.krcg.org/t/vekn-34265/#m17)
-    [[RBK targeting-of-cards]](https://www.vekn.net/rulebook#targeting-of-cards) — {Owain Evans, The Wanderer}; group
-    "Can draw during action" (G00023); group "Cancel with no action" (G00063).
+    [[RBK targeting-of-cards]](https://archon.vekn.net/help/rules#targeting-of-cards) — {Owain Evans, The Wanderer};
+    group "Can draw during action" (G00023); group "Cancel with no action" (G00063).
 
 [^2-1-10]: Owner's reading, no official ruling: [[rules-qa
     26.5]](https://github.com/lionel-panhaleux/zero-vtes/blob/main/docs/rules-qa.md#batch-26--actions-wave-1) — {Rutor's
@@ -4570,8 +4574,9 @@ exemplar cards.
 
 [^2-1-2]: [[LSJ 19990425]](https://usenet.krcg.org/t/Mmfn07ib6Yw/#m1) [[SFC
     19960819]](https://usenet.krcg.org/t/G40EE8vCBB8/#m2) [[RBK
-    summary-of-the-course-of-an-action]](https://www.vekn.net/rulebook#summary-of-the-course-of-an-action) — {Blanket of
-    Night}, {Siren's Lure}, {Veil the Legions}, {Empowering the Puppet King}, {Inspire Greatness}, {Spiridonas}.
+    summary-of-the-course-of-an-action]](https://archon.vekn.net/help/rules#summary-of-the-course-of-an-action) —
+    {Blanket of Night}, {Siren's Lure}, {Veil the Legions}, {Empowering the Puppet King}, {Inspire Greatness},
+    {Spiridonas}.
 
 [^2-1-9]: [[LSJ 19990425]](https://usenet.krcg.org/t/Mmfn07ib6Yw/#m1) [[ANK
     20200515]](https://usenet.krcg.org/t/vekn-78634/#m1) — {Blanket of Night}, {Cloak the
@@ -4612,8 +4617,8 @@ exemplar cards.
 
 [^2-2-1]: [[ANK
     20190425]](https://usenet.krcg.org/t/vekn-77581/#m1)
-    [[RBK summary-of-the-course-of-an-action]](https://www.vekn.net/rulebook#summary-of-the-course-of-an-action) — group
-    "Modifier as announced" (G00052); {Force of Personality}, {Shroud Mastery}, {Hide}.
+    [[RBK summary-of-the-course-of-an-action]](https://archon.vekn.net/help/rules#summary-of-the-course-of-an-action) —
+    group "Modifier as announced" (G00052); {Force of Personality}, {Shroud Mastery}, {Hide}.
 
 [^2-2-2]: [[LSJ 20081105]](https://usenet.krcg.org/t/CYjOJtTBMGU/#m1) [[PIB
     20150820]](https://usenet.krcg.org/t/vekn-72462/#m1) — {Yoruba
@@ -4701,8 +4706,8 @@ exemplar cards.
     20180206]](https://usenet.krcg.org/t/vekn-76404/#m4) [[LSJ
     20020904-2]](https://usenet.krcg.org/t/ObuKimgcCpI/#m10) [[LSJ 20100211-2]](https://usenet.krcg.org/t/pL63VXEPGME/)
     [[LSJ 20020301]](https://usenet.krcg.org/t/HgmPj9MEdiQ/#m4) [[RBK
-    sequencing]](https://www.vekn.net/rulebook#sequencing) — {The Damned}, {Ecstasy}, {Travelers Obey the Tenets},
-    {Shemti}, {Dreams of the Sphinx}, {Cleave}, {Darkness Within}.
+    sequencing]](https://archon.vekn.net/help/rules#advanced-rules-sequencing) — {The Damned}, {Ecstasy}, {Travelers
+    Obey the Tenets}, {Shemti}, {Dreams of the Sphinx}, {Cleave}, {Darkness Within}.
 
 [^2-4-2]: [[LSJ 20021113]](https://usenet.krcg.org/t/df2P8YHZex8/#m11) [[ANK
     20191219]](https://usenet.krcg.org/t/vekn-78241/#m3)
@@ -4917,7 +4922,7 @@ exemplar cards.
 [^3-1-13]: [[PIB 20121028]](https://usenet.krcg.org/t/vekn-39816/#m10)
     — {Baltimore Purge}.
 
-[^3-1-14]: [[RBK who-may-attempt-to-block]](https://www.vekn.net/rulebook#who-may-attempt-to-block) [[LSJ
+[^3-1-14]: [[RBK who-may-attempt-to-block]](https://archon.vekn.net/help/rules#who-may-attempt-to-block) [[LSJ
     20090324]](https://usenet.krcg.org/t/Zc_ogoVhsug/#m8) [[ANK
     20190606]](https://usenet.krcg.org/t/vekn-77692/#m2) [[PIB
     20121210]](https://usenet.krcg.org/t/vekn-42498/#m19)
@@ -4928,7 +4933,7 @@ exemplar cards.
     {Lunatic Eruption}, {Temptation}, {Impundulu}.
 
 [^3-1-15]: [[LSJ 20090324]](https://usenet.krcg.org/t/Zc_ogoVhsug/#m8) [[RBK
-    who-may-attempt-to-block]](https://www.vekn.net/rulebook#who-may-attempt-to-block) [[LSJ
+    who-may-attempt-to-block]](https://archon.vekn.net/help/rules#who-may-attempt-to-block) [[LSJ
     19970224]](https://usenet.krcg.org/t/80KRDjVFkyg/#m1) — {Conceal}, {Haunt}, {Goblinism}, group "Locquipments"
     (G00047), {Annazir}, {Arcanum Investigator}, {Gremlins}, {Loss}, {Principia Discordia}, {Ethan Locke}.
 
@@ -4968,8 +4973,8 @@ exemplar cards.
 [^3-2-12]: [[ANK 20231031]](https://usenet.krcg.org/t/vekn-80911/#m4) — group "Stealth from random effect" (G00067),
     {Gathii}.
 
-[^3-2-2]: [[RBK wording-templates]](https://www.vekn.net/rulebook#wording-templates) [[RBK
-    who-may-attempt-to-block]](https://www.vekn.net/rulebook#who-may-attempt-to-block) [[LSJ
+[^3-2-2]: [[RBK wording-templates]](https://archon.vekn.net/help/rules#wording-templates) [[RBK
+    who-may-attempt-to-block]](https://archon.vekn.net/help/rules#who-may-attempt-to-block) [[LSJ
     20010111]](https://usenet.krcg.org/t/d3WSV1UXBV0/#m5) [[LSJ 20100329]](https://usenet.krcg.org/t/1SAloV6P7Xk/#m1)
     [[PIB
     20150216]](https://usenet.krcg.org/t/vekn-57153/#m7)
@@ -4979,7 +4984,7 @@ exemplar cards.
     20021211]](https://usenet.krcg.org/t/-J07wvmidOA/#m17) [[LSJ 20020612]](https://usenet.krcg.org/t/sC0pTtJJDj4/#m2) —
     {Draba}, {Night Terrors}, groups "Minus stealth" (G00104) and "Minus Intercept" (G00102).
 
-[^3-2-5]: [[RBK stealth-and-intercept]](https://www.vekn.net/rulebook#stealth-and-intercept) [[LSJ
+[^3-2-5]: [[RBK stealth-and-intercept]](https://archon.vekn.net/help/rules#stealth-and-intercept) [[LSJ
     20100604-2]](https://usenet.krcg.org/t/Tr3X4DsZr-8/#m6) [[LSJ 20100611]](https://usenet.krcg.org/t/Tr3X4DsZr-8/#m11)
     — {Marciana Giovanni, Investigator}.
 
@@ -5005,7 +5010,7 @@ exemplar cards.
     [[ANK 20211003]](https://usenet.krcg.org/t/vekn-79372/#m1)
     — {Guardian Vigil}, {Inspire Greatness}, {Deflection}, {My Enemy's Enemy}, {Redirection}.
 
-[^3-2-10]: [[RBK wording-templates]](https://www.vekn.net/rulebook#wording-templates) [[ANK
+[^3-2-10]: [[RBK wording-templates]](https://archon.vekn.net/help/rules#wording-templates) [[ANK
     20230116]](https://usenet.krcg.org/t/vekn-80266/#m1)
     [[ANK
     20180307-2]](https://usenet.krcg.org/t/vekn-76451/#m1)
@@ -5036,7 +5041,8 @@ exemplar cards.
     20100507]](https://usenet.krcg.org/t/vJQTPYtp-Eg/#m1) [[PIB
     20150820]](https://usenet.krcg.org/t/vekn-72462/#m1) [[ANK
     20210131-1]](https://usenet.krcg.org/t/vekn-79007/#m2) [[RBK
-    sequencing]](https://www.vekn.net/rulebook#sequencing) — {Hide the Heart}, {Draba}, {Netwar}, {Folderol}.
+    sequencing]](https://archon.vekn.net/help/rules#advanced-rules-sequencing) — {Hide the Heart}, {Draba}, {Netwar},
+    {Folderol}.
 
 [^3-3-8]: [[LSJ 20000507]](https://usenet.krcg.org/t/6-sMg4Wo7KE/#m3) [[LSJ
     20070203]](https://usenet.krcg.org/t/37EYK3FA30k/#m2) [[ANK
@@ -5079,8 +5085,8 @@ exemplar cards.
     20060410]](https://usenet.krcg.org/t/jr8wSeSchsc/#m1) [[ANK
     20171017]](https://usenet.krcg.org/t/vekn-76233/#m4)
     [[ANK 20230305]](https://usenet.krcg.org/t/vekn-63821/#m40)
-    [[RBK resolve-the-action]](https://www.vekn.net/rulebook#resolve-the-action) — {Change of Target}, {Clan Loyalty},
-    {Angel of Berlin}, {Faceless Night}.
+    [[RBK resolve-the-action]](https://archon.vekn.net/help/rules#3-resolve-the-action) — {Change of Target}, {Clan
+    Loyalty}, {Angel of Berlin}, {Faceless Night}.
 
 [^3-3-25]: Owner's reading, no official ruling: [[rules-qa
     53.1]](https://github.com/lionel-panhaleux/zero-vtes/blob/main/docs/rules-qa.md#batch-53--sabbat-v5-the-path-of-cathari-implemented-readings-2026-10-07)
@@ -5128,7 +5134,7 @@ exemplar cards.
     20100527]](https://usenet.krcg.org/t/Tr3X4DsZr-8/#m1) — {Edged Illusion}, {Jaroslav Pascek}, {Enticement}.
 
 [^3-4-8]: [[LSJ 20090323]](https://usenet.krcg.org/t/bG4PSmditm4/#m1) [[RBK
-    wording-templates]](https://www.vekn.net/rulebook#wording-templates) — {Veil of Darkness}.
+    wording-templates]](https://archon.vekn.net/help/rules#wording-templates) — {Veil of Darkness}.
 
 [^3-4-9]: [[ANK
     20240706]](https://usenet.krcg.org/t/vekn-81563/#m19) [[LSJ
@@ -5177,7 +5183,7 @@ exemplar cards.
     and sixteen further cards carrying the identical "has reached resolution" template.
 
 [^3-5-2]: [[LSJ 19980212]](https://usenet.krcg.org/t/fLFLlXZXHqA/#m0) [[RBK
-    cancel-a-card]](https://www.vekn.net/rulebook#cancel-a-card) [[LSJ
+    cancel-a-card]](https://archon.vekn.net/help/rules#advanced-rules-cancellation-effects) [[LSJ
     20060425]](https://usenet.krcg.org/t/U34QDob4Vco/#m5) [[ANK
     20220411]](https://usenet.krcg.org/t/vekn-79730/#m1) [[LSJ
     20050607]](https://usenet.krcg.org/t/WLv9R8wA0Ow/#m8) [[LSJ 20050608]](https://usenet.krcg.org/t/WLv9R8wA0Ow/#m10) —
@@ -5191,8 +5197,8 @@ exemplar cards.
 
 [^3-5-26]: [[ANK
     20211015]](https://usenet.krcg.org/t/vekn-79389/#m6) [[RBK
-    cancel-a-card]](https://www.vekn.net/rulebook#cancel-a-card) — {The Kiss of Ra}; the card text of {Tangle Atropos'
-    Hand}.
+    cancel-a-card]](https://archon.vekn.net/help/rules#advanced-rules-cancellation-effects) — {The Kiss of Ra}; the card
+    text of {Tangle Atropos' Hand}.
 
 [^3-5-4]: [[ANK
     20210124]](https://usenet.krcg.org/t/vekn-79001/#m2) [[ANK
@@ -5292,7 +5298,7 @@ exemplar cards.
     20210131]](https://usenet.krcg.org/t/vekn-79008/#m3) —
     {Bear-Baiting}, {Venenation}, {Crypt's Sons}.
 
-[^3-5-24]: [[RBK cancel-a-card]](https://www.vekn.net/rulebook#cancel-a-card) [[LSJ
+[^3-5-24]: [[RBK cancel-a-card]](https://archon.vekn.net/help/rules#advanced-rules-cancellation-effects) [[LSJ
     20090818]](https://usenet.krcg.org/t/jkKBGVLmFHc/#m1) — {Supernatural Resistance}.
 
 [^3-5-25]: [[ANK 20200813-2]](https://usenet.krcg.org/t/vekn-78799/#m1)
@@ -5309,8 +5315,8 @@ exemplar cards.
 [^3-6-3]: [[ANK
     20190116]](https://usenet.krcg.org/t/vekn-77302/#m1) [[ANK
     20191108]](https://usenet.krcg.org/t/vekn-78081/#m2) [[RBK
-    summary-of-the-course-of-an-action]](https://www.vekn.net/rulebook#summary-of-the-course-of-an-action) — {Form of
-    Mist}, {Mirror Image}, {Wamukota} (and thirteen further cards); {Eyes of the Beast}.
+    summary-of-the-course-of-an-action]](https://archon.vekn.net/help/rules#summary-of-the-course-of-an-action) — {Form
+    of Mist}, {Mirror Image}, {Wamukota} (and thirteen further cards); {Eyes of the Beast}.
 
 [^3-6-4]: [[ANK
     20230319]](https://usenet.krcg.org/t/vekn-80393/#m2)
@@ -5412,8 +5418,8 @@ exemplar cards.
     Gift}.
 
 [^3-7-2-10]: [[LSJ 20050331]](https://usenet.krcg.org/t/J0CgOqvbfEk/#m3) [[LSJ
-    20081213-2]](https://usenet.krcg.org/t/0Yf2s-qrWpM/#m1) [[RBK hunt]](https://www.vekn.net/rulebook#hunt) — {Rabbat,
-    The Sewer Goddess}, {Undying Thirst}.
+    20081213-2]](https://usenet.krcg.org/t/0Yf2s-qrWpM/#m1) [[RBK hunt]](https://archon.vekn.net/help/rules#hunt) —
+    {Rabbat, The Sewer Goddess}, {Undying Thirst}.
 
 [^3-7-3-1]: [[TOM 19960130]](https://usenet.krcg.org/t/wF82VdVPlm0/#m13) [[LSJ
     20050313]](https://usenet.krcg.org/t/eSShNquHnXI/#m1) [[ANK
@@ -5435,7 +5441,7 @@ exemplar cards.
     [[ANK 20210109]](https://usenet.krcg.org/t/vekn-78983/#m3) — {Flaming
     Candle}, {Fear of Mekhet}.
 
-[^3-7-3-12]: [[RBK equip]](https://www.vekn.net/rulebook#equip) [[ANK
+[^3-7-3-12]: [[RBK equip]](https://archon.vekn.net/help/rules#equip) [[ANK
     20221103]](https://usenet.krcg.org/t/vekn-80131/#m2)
     — {Flaming Candle}.
 
@@ -5462,8 +5468,8 @@ exemplar cards.
 [^3-7-4-1]: [[LSJ 20100303]](https://usenet.krcg.org/t/jmmm0WRUPvs/#m4) [[ANK
     20180817]](https://usenet.krcg.org/t/vekn-76933/#m2) [[LSJ
     20100725]](https://usenet.krcg.org/t/9d1zMZfsfNo/) [[LSJ 20030520-2]](https://usenet.krcg.org/t/GcymCHOJDVY/#m6)
-    [[RBK employ-retainer]](https://www.vekn.net/rulebook#employ-retainer) [[RBK
-    recruit-ally]](https://www.vekn.net/rulebook#recruit-ally) — groups "Equip/employ/recruit outside of an action"
+    [[RBK employ-retainer]](https://archon.vekn.net/help/rules#employ-retainer) [[RBK
+    recruit-ally]](https://archon.vekn.net/help/rules#recruit-ally) — groups "Equip/employ/recruit outside of an action"
     (G00131) and "Equip/Employ/Recruit action" (G00132), {Ghouled}.
 
 [^3-7-4-9]: Owner's reading, no official ruling: [[rules-qa
@@ -5474,8 +5480,8 @@ exemplar cards.
 
 [^3-7-4-3]: [[LSJ 20100204]](https://usenet.krcg.org/t/o5Xnzc8G774/#m31) [[LSJ
     20080803]](https://usenet.krcg.org/t/VgARso4nY7w/#m1) [[RBK
-    employ-retainer]](https://www.vekn.net/rulebook#employ-retainer) [[RBK
-    recruit-ally]](https://www.vekn.net/rulebook#recruit-ally) — group "Put card in play ignoring requirements"
+    employ-retainer]](https://archon.vekn.net/help/rules#employ-retainer) [[RBK
+    recruit-ally]](https://archon.vekn.net/help/rules#recruit-ally) — group "Put card in play ignoring requirements"
     (G00110), {Piper}.
 
 [^3-7-4-4]: [[LSJ 20090115-1]](https://usenet.krcg.org/t/RQ3ARP9Kvfk/#m1) [[ANK
@@ -5494,7 +5500,7 @@ exemplar cards.
     20121028]](https://usenet.krcg.org/t/vekn-39816/#m10) [[LSJ
     20011222]](https://usenet.krcg.org/t/DlCBJmB2fzY/#m7) [[ANK
     20221028-2]](https://usenet.krcg.org/t/vekn-80122/#m1) [[RBK
-    politics]](https://www.vekn.net/rulebook#politics) — {Abactor}, {Sargon}.
+    politics]](https://archon.vekn.net/help/rules#politics) — {Abactor}, {Sargon}.
 
 [^3-7-5-2]: [[RTR 19951110]](https://usenet.krcg.org/t/TXfganI5B2o/#m0) — {Voter Captivation}.
 
@@ -5511,7 +5517,7 @@ exemplar cards.
     {Veles' Hunt}, {Bernard, the Scourge}, {Delaying Tactics}, {Telepathic Vote Counting}, {Scorn of Adonis}.
 
 [^3-7-5-5]: [[RTR 20040501]](https://usenet.krcg.org/t/7-mp3Ada86I/#m0) [[RBK
-    politics]](https://www.vekn.net/rulebook#politics) — {Business Pressure}.
+    politics]](https://archon.vekn.net/help/rules#politics) — {Business Pressure}.
 
 [^3-7-5-6]: [[LSJ 20081203]](https://usenet.krcg.org/t/gaskAJqA-mE/#m1) [[LSJ
     20041004]](https://usenet.krcg.org/t/UZbyxuVsTJE/#m10) [[RTR 19941109]](https://usenet.krcg.org/t/_6CXoKTSLnw/#m0) —
@@ -5530,15 +5536,16 @@ exemplar cards.
 
 [^3-7-5-8]: [[RTR 20010711]](https://usenet.krcg.org/t/GsI1UyH54jU/#m0) — {Peace Treaty}.
 
-[^3-7-5-22]: [[RBK politics]](https://www.vekn.net/rulebook#politics) [[RBK
-    sequencing]](https://www.vekn.net/rulebook#sequencing) — {Closed Session}.
+[^3-7-5-22]: [[RBK politics]](https://archon.vekn.net/help/rules#politics) [[RBK
+    sequencing]](https://archon.vekn.net/help/rules#advanced-rules-sequencing) — {Closed Session}.
 
 [^3-7-5-9]: [[RTR 19960530]](https://usenet.krcg.org/t/DpvF2Peet9o/#m0) [[LSJ
     20030602]](https://usenet.krcg.org/t/dy31XE695_M/#m6) — {Business Pressure}, {Mob Rule}.
 
 [^3-7-5-10]: [[LSJ 20041207]](https://usenet.krcg.org/t/6oC7FtG2Ac4/#m3) [[ANK
     20180307-2]](https://usenet.krcg.org/t/vekn-76451/#m1)
-    [[RBK wording-templates]](https://www.vekn.net/rulebook#wording-templates) — {Michael Luther}, {Ellison Humboldt}.
+    [[RBK wording-templates]](https://archon.vekn.net/help/rules#wording-templates) — {Michael Luther}, {Ellison
+    Humboldt}.
 
 [^3-7-5-11]: [[RTR 20001020]](https://usenet.krcg.org/t/GvxNYsYsWJ4/#m0) — {Astrid Thomas}.
 
@@ -5586,7 +5593,7 @@ exemplar cards.
     20100311]](https://usenet.krcg.org/t/Ogc7-acbMFs/#m1) — {Arishat}, {Kateline Nadasdy}, {Sundown}.
 
 [^3-7-6-3]: [[LSJ 20040519]](https://usenet.krcg.org/t/fz-EAPmmqZY/#m10) [[RBK
-    gaining-votes]](https://www.vekn.net/rulebook#gaining-votes) [[LSJ
+    gaining-votes]](https://archon.vekn.net/help/rules#gaining-votes) [[LSJ
     20051113-2]](https://usenet.krcg.org/t/O2cgcyCHBSI/#m3) — {Gratiano}, {Genevieve}.
 
 [^3-7-6-4]: [[ANK
@@ -5624,8 +5631,8 @@ exemplar cards.
     [[LSJ 20100705]](https://usenet.krcg.org/t/Dm_Zqyjdx8s/) [[ANK
     20180307-2]](https://usenet.krcg.org/t/vekn-76451/#m1)
     [[LSJ 20010326]](https://usenet.krcg.org/t/0Sy3xNbjYeU/#m2) [[RBK
-    wording-templates]](https://www.vekn.net/rulebook#wording-templates) — {Disarming Presence}, {Alvaro, The Scion of
-    Angelica}, group "Unconditional referendum ability" (G00039), group "Non-locking referendum ability" (G00040).
+    wording-templates]](https://archon.vekn.net/help/rules#wording-templates) — {Disarming Presence}, {Alvaro, The Scion
+    of Angelica}, group "Unconditional referendum ability" (G00039), group "Non-locking referendum ability" (G00040).
 
 [^3-7-6-10]: [[ANK
     20220704]](https://usenet.krcg.org/t/vekn-79890/#m1)
@@ -5634,8 +5641,8 @@ exemplar cards.
     20210309-2]](https://usenet.krcg.org/t/vekn-79005/#m7) — {Charming
     Lobby}, {Echo of Harmonies}, group "Vote playable once per game" (G00030).
 
-[^3-7-7-1]: [[RBK leave-torpor]](https://www.vekn.net/rulebook#leave-torpor) [[RBK
-    rescue-a-vampire-from-torpor]](https://www.vekn.net/rulebook#rescue-a-vampire-from-torpor) — rulebook action
+[^3-7-7-1]: [[RBK leave-torpor]](https://archon.vekn.net/help/rules#leave-torpor-see-torpor) [[RBK
+    rescue-a-vampire-from-torpor]](https://archon.vekn.net/help/rules#rescue-a-vampire-from-torpor) — rulebook action
     templates.
 
 [^3-7-7-2]: [[ANK
@@ -5716,8 +5723,8 @@ exemplar cards.
     20220615]](https://usenet.krcg.org/t/vekn-72394/#m7) [[ANK
     20200810]](https://usenet.krcg.org/t/vekn-78797/#m2) [[ANK
     20220910]](https://usenet.krcg.org/t/vekn-80021/#m1) [[RBK
-    action-card-or-card-in-play]](https://www.vekn.net/rulebook#action-card-or-card-in-play) — group "Provide multiple
-    actions" (G00035), {Annazir}, {Bindusara, Historian of the Kindred}, {Clandestine Contract}.
+    action-card-or-card-in-play]](https://archon.vekn.net/help/rules#action-card-or-card-in-play) — group "Provide
+    multiple actions" (G00035), {Annazir}, {Bindusara, Historian of the Kindred}, {Clandestine Contract}.
 
 [^3-8-3]: [[ANK 20180202]](https://usenet.krcg.org/t/vekn-76402/#m4) [[RTR
     19970630]](https://usenet.krcg.org/t/KireUeOYY3c/#m1) — {Haqim's Law: Judgment}, {Pariah}, {Delaying Tactics}.
@@ -5732,7 +5739,7 @@ exemplar cards.
 
 [^3-9-1]: [[LSJ 20001127]](https://usenet.krcg.org/t/XgeLMemLbj0/#m1) [[LSJ
     20011216-2]](https://usenet.krcg.org/t/eYJFjfISdPY/#m7) [[RBK
-    minion-phase]](https://www.vekn.net/rulebook#minion-phase) — {Lunatic Eruption}, {Spirit Marionette}.
+    minion-phase]](https://archon.vekn.net/help/rules#3-minion-phase) — {Lunatic Eruption}, {Spirit Marionette}.
 
 [^3-9-2]: [[LSJ 20050514]](https://usenet.krcg.org/t/9803Eu3PvDs/#m4) [[ANK
     20211010]](https://usenet.krcg.org/t/vekn-79335/#m8) — {Phillipe
@@ -5770,7 +5777,7 @@ exemplar cards.
 
 [^3-10-5]: [[LSJ 20020926]](https://usenet.krcg.org/t/C7vgb-0Mcbo/#m1) — {Mask of a Thousand Faces}.
 
-[^3-10-3]: [[RBK traits]](https://www.vekn.net/rulebook#traits) [[LSJ
+[^3-10-3]: [[RBK traits]](https://archon.vekn.net/help/rules#traits) [[LSJ
     20011023]](https://usenet.krcg.org/t/2GOLIrXAF8M/#m1) [[RTR 20020501]](https://usenet.krcg.org/t/M1snoR2msbQ/#m0) —
     {Malleable Visage}; [[ANK
     20171212]](https://usenet.krcg.org/t/vekn-76334/#m14) —
@@ -5790,7 +5797,8 @@ exemplar cards.
 [^4-1-3]: [[ANK 20221102]](https://usenet.krcg.org/t/vekn-80129/#m1)
     [[LSJ 20011214-3]](https://usenet.krcg.org/t/9WJX_WF656A/#m1) [[LSJ
     20031212]](https://usenet.krcg.org/t/dOATNbVuaqs/#m2) [[LSJ 20070319]](https://usenet.krcg.org/t/9ArBwoYDquw/#m1)
-    [[RBK combat]](https://www.vekn.net/rulebook#combat) — {Guardian, The}, {Blissful Agony}, {Taunt the Caged Beast}.
+    [[RBK combat]](https://archon.vekn.net/help/rules#combat) — {Guardian, The}, {Blissful Agony}, {Taunt the Caged
+    Beast}.
 
 [^4-1-4]: [[ANK 20180929]](https://usenet.krcg.org/t/vekn-77035/#m7)
     [[LSJ 19980109]](https://usenet.krcg.org/t/d2U51Uw0Hfg/#m1) [[RTR
@@ -5803,7 +5811,7 @@ exemplar cards.
     20020204]](https://usenet.krcg.org/t/DDjGFeolsxg/#m1) — {Angel of Berlin}, {Internal Recursion}.
 
 [^4-1-9]: [[ANK 20181101]](https://usenet.krcg.org/t/vekn-77132/#m1) [[RBK
-    combat]](https://www.vekn.net/rulebook#combat) — {Nosferatu Putrescence}, {Bliss}, {Martyr's Resilience}.
+    combat]](https://archon.vekn.net/help/rules#combat) — {Nosferatu Putrescence}, {Bliss}, {Martyr's Resilience}.
 
 [^4-1-10]: [[LSJ 20080618]](https://usenet.krcg.org/t/9FAkwIsuYZc/#m3) — group "Cancel with no action" (G00063).
 
@@ -5826,7 +5834,7 @@ exemplar cards.
     {Sniper Rifle}.
 
 [^4-2-4]: [[LSJ 20100709]](https://usenet.krcg.org/t/j98aqFIFjnE/#m23) [[RBK
-    before-range]](https://www.vekn.net/rulebook#before-range) — {Fear of the Void Below}.
+    before-range]](https://archon.vekn.net/help/rules#1-before-range) — {Fear of the Void Below}.
 
 [^4-2-5]: [[ANK
     20170930]](https://usenet.krcg.org/t/vekn-76197/#m1)
@@ -5849,7 +5857,7 @@ exemplar cards.
 [^4-2-13]: [[LSJ 20060509]](https://usenet.krcg.org/t/KBFnBRrOGB4/#m1) — {Earthshock}.
 
 [^4-3-1]: [[ANK 20180704]](https://usenet.krcg.org/t/vekn-76784/#m2) [[LSJ
-    20050304]](https://usenet.krcg.org/t/X5JZBbSIj3U/#m2) [[RBK combat]](https://www.vekn.net/rulebook#combat) —
+    20050304]](https://usenet.krcg.org/t/X5JZBbSIj3U/#m2) [[RBK combat]](https://archon.vekn.net/help/rules#combat) —
     {Blessed Blade}, {Projectile}.
 
 [^4-3-2]: [[ANK
@@ -5893,7 +5901,7 @@ exemplar cards.
 [^4-3-21]: [[TOM 19960521]](https://usenet.krcg.org/t/poYD3n0TKGo/#m4) — group "Optional press" (G00096); as previously
     recorded for member {Dust to Dust}, the ruling covered its optional maneuver as well.
 
-[^4-3-9]: [[RBK cancel-a-card]](https://www.vekn.net/rulebook#cancel-a-card) [[LSJ
+[^4-3-9]: [[RBK cancel-a-card]](https://archon.vekn.net/help/rules#advanced-rules-cancellation-effects) [[LSJ
     20090818]](https://usenet.krcg.org/t/jkKBGVLmFHc/#m1) [[LSJ 20100206]](https://usenet.krcg.org/t/cAGrXqpO-YQ/#m1)
     [[RTR 20040501]](https://usenet.krcg.org/t/7-mp3Ada86I/#m0) [[LSJ
     20050228-3]](https://usenet.krcg.org/t/UHEZEmX22jA/#m4) [[ANK
@@ -5911,7 +5919,7 @@ exemplar cards.
 
 [^4-3-11]: [[LSJ 20051123]](https://usenet.krcg.org/t/Ww3zSY8cVNs/#m2) [[LSJ
     20080212]](https://usenet.krcg.org/t/Yg1nZfgkpGM/#m3) [[RBK
-    strike-effects]](https://www.vekn.net/rulebook#strike-effects) — {Darkness Within}, {Young Bloods}.
+    strike-effects]](https://archon.vekn.net/help/rules#strike-effects) — {Darkness Within}, {Young Bloods}.
 
 [^4-3-12]: [[RTR 19960221]](https://usenet.krcg.org/t/UdU535eVm0Y/#m0) [[PIB
     20130319]](https://usenet.krcg.org/t/vekn-46164/#m3) [[ANK
@@ -5921,7 +5929,7 @@ exemplar cards.
     River}, group "Damage after combat ends" (G00091).
 
 [^4-3-18]: [[ANK 20171225]](https://usenet.krcg.org/t/vekn-76349/#m2) [[RBK
-    combat]](https://www.vekn.net/rulebook#combat) — {Shoulder Drop}, {Coordinate Attacks}.
+    combat]](https://archon.vekn.net/help/rules#combat) — {Shoulder Drop}, {Coordinate Attacks}.
 
 [^4-3-13]: [[LSJ 20040928]](https://usenet.krcg.org/t/GBcR6aNjIk4/#m1) [[ANK
     20170519]](https://usenet.krcg.org/t/vekn-75805/#m1) — {Soul
@@ -5930,12 +5938,13 @@ exemplar cards.
 [^4-3-14]: [[PIB 20110830]](https://usenet.krcg.org/t/vekn-9340/#m1) [[LSJ
     20030307]](https://usenet.krcg.org/t/zhdj4jnSdrM/#m1) [[LSJ 20100119]](https://usenet.krcg.org/t/1eULCGaVcO0/#m1)
     [[ANK 20180913-1]](https://usenet.krcg.org/t/vekn-77003/#m5) [[RBK
-    first-strike]](https://www.vekn.net/rulebook#first-strike) — {Scorpion's Touch}, {Shambling Hordes}, {Stutter-Step}.
+    first-strike]](https://archon.vekn.net/help/rules#first-strike) — {Scorpion's Touch}, {Shambling Hordes},
+    {Stutter-Step}.
 
 [^4-3-17]: [[LSJ 20001206]](https://usenet.krcg.org/t/kFIO74LxqFQ/#m4) [[LSJ
     20080210]](https://usenet.krcg.org/t/nL-xqiydvYg/#m1) [[RTR 19941109]](https://usenet.krcg.org/t/_6CXoKTSLnw/#m0)
-    [[RBK additional-strikes]](https://www.vekn.net/rulebook#additional-strikes) — {Quickness}, {Ghoul Retainer}, group
-    "Retainer that strike" (G00029).
+    [[RBK additional-strikes]](https://archon.vekn.net/help/rules#advanced-rules-additional-strikes) — {Quickness},
+    {Ghoul Retainer}, group "Retainer that strike" (G00029).
 
 [^4-4-1]: [[LSJ 19971211-2]](https://usenet.krcg.org/t/2s5V_AIczYw/#m1) [[PIB
     20130303]](https://usenet.krcg.org/t/vekn-45620/#m4) [[LSJ
@@ -5966,7 +5975,7 @@ exemplar cards.
 
 [^4-4-5]: [[RTR 19970630]](https://usenet.krcg.org/t/KireUeOYY3c/#m1) [[LSJ
     19970801]](https://usenet.krcg.org/t/7ZnLKTdPEn4/#m0) [[LSJ 20060217]](https://usenet.krcg.org/t/BhecJx5BqtQ/#m19)
-    [[RBK damage-resolution]](https://www.vekn.net/rulebook#damage-resolution) — {Grenade}, {Burst of Sunlight},
+    [[RBK damage-resolution]](https://archon.vekn.net/help/rules#5-damage-resolution) — {Grenade}, {Burst of Sunlight},
     {Shemti}, and ~24 further cards carrying the same sentence.
 
 [^4-4-6]: [[LSJ 20090304-1]](https://usenet.krcg.org/t/B7EQiAVOr1Q/#m1) [[LSJ
@@ -5999,7 +6008,7 @@ exemplar cards.
 
 [^4-4-12]: [[ANK 20210424]](https://usenet.krcg.org/t/vekn-79121/#m2) [[LSJ
     20021120]](https://usenet.krcg.org/t/4TgUatcTtdk/#m21) [[RBK
-    damage-resolution]](https://www.vekn.net/rulebook#damage-resolution) — {Byzar}, {Anathema}.
+    damage-resolution]](https://archon.vekn.net/help/rules#5-damage-resolution) — {Byzar}, {Anathema}.
 
 [^4-4-13]: [[ANK
     20170427]](https://usenet.krcg.org/t/vekn-75755/#m6) [[LSJ
@@ -6058,8 +6067,8 @@ exemplar cards.
 
 [^4-5-17]: [[LSJ 20010627]](https://usenet.krcg.org/t/NhNCVCCDyU0/#m5) [[LSJ
     20010629]](https://usenet.krcg.org/t/MhHKBY7II78/#m1) [[LSJ 20090304-1]](https://usenet.krcg.org/t/B7EQiAVOr1Q/#m1)
-    [[RBK damage-resolution]](https://www.vekn.net/rulebook#damage-resolution) — group "Immune to damage" (G00026),
-    {Bloodform}, {Ignore the Searing Flames}.
+    [[RBK damage-resolution]](https://archon.vekn.net/help/rules#5-damage-resolution) — group "Immune to damage"
+    (G00026), {Bloodform}, {Ignore the Searing Flames}.
 
 [^4-5-18]: [[LSJ 20040120]](https://usenet.krcg.org/t/5zBRtwg6lpU/#m9) — {Ex Nihilo}.
 
@@ -6068,7 +6077,7 @@ exemplar cards.
     20211127]](https://usenet.krcg.org/t/vekn-76687/#m9)
     — {Charnas the Imp}, group "Retainer doing damage" (G00016).
 
-[^4-5-20]: [[RBK damage-resolution]](https://www.vekn.net/rulebook#damage-resolution) [[LSJ
+[^4-5-20]: [[RBK damage-resolution]](https://archon.vekn.net/help/rules#5-damage-resolution) [[LSJ
     20020215]](https://usenet.krcg.org/t/FArran2SmSQ/#m1) [[ANK 20171226]](https://usenet.krcg.org/t/vekn-76349/#m8)
     [[ANK 20210324-1]](https://usenet.krcg.org/t/vekn-79087/#m12) [[ANK
     20210324-2]](https://usenet.krcg.org/t/vekn-79087/#m15) [[LSJ 20040802]](https://usenet.krcg.org/t/b6V_OGl-TgE/#m1)
@@ -6100,7 +6109,7 @@ exemplar cards.
     20140324]](https://usenet.krcg.org/t/vekn-60259/#m1)
     [[ANK
     20200422]](https://usenet.krcg.org/t/vekn-78582/#m3)
-    [[RBK strike-effects]](https://www.vekn.net/rulebook#strike-effects) — group "Environmental damage" (G00017),
+    [[RBK strike-effects]](https://archon.vekn.net/help/rules#strike-effects) — group "Environmental damage" (G00017),
     {Conscripted Statue}, {Darkling Trickery}, {Thoughts Betrayed}.
 
 [^4-6-5]: [[ANK 20200517]](https://usenet.krcg.org/t/vekn-78638/#m1) —
@@ -6109,7 +6118,7 @@ exemplar cards.
 [^4-6-6]: [[LSJ 20011210-2]](https://usenet.krcg.org/t/mUwzyHLcAx8/#m6) [[LSJ
     20011005]](https://usenet.krcg.org/t/9fyH2X1YGAQ/#m1) [[ANK
     20211102]](https://usenet.krcg.org/t/vekn-79447/#m1) [[RBK
-    strike-effects]](https://www.vekn.net/rulebook#strike-effects) — {Anesthetic Touch}, {Rötschreck}.
+    strike-effects]](https://archon.vekn.net/help/rules#strike-effects) — {Anesthetic Touch}, {Rötschreck}.
 
 [^4-6-7]: [[RTR 20041202]](https://usenet.krcg.org/t/WUWh7AdooDU/#m5) [[LSJ
     20060808]](https://usenet.krcg.org/t/ncZn3knH-Uo/#m1) [[ANK
@@ -6145,8 +6154,8 @@ exemplar cards.
     20140324]](https://usenet.krcg.org/t/vekn-60259/#m1)
     [[ANK
     20200422]](https://usenet.krcg.org/t/vekn-78582/#m3)
-    [[RBK first-strike]](https://www.vekn.net/rulebook#first-strike) — {Gianna di Canneto}, group "Environmental damage"
-    (G00017).
+    [[RBK first-strike]](https://archon.vekn.net/help/rules#first-strike) — {Gianna di Canneto}, group "Environmental
+    damage" (G00017).
 
 [^4-7-5]: [[ANK
     20190412]](https://usenet.krcg.org/t/vekn-77543/#m6) — {Dog
@@ -6332,7 +6341,7 @@ exemplar cards.
 
 [^4-10-8]: [[PIB 20141026]](https://usenet.krcg.org/t/vekn-66960/#m3) [[LSJ
     19980319]](https://usenet.krcg.org/t/i1Eqqm5Ctv0/#m1) [[RBK
-    strike-effects]](https://www.vekn.net/rulebook#strike-effects) — {Gianna di Canneto}, {Disguised Weapon}.
+    strike-effects]](https://archon.vekn.net/help/rules#strike-effects) — {Gianna di Canneto}, {Disguised Weapon}.
 
 [^4-10-9]: [[LSJ 19981006]](https://usenet.krcg.org/t/RU5yM2Ov5Mg/#m0) [[LSJ
     20001127-2]](https://usenet.krcg.org/t/KInac4MQMuA/#m4) [[LSJ
@@ -6368,12 +6377,12 @@ exemplar cards.
     20180524]](https://usenet.krcg.org/t/vekn-76595/#m61) [[ANK
     20180523]](https://usenet.krcg.org/t/vekn-76595/#m55) [[LSJ
     20031121-3]](https://usenet.krcg.org/t/JQO1RBmvV_o/#m9) [[RBK
-    influence-phase]](https://www.vekn.net/rulebook#influence-phase) — the [MERGED] crypt-card clause, e.g. {Goratrix},
-    {Dancin' Dana}, {Tariq, The Silent}.
+    influence-phase]](https://archon.vekn.net/help/rules#4-influence-phase) — the [MERGED] crypt-card clause, e.g.
+    {Goratrix}, {Dancin' Dana}, {Tariq, The Silent}.
 
 [^5-1-7]: [[ANK
     20220805-2]](https://usenet.krcg.org/t/vekn-79934/#m4)
-    [[RBK influence-phase]](https://www.vekn.net/rulebook#influence-phase) — {Theo Bell}.
+    [[RBK influence-phase]](https://archon.vekn.net/help/rules#4-influence-phase) — {Theo Bell}.
 
 [^5-1-8]: [[RTR 19990712]](https://usenet.krcg.org/t/x5k5Vw_hkI0/#m0) [[LSJ
     20020115]](https://usenet.krcg.org/t/wG_tDLgfZso/#m1) — group "Action creating vampire" (G00054), {Creation Rites}.
@@ -6411,8 +6420,8 @@ exemplar cards.
     20151009]](https://usenet.krcg.org/t/vekn-73577/#m3) [[ANK
     20180702]](https://usenet.krcg.org/t/vekn-76770/#m1) [[LSJ
     20010622]](https://usenet.krcg.org/t/65IHHAii7ms/#m1) [[RBK
-    unlock-phase]](https://www.vekn.net/rulebook#unlock-phase) — {Raphael Catarari}, {Baleful Doll}, {Vampiric Disease},
-    {Parmenides}.
+    unlock-phase]](https://archon.vekn.net/help/rules#1-unlock-phase) — {Raphael Catarari}, {Baleful Doll}, {Vampiric
+    Disease}, {Parmenides}.
 
 [^5-2-7]: [[LSJ 20080106]](https://usenet.krcg.org/t/q4s1P6ozsW8/#m1) — {Anarch Revolt}.
 
@@ -6516,7 +6525,7 @@ exemplar cards.
     Angelica}, {Lord Tremere}, {Wamukota}, {Marciana Giovanni, Investigator}.
 
 [^5-3-8]: [[LSJ 20020416]](https://usenet.krcg.org/t/XS0Z0P5qaew/#m4) [[RBK
-    torpor]](https://www.vekn.net/rulebook#torpor) — {Save Face}, {Martyr's Resilience}, {Bliss}, {Nosferatu
+    torpor]](https://archon.vekn.net/help/rules#torpor) — {Save Face}, {Martyr's Resilience}, {Bliss}, {Nosferatu
     Putrescence}.
 
 [^5-3-9]: [[PIB 20150720]](https://usenet.krcg.org/t/vekn-72088/#m4) [[RTR
@@ -6524,8 +6533,9 @@ exemplar cards.
 
 [^5-3-10]: [[LSJ 19970325]](https://usenet.krcg.org/t/R-t138q8688/#m3) [[RTR
     19950509]](https://usenet.krcg.org/t/_LKyR7pdMig/#m8) [[RTR 20010711]](https://usenet.krcg.org/t/GsI1UyH54jU/#m0)
-    [[RTR 19970306]](https://usenet.krcg.org/t/1dlmpgX6t14/#m0) [[RBK torpor]](https://www.vekn.net/rulebook#torpor) —
-    {The Kiss of Ra}, {Madness Network}, {Blood Brother Ambush}, {Make an Example}.
+    [[RTR 19970306]](https://usenet.krcg.org/t/1dlmpgX6t14/#m0) [[RBK
+    torpor]](https://archon.vekn.net/help/rules#torpor) — {The Kiss of Ra}, {Madness Network}, {Blood Brother Ambush},
+    {Make an Example}.
 
 [^5-3-11]: [[RTR 19980623]](https://usenet.krcg.org/t/tSpd9dtTElc/#m0) [[LSJ
     20030130]](https://usenet.krcg.org/t/TUDO_4FwdyY/#m1) [[ANK
@@ -6540,7 +6550,7 @@ exemplar cards.
     Signal}, {Deep Cover Agent}, {Unleash Hell's Fury}, {Veneficti}, {Barrenness}, {Minor Curse}, {Evil Eye}, {Strix}.
     [[LSJ 20091204]](https://usenet.krcg.org/t/JBdmMh1udN8/#m8) — {Council of Seraphim}, {The Red Question}. [[ANK
     20240610]](https://usenet.krcg.org/t/vekn-81521/#m12) — {High Orun}, {Consume the Dead}. [[RBK
-    unlock-phase]](https://www.vekn.net/rulebook#unlock-phase).
+    unlock-phase]](https://archon.vekn.net/help/rules#1-unlock-phase).
 
 [^5-3-17]: [[LSJ 20100203-2]](https://usenet.krcg.org/t/tKnhKlDo8lk/#m3) — group "Unique cards with burn option"
     (G00092).
@@ -6566,9 +6576,9 @@ exemplar cards.
     20130128-2]](https://usenet.krcg.org/t/vekn-44232/#m2) [[LSJ
     20100325-2]](https://usenet.krcg.org/t/aC6OOfaulbM/#m1) [[LSJ 20040616]](https://usenet.krcg.org/t/jQkkiC3I8P8/#m1)
     [[ANK 20230317]](https://usenet.krcg.org/t/vekn-76656/#m3)
-    [[RBK important-terms-of-the-game]](https://www.vekn.net/rulebook#important-terms-of-the-game) [[RBK
-    contested-cards]](https://www.vekn.net/rulebook#contested-cards) — {Blessed Resilience}, {Khazar's Diary (Endless
-    Night)}, {Chain of Command}, {Unleash Hell's Fury}.
+    [[RBK important-terms-of-the-game]](https://archon.vekn.net/help/rules#important-terms-in-the-game) [[RBK
+    contested-cards]](https://archon.vekn.net/help/rules#advanced-rules-contested-cards) — {Blessed Resilience},
+    {Khazar's Diary (Endless Night)}, {Chain of Command}, {Unleash Hell's Fury}.
 
 [^5-4-2]: [[LSJ 20090922]](https://usenet.krcg.org/t/UdvGbJqOeo4/#m15) [[ANK
     20220916]](https://usenet.krcg.org/t/vekn-80030/#m1)
@@ -6632,14 +6642,15 @@ exemplar cards.
 [^5-5-5]: [[LSJ 20050606]](https://usenet.krcg.org/t/IkZS3ikg7y8/#m1) [[ANK
     20200605]](https://usenet.krcg.org/t/vekn-78671/#m1)
     [[LSJ 20060124]](https://usenet.krcg.org/t/PBEBNFH61ik/#m1) [[LSJ
-    20050224-1]](https://usenet.krcg.org/t/enxwleC-ZKw/#m27) [[RBK allies]](https://www.vekn.net/rulebook#allies) —
-    {Veil of Darkness}, {The Line}, {Descent into Darkness}, {Sonja Blue}.
+    20050224-1]](https://usenet.krcg.org/t/enxwleC-ZKw/#m27) [[RBK
+    allies]](https://archon.vekn.net/help/rules#advanced-rules-allies) — {Veil of Darkness}, {The Line}, {Descent into
+    Darkness}, {Sonja Blue}.
 
 [^5-5-6]: [[ANK
     20180928-1]](https://usenet.krcg.org/t/vekn-77034/#m2)
     [[LSJ 20080512]](https://usenet.krcg.org/t/z2DGSFph6sM/#m17) — group "Allies who can play as a vampire" (G00011).
 
-[^5-5-7]: [[RBK recruit-ally]](https://www.vekn.net/rulebook#recruit-ally) [[LSJ
+[^5-5-7]: [[RBK recruit-ally]](https://archon.vekn.net/help/rules#recruit-ally) [[LSJ
     20100204]](https://usenet.krcg.org/t/o5Xnzc8G774/#m31) [[LSJ 20080426]](https://usenet.krcg.org/t/VIV521VtVfk/#m2) —
     {The Summoning}, {Piper}, group "Put card in play ignoring requirements" (G00110), {Khazar's Diary (Endless Night)}.
 
@@ -6669,7 +6680,7 @@ exemplar cards.
     20010503]](https://usenet.krcg.org/t/OjxDSCbB6i4/#m1) [[LSJ 19970224]](https://usenet.krcg.org/t/80KRDjVFkyg/#m1) —
     {Detect Authority}, {Shadow Twin}, {Camarilla Vitae Slave}.
 
-[^5-6-4]: [[RBK recruit-ally]](https://www.vekn.net/rulebook#recruit-ally) — rulebook template.
+[^5-6-4]: [[RBK recruit-ally]](https://archon.vekn.net/help/rules#recruit-ally) — rulebook template.
 
 [^5-6-5]: [[RTR 19941109]](https://usenet.krcg.org/t/_6CXoKTSLnw/#m0) [[ANK
     20180612]](https://usenet.krcg.org/t/vekn-76717/#m2) — group
@@ -6689,7 +6700,7 @@ exemplar cards.
 [^5-7-3]: [[LSJ 20050114]](https://usenet.krcg.org/t/JWiZmyC2Y6s/#m3) [[LSJ
     20050228-2]](https://usenet.krcg.org/t/xBb9HQz2KPo/#m1) [[ANK
     20210322-2]](https://usenet.krcg.org/t/vekn-79080/#m6) [[RBK
-    traits]](https://www.vekn.net/rulebook#traits) — group "Prevent normal unlock" (G00005), {Ruins of Charizel},
+    traits]](https://archon.vekn.net/help/rules#traits) — group "Prevent normal unlock" (G00005), {Ruins of Charizel},
     {Nightmares upon Nightmares}.
 
 [^5-7-4]: [[LSJ 20070322]](https://usenet.krcg.org/t/Ww-4rYJxi4w/#m1) [[ANK
@@ -6699,17 +6710,17 @@ exemplar cards.
 
 [^5-7-5]: [[ANK 20220528]](https://usenet.krcg.org/t/vekn-76455/#m19)
     [[LSJ 20060409]](https://usenet.krcg.org/t/gsFQXsCGTG4/#m1) [[RBK
-    appendix-imbued-rules]](https://www.vekn.net/rulebook#appendix-imbued-rules) — {Keystone Kine}, {Kindred
+    appendix-imbued-rules]](https://archon.vekn.net/help/rules#appendix-imbued-rules) — {Keystone Kine}, {Kindred
     Segregation}.
 
 [^5-7-6]: [[LSJ 20070516]](https://usenet.krcg.org/t/zalQ_AHTpAY/#m1) [[LSJ
     20060323]](https://usenet.krcg.org/t/taLKfNyQ3Kc/#m3) [[RBK
-    appendix-imbued-rules]](https://www.vekn.net/rulebook#appendix-imbued-rules) — {Dreams of the Sphinx}, {Soul Gem of
-    Etrius}, {Illusions of the Kindred}.
+    appendix-imbued-rules]](https://archon.vekn.net/help/rules#appendix-imbued-rules) — {Dreams of the Sphinx}, {Soul
+    Gem of Etrius}, {Illusions of the Kindred}.
 
 [^5-7-7]: [[LSJ 20060409-2]](https://usenet.krcg.org/t/lWdr_Ym-UIg/#m2) [[LSJ
     20081016]](https://usenet.krcg.org/t/GizIs4K_HiY/#m2) [[LSJ 20100211]](https://usenet.krcg.org/t/pL63VXEPGME/#m8)
-    [[RBK appendix-imbued-rules]](https://www.vekn.net/rulebook#appendix-imbued-rules) — {Tension in the Ranks},
+    [[RBK appendix-imbued-rules]](https://archon.vekn.net/help/rules#appendix-imbued-rules) — {Tension in the Ranks},
     {Abjure}, {Pressing Flesh}.
 
 [^5-7-8]: [[LSJ 20011015]](https://usenet.krcg.org/t/ZXW0ScxTsBA/#m24) [[LSJ
@@ -6731,23 +6742,25 @@ exemplar cards.
     Hambrienta Mayor}.
 
 [^5-8-1]: [[LSJ 20010714]](https://usenet.krcg.org/t/-xrhpMEiMrw/#m10) [[RBK
-    6-vampire-sects]](https://www.vekn.net/rulebook#6-vampire-sects) — {Ambrogino Giovanni}, {The Baron}, {Kemintiri},
-    {Xaviar}, {Zayyat, The Sandstorm}, and the other crypt cards printing "N votes (titled)".
+    6-vampire-sects]](https://archon.vekn.net/help/rules#6-vampire-sects) — {Ambrogino Giovanni}, {The Baron},
+    {Kemintiri}, {Xaviar}, {Zayyat, The Sandstorm}, and the other crypt cards printing "N votes (titled)".
 
 [^5-8-2]: [[ANK 20190211]](https://usenet.krcg.org/t/vekn-76865/#m15)
-    [[RBK 8-glossaries]](https://www.vekn.net/rulebook#8-glossaries) — {Vlad Tepes}.
+    [[RBK 8-glossaries]](https://archon.vekn.net/help/rules#8-glossaries) — {Vlad Tepes}.
 
 [^5-8-3]: [[ANK 20190407]](https://usenet.krcg.org/t/vekn-77533/#m2) — {Karsh}.
 
 [^5-8-30]: Owner's reading, no official ruling: [[rules-qa
     3.1]](https://github.com/lionel-panhaleux/zero-vtes/blob/main/docs/rules-qa.md#batch-3--p0-open-items) [[RBK
-    contested-titles]](https://www.vekn.net/rulebook#contested-titles) — {Toreador Justicar}, {Madame Guil}.
+    contested-titles]](https://archon.vekn.net/help/rules#advanced-rules-contested-titles) — {Toreador Justicar},
+    {Madame Guil}.
 
 [^5-8-4]: [[RTR 19950509]](https://usenet.krcg.org/t/_LKyR7pdMig/#m8) [[RBK
-    contested-titles]](https://www.vekn.net/rulebook#contested-titles) — {Democritus}.
+    contested-titles]](https://archon.vekn.net/help/rules#advanced-rules-contested-titles) — {Democritus}.
 
 [^5-8-5]: [[LSJ 20070808-2]](https://usenet.krcg.org/t/gaFBeSrs7fU/#m0) [[RBK
-    contested-titles]](https://www.vekn.net/rulebook#contested-titles) — group "Title providing action" (G00042).
+    contested-titles]](https://archon.vekn.net/help/rules#advanced-rules-contested-titles) — group "Title providing
+    action" (G00042).
 
 [^5-8-6]: [[TOM 19960210]](https://usenet.krcg.org/t/PiOmH08RyVw/#m10) [[LSJ
     19980209]](https://usenet.krcg.org/t/8boERT-e5e4/#m0) [[LSJ 19970224]](https://usenet.krcg.org/t/80KRDjVFkyg/#m1) —
@@ -6762,14 +6775,14 @@ exemplar cards.
     19960210]](https://usenet.krcg.org/t/PiOmH08RyVw/#m10) [[RTR 20000501]](https://usenet.krcg.org/t/MKrA0hBXuaU/#m0)
     [[LSJ 20060908]](https://usenet.krcg.org/t/CTy2GjM6-Dc/#m1) — {Banishment}, {Descent into Darkness}.
 
-[^5-8-25]: [[RBK 6-vampire-sects]](https://www.vekn.net/rulebook/6-vampire-sects) — {Toreador Justicar}.
+[^5-8-25]: [[RBK 6-vampire-sects]](https://archon.vekn.net/help/rules#6-vampire-sects) — {Toreador Justicar}.
 
 [^5-8-21]: [[LSJ 20030419]](https://usenet.krcg.org/t/A0mvllC-tgs/#m5) — {Illusions of the Kindred}.
 
 [^5-8-9]: [[LSJ 20080602]](https://usenet.krcg.org/t/Y7CLzywq1Lk/#m1) [[LSJ
     20060904]](https://usenet.krcg.org/t/L9D4GK0yNv8/#m4) [[RBK
-    6-vampire-sects]](https://www.vekn.net/rulebook#6-vampire-sects) — {No Confidence}, {Field Training}, {Go Anarch},
-    and the other sect-change cards carrying this ruling.
+    6-vampire-sects]](https://archon.vekn.net/help/rules#6-vampire-sects) — {No Confidence}, {Field Training}, {Go
+    Anarch}, and the other sect-change cards carrying this ruling.
 
 [^5-8-10]: [[RTR 20201130]](https://www.blackchantry.com/2020/12/25/rtr-30-11-2020/) [[LSJ
     20060904]](https://usenet.krcg.org/t/L9D4GK0yNv8/#m4) — {Clan Impersonation}, {Derange}.
@@ -6794,8 +6807,8 @@ exemplar cards.
 [^5-8-26]: [[ANK 20250320]](https://usenet.krcg.org/t/vekn-82172/#m4) —
     {Garibaldi-Meucci Museum}.
 
-[^5-8-28]: [[RBK 6-vampire-sects]](https://www.vekn.net/rulebook/6-vampire-sects) [[RBK
-    other-vampire-sects]](https://www.vekn.net/rulebook#other-vampire-sects).
+[^5-8-28]: [[RBK 6-vampire-sects]](https://archon.vekn.net/help/rules#6-vampire-sects) [[RBK
+    other-vampire-sects]](https://archon.vekn.net/help/rules#other-vampire-sects).
 
 [^5-8-27]: Owner's reading, no official ruling: [[rules-qa
     112.21]](https://github.com/lionel-panhaleux/zero-vtes/blob/main/docs/rules-qa.md#batch-112--round-27-secrets-of-new-york-and-noites-brasileiras-63-cards-the-cards-board-owner-2026-11-08-red-11214-11219-11221-11247-claude-2026-11-09-the-owner-11214-11219-11221-11247-confirmed)
@@ -6865,7 +6878,7 @@ exemplar cards.
     — {Fall of the Camarilla}, {Fall of the Sabbat}. [[ANK
     20180125]](https://usenet.krcg.org/t/vekn-76385/#m1) — {The Red Question}.
 
-[^5-9-8]: [[RBK allies]](https://www.vekn.net/rulebook#allies) [[ANK
+[^5-9-8]: [[RBK allies]](https://archon.vekn.net/help/rules#advanced-rules-allies) [[ANK
     20230417]](https://usenet.krcg.org/t/vekn-80399/#m4)
     — {Grey Thorne}, {Vivienne Géroux}.
 
@@ -6917,7 +6930,7 @@ exemplar cards.
     control" (G00001), {The Ailing Spirit}, {Temptation}, {Puppet Master}, {Spirit Marionette}.
 
 [^6-2-6]: [[LSJ 20021111]](https://usenet.krcg.org/t/Y6_dPn4ONCA/#m2) [[RBK
-    5-ending-the-game]](https://www.vekn.net/rulebook/5-ending-the-game) — {Parmenides}.
+    5-ending-the-game]](https://archon.vekn.net/help/rules#5-ending-the-game) — {Parmenides}.
 
 [^6-2-7]: [[RTR 19941109]](https://usenet.krcg.org/t/_6CXoKTSLnw/#m0) [[ANK
     20200130-2]](https://usenet.krcg.org/t/vekn-78398/#m2) [[LSJ
@@ -6935,7 +6948,7 @@ exemplar cards.
 [^6-3-3]: [[LSJ 19971002]](https://usenet.krcg.org/t/RY_nhdykKP0/#m1) [[LSJ
     20080803-2]](https://usenet.krcg.org/t/OknxGrvlaNk/#m2) — {Disputed Territory}, {New Management}.
 
-[^6-3-7]: [[RBK 8-glossaries]](https://www.vekn.net/rulebook#8-glossaries) — glossary "Steal (a card)".
+[^6-3-7]: [[RBK 8-glossaries]](https://archon.vekn.net/help/rules#8-glossaries) — glossary "Steal (a card)".
 
 [^6-3-4]: [[RTR 19960708]](https://usenet.krcg.org/t/Rd3Zb61ELuw/#m0) [[LSJ
     20001031]](https://usenet.krcg.org/t/y8LNZhRyXO0/#m2) [[PIB
@@ -6993,8 +7006,8 @@ exemplar cards.
     20180719-2]](https://usenet.krcg.org/t/vekn-76835/#m1)
     [[ANK 20181105]](https://usenet.krcg.org/t/vekn-77140/#m1) [[LSJ
     19970224]](https://usenet.krcg.org/t/80KRDjVFkyg/#m1) [[RBK
-    5-ending-the-game]](https://www.vekn.net/rulebook/5-ending-the-game) — {Poison Pill}, {The Rising}, {Dirty Little
-    Secrets}.
+    5-ending-the-game]](https://archon.vekn.net/help/rules#5-ending-the-game) — {Poison Pill}, {The Rising}, {Dirty
+    Little Secrets}.
 
 [^6-5-2]: [[ANK 20180813]](https://usenet.krcg.org/t/vekn-76917/#m2) [[LSJ
     20041025]](https://usenet.krcg.org/t/sbfkGmojYao/#m4) — {Poison Pill}, {Ancient Influence}, {Reins of Power}.
@@ -7028,8 +7041,8 @@ exemplar cards.
 
 [^6-5-10]: [[LSJ 20000309]](https://usenet.krcg.org/t/ykAzsCzPkvg/#m2) [[LSJ
     20100208]](https://usenet.krcg.org/t/wt2kuUJXoRI/#m9) [[TOM 19951214-1]](https://usenet.krcg.org/t/8Fr6gioYZDI/#m1)
-    [[RBK 5-ending-the-game]](https://www.vekn.net/rulebook/5-ending-the-game) — group "Vote damaging multiple players"
-    (G00015), {The Rising}, {Sabbat Threat}.
+    [[RBK 5-ending-the-game]](https://archon.vekn.net/help/rules#5-ending-the-game) — group "Vote damaging multiple
+    players" (G00015), {The Rising}, {Sabbat Threat}.
 
 [^6-5-11]: [[LSJ 20100206-2]](https://usenet.krcg.org/t/reXyybyIYX8/#m1) [[LSJ
     20100210-2]](https://usenet.krcg.org/t/wt2kuUJXoRI/#m12) [[LSJ 20100207]](https://usenet.krcg.org/t/wt2kuUJXoRI/#m4)
@@ -7043,23 +7056,24 @@ exemplar cards.
     — {Sargon}, {Tereza Rostas}, {Hrothulf}, {Enticement}, {Curse of Nitocris}.
 
 [^6-6-1]: [[LSJ 20070309-2]](https://usenet.krcg.org/t/c3Kx0-C_5JU/#m1) [[RBK
-    master-cards]](https://www.vekn.net/rulebook#master-cards) [[RBK
-    master-phase]](https://www.vekn.net/rulebook#master-phase) — {Wash}. The rulebook is explicit that a canceled
+    master-cards]](https://archon.vekn.net/help/rules#master-cards) [[RBK
+    master-phase]](https://archon.vekn.net/help/rules#2-master-phase) — {Wash}. The rulebook is explicit that a canceled
     out-of-turn master still counts against the next master phase; the older ruling's parenthetical to the contrary is
     superseded.
 
 [^6-6-2]: [[LSJ 20090626]](https://usenet.krcg.org/t/3Cd-DNfT7yQ/#m4) [[ANK
     20170124]](https://usenet.krcg.org/t/vekn-75556/#m2) [[RBK
-    trifle]](https://www.vekn.net/rulebook#trifle) — {Wash}, {Sudden Reversal}.
+    trifle]](https://archon.vekn.net/help/rules#trifle) — {Wash}, {Sudden Reversal}.
 
-[^6-6-8]: [[RBK contested-cards]](https://www.vekn.net/rulebook#contested-cards) — group "Unique Trifle" (G00082).
+[^6-6-8]: [[RBK contested-cards]](https://archon.vekn.net/help/rules#advanced-rules-contested-cards) — group "Unique
+    Trifle" (G00082).
 
 [^6-6-3]: [[ANK 20170124]](https://usenet.krcg.org/t/vekn-75556/#m2) [[LSJ
     20090626]](https://usenet.krcg.org/t/3Cd-DNfT7yQ/#m4) — {Wash}.
 
 [^6-6-4]: [[PIB 20150524]](https://usenet.krcg.org/t/vekn-71300/#m3) [[ANK
     20191004]](https://usenet.krcg.org/t/vekn-77994/#m1) [[RBK
-    master-cards]](https://www.vekn.net/rulebook#master-cards) — {Proxy Kissed}, {Synesios}.
+    master-cards]](https://archon.vekn.net/help/rules#master-cards) — {Proxy Kissed}, {Synesios}.
 
 [^6-6-5]: [[LSJ 20031201]](https://usenet.krcg.org/t/Mi_j7sUsZZw/#m1) — {Vox Senis}.
 
@@ -7069,8 +7083,8 @@ exemplar cards.
 
 [^6-7-1]: [[LSJ 19970224]](https://usenet.krcg.org/t/80KRDjVFkyg/#m1) [[LSJ
     20070516]](https://usenet.krcg.org/t/zalQ_AHTpAY/#m1) [[RBK
-    targeting-of-cards]](https://www.vekn.net/rulebook#targeting-of-cards) [[RBK
-    card-rulings]](https://www.vekn.net/rulebook#card-rulings) — {Reform Body}, {Dreams of the Sphinx}.
+    targeting-of-cards]](https://archon.vekn.net/help/rules#targeting-of-cards) [[RBK
+    card-rulings]](https://archon.vekn.net/help/rules#card-rulings) — {Reform Body}, {Dreams of the Sphinx}.
 
 [^6-7-3]: [[ANK 20200408-2]](https://usenet.krcg.org/t/vekn-78562/#m10) [[RTR
     20000501]](https://usenet.krcg.org/t/MKrA0hBXuaU/#m0) [[ANK
@@ -7080,12 +7094,12 @@ exemplar cards.
     20210630]](https://usenet.krcg.org/t/vekn-79205/#m3) [[LSJ
     20100902]](https://usenet.krcg.org/t/SM2_578Th0U/#m17) [[RTR
     20180303]](https://usenet.krcg.org/t/vekn-76447/#m0) [[RBK
-    influence-phase]](https://www.vekn.net/rulebook#influence-phase) — {Lay Low}, {Wormwood}, {Jimmy Dunn}.
+    influence-phase]](https://archon.vekn.net/help/rules#4-influence-phase) — {Lay Low}, {Wormwood}, {Jimmy Dunn}.
 
 [^6-7-5]: [[RTR 20180303]](https://usenet.krcg.org/t/vekn-76447/#m0)
     [[ANK 20240118]](https://usenet.krcg.org/t/vekn-81155/#m1) [[LSJ
     20100527]](https://usenet.krcg.org/t/Tr3X4DsZr-8/#m1) [[RBK
-    influence-phase]](https://www.vekn.net/rulebook#influence-phase) — {Ingrid Rossler}, {Angela Preston}, {Paul
+    influence-phase]](https://archon.vekn.net/help/rules#4-influence-phase) — {Ingrid Rossler}, {Angela Preston}, {Paul
     "Sixofswords29" Moreton}, {Ennoia's Theater}, {Gather}, {Leandro}.
 
 [^6-7-6]: [[LSJ 20060623]](https://usenet.krcg.org/t/mfgW0TeoLNM/#m1) [[LSJ

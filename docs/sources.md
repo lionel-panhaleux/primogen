@@ -18,7 +18,7 @@ service is checked against that service before it is relied on.
 | `engine.krcg.org` | Rules enforcement for the cards it covers; bots | On each engine release | Public API |
 | `api.krcg.org` | Card search and decklist conversion | Live | Public API |
 | `gist.github.com/lionel-panhaleux/a4a9cad2e492af7c45c50a1cea7e6cf6` | The history of card and rules changes: each errata and rules change, dated (one section, 1995-10, by its month), linking its announcement (a newsgroup or forum post at its `usenet.krcg.org` copy) | By hand, by the owner; primogen copies it with `/sync` ([provenance.md](provenance.md)) | Public gist |
-| `vekn.net` (`/rulebook`, `/tournament-rules`, `/judges-guide`) | Other copies of the same documents, worded apart in places; Archon's are the official, maintained ones (owner, 2026-11-12); the rulebook's anchors are what the advanced rules' `[RBK …]` citations link to, and what the rulings database's `RBK` labels were named after | When the VEKN publishes a revision | Public pages; primogen reads none |
+| `vekn.net` (`/rulebook`, `/tournament-rules`, `/judges-guide`) | Other copies of the same documents, worded apart in places; Archon's are the official, maintained ones (owner, 2026-11-12); the rulebook's anchors are what the `RBK` labels of the rulings database and the advanced rules are named after | When the VEKN publishes a revision | Public pages; primogen reads none |
 
 ## The rulings chain
 
@@ -39,8 +39,9 @@ the rulings site offers and never adds to) links an id archon's renderer
 gives `archon.vekn.net/help/rules` (a heading, a box or a bold term), the
 label still the vekn.net anchor or page it linked until November 2026;
 primogen joins it to the section that id opens, and its build warns of a
-cited one no section opens. An id is its element's words slugged: an element
-archon rewords breaks the links to it.
+cited one no section opens. The advanced rules' `[RBK <label>]` citations
+link the URL `references.yaml` gives the label. An id is its element's words
+slugged: an element archon rewords breaks the links to it.
 
 A ruling has no id of its own in the YAML. The rulings site's id is the first
 5 bytes of SHAKE128 over the ruling's text (`[REMINDER]` stripped, each card

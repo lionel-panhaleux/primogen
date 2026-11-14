@@ -100,8 +100,8 @@ about ten seconds. The tests build a bundle from `testdata/upstream`, the
 real upstreams pinned and served by a local file server (the whole card
 data, `vtes-rulings` and `archon-vibe`'s three documents at one commit
 each, the ids archon.vekn.net gives those documents' headings by archon's
-own renderer at that commit, which every link of theirs is checked
-against, the archive cut to
+own renderer at that commit, which every link of theirs and of the
+advanced rules to them is checked against, the archive cut to
 its ids and titles with the text of the posts the rulings and the advanced
 rules cite and of the threads the calibration corpus's `settled-by`
 names), with `knowledge/` as it stands, then query it as a user does,
