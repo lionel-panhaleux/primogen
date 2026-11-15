@@ -28,13 +28,6 @@ At most three open, each named by what someone can do afterwards. A board
 line serving one carries its token; done is deleted. Opening one is the
 owner's decision.
 
-- **M:cards**: anyone can add `mcp.krcg.org` to their assistant and get exact
-  card text and rulings. Done when a card and its rulings, each with its
-  link, come back in at least Claude, ChatGPT and one local client, from the
-  hosted server and from a local install, and the README says how.
-- **M:rules**: a player gets a rules answer that quotes what settles it. Done
-  when the evidence tests pass on the seed cases and an owner-graded rules
-  session beats the `vtes` skill on the regression set.
 - **M:deck**: a player gets their deck explained and improved. Done when an
   owner-graded session of deck analyses and advice passes.
 

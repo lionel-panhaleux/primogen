@@ -43,8 +43,8 @@ none".
 ```
 
 - `answered-by` ties the answer to a revision; drift is meaningless without
-  it. The entries answered by `vtes-skill` are the baseline primogen must
-  beat ([roadmap.md](../docs/roadmap.md) "M:rules").
+  it. The entries answered by `vtes-skill` are the baseline from before
+  primogen.
 - `status: graded` needs the owner's verdict. Feedback from anyone else
   enters as `status: candidate`, attributed, and drives nothing until the
   owner grades it.
