@@ -83,6 +83,7 @@ func newUpstream() (*upstream, bundle.Upstream, error) {
 	return u, bundle.Upstream{
 		Cards:         srv.URL + "/vtes.json",
 		Sets:          srv.URL + "/expansions.json",
+		TWDA:          srv.URL + "/twda.json",
 		RulingsHead:   srv.URL + "/commit",
 		RulingsFile:   srv.URL + "/vtes-rulings/%s/%s",
 		Archive:       srv.URL + "/archive.json.gz",
@@ -239,6 +240,230 @@ func TestQueryCards(t *testing.T) {
 			}
 		})
 	}
+}
+
+// herne is TWDA deck 12947 as a player writes it: crypt columns, a Lackey
+// tab, a count after the name, a line's comment, accents left out.
+const herne = `Deck Name: Herne Gangrel
+Author: Jozef Patrnciak
+
+Crypt (12 cards, min=10, max=27, avg=4.92)
+2x Massimiliano      7  pro ANI FOR  baron  Gangrel:6
+2x Casey Snyder      6  ani cel for PRO  baron  Gangrel:6
+2x Kuyén             6  ANI PRO  baron  Gangrel:6
+1x Kamile Paukstys   5  ani for PRO  Gangrel:6
+1x Hanna Nokelainen 4 ani for pro Gangrel:6
+1 Nathan Turner
+1 Indira
+1x Joaquin de Cadiz
+1x Ruslan Fedorenko
+
+Library (90 cards)
+Master (25)
+3x Vessel
+3x Villein
+2x Club Illusion
+2x Direct Intervention -- the only cancel
+2x Garibaldi-Meucci Museum
+2x Powerbase: Savannah
+1x Anarch Railroad
+1x Backways
+1x Carfax Abbey
+1x Ecoterrorists
+1x Ennoia's Theater
+1x Information Highway
+1x Papillon
+1x Powerbase: Los Angeles
+1x Powerbase: Montreal
+1x The Rack
+1x Zoo Hunting Ground
+11x Thing
+1x Revolutionary Council
+5	Raven Spy
+1x Mr. Winthrop
+Heart of Nizchetus x2
+3x Earth Control
+1x Monkey Wrench
+4x Form of the Bat
+9x Organized Resistance
+7x Bait and Switch
+5x Deep Ecology
+3x Delaying Tactics
+9x Earth Meld
+4x Form of Mist
+`
+
+// TestQueryDeck reads one deck by its TWDA id, as text and by its VDB links,
+// and the lists it must refuse.
+func TestQueryDeck(t *testing.T) {
+	u, _, err := newUpstream()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer u.srv.Close()
+	query := func(args ...string) (string, error) {
+		var stdout, stderr strings.Builder
+		err := run(t.Context(), append([]string{"query", "-bundle", testBundle, "-vdb", u.srv.URL + "/vdb/api/deck/"}, args...), &stdout, &stderr)
+		return stdout.String(), err
+	}
+	// the computed facts, from the crypt to the procedures
+	facts := func(out string) string {
+		i, j := strings.Index(out, "## Crypt"), strings.Index(out, "## How to answer")
+		if i < 0 || j < i {
+			t.Fatalf("no dossier in:\n%s", out)
+		}
+		return out[i:j]
+	}
+	byID, err := query("deck", "12947")
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, w := range []string{
+		"TWDA deck 12947: won by Jozef Patrnciak at Year of the Sabbat Paths IV: Amaranth, Herne, Germany, 2026-10-24, 20 players",
+		"Tournament legal today (",
+		"## Crypt (12 cards, 9 distinct; capacity 2 to 7, average 4.9; groups G6)",
+		"| 2 | Massimiliano (G6) | 201602 | 7 | G6 | Gangrel | pro ANI FOR | Baron |",
+		"- [ani] 9: superior 4 (Massimiliano (G6) ×2, Kuyén (G6) ×2); inferior 5 (",
+		"## Library (90 cards, 31 distinct)",
+		"- 5× **Raven Spy** (card 101550). Requires [ani]. Cost: 1 blood.\n  Crypt cards with the [ani] it requires: 9 of 12, 4 at superior",
+		// any discipline of three, and the requirement the card data does not hold
+		"Crypt cards with the [ani] or [for] or [pro] it requires (each effect's symbols in the text say which): 12 of 12: Massimiliano (G6) ×2 [ANI FOR pro];",
+		`Its text also requires, unchecked here: "Requires an Anarch."`,
+		"- 11× **Thing** (card 101972). Clans its requirement names: Gangrel.\n  Crypt cards with the clan Gangrel it requires: all 12.",
+		"  > [pro] Strike: combat ends.\n  > [PRO] As above, and unlock this vampire before combat ends.\n",
+		"This dossier computes no modules, no hand expectation and no relatives",
+		"Costs, every copy counted: 22 pool over 15 cards; 11 blood over 11 cards; variable: Monkey Wrench (X blood).",
+		"# Procedure: a deck analysis", "# Procedure: advice on a deck or an idea",
+		"TWDA of static.krcg.org ",
+	} {
+		if !strings.Contains(byID, w) {
+			t.Errorf("missing %q in:\n%s", w, byID)
+		}
+	}
+	asText, err := query("deck", herne)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(asText, "# Deck: Herne Gangrel\nBy Jozef Patrnciak.") ||
+		strings.Replace(facts(asText), "\n  The author: the only cancel", "", 1) != facts(byID) {
+		t.Errorf("the list as text reads otherwise than by id:\n%s", asText)
+	}
+	for _, link := range []string{"https://vdb.im/decks/12947", "https://vdb.im/decks/notwda"} {
+		vdb, err := query("deck", link)
+		if err != nil || facts(vdb) != facts(byID) {
+			t.Errorf("%s reads otherwise than by id: %v\n%s", link, err, vdb)
+		}
+	}
+	var stored struct{ Cards map[string]int }
+	raw, _ := os.ReadFile("testdata/upstream/vdb/api/deck/notwda")
+	json.Unmarshal(raw, &stored)
+	var pairs []string
+	for id, n := range stored.Cards {
+		pairs = append(pairs, fmt.Sprintf("%s=%d", id, n))
+	}
+	inURL, err := query("deck", "https://vdb.im/decks/deck?name=Herne&author=Jozef#"+strings.Join(pairs, ";"))
+	if err != nil || facts(inURL) != facts(byID) || !strings.Contains(inURL, "Read from https://vdb.im/decks/deck?name=Herne&author=Jozef\n") {
+		t.Errorf("the VDB link carrying the cards reads otherwise than by id: %v\n%s", err, inURL)
+	}
+	if out, err := query("deck", "https://vdb.im/decks/notpinned"); err == nil || !strings.Contains(err.Error(), `VDB has no public deck "notpinned" (404 Not Found)`) {
+		t.Errorf("an unknown VDB deck: %v\n%s", err, out)
+	}
+
+	for _, tc := range []struct {
+		deck string
+		want []string
+	}{
+		{strings.NewReplacer("Raven Spy", "Ravn Spy", "\n1 Indira", "\n1 Theo Bell", "3x Earth Control", "3x Elemental Stoicism\nVilein\nCombat Shotgn\nAction Modifier (4)").Replace(herne), []string{
+			`No card is named "Ravn Spy"; this is Raven Spy, the one closest name.`,
+			`"Theo Bell" read as Theo Bell (G6), of the group of the rest of the crypt`,
+			`"Vilein" reads as no card with its count: left out`,
+			`"Combat Shotgn" reads as no card with its count: left out`,
+			// a combination card, one of whose effects needs [for] alone
+			"Crypt cards with the [for] or [obf] it requires (each effect's symbols in the text say which): 7 of 12: Massimiliano (G6) ×2 [FOR];",
+		}},
+		{"12434", []string{"(cut at 1500 of 6967 characters: detail gives it whole)"}},
+		// a deck the TWDA archives, illegal today
+		{"zink2k1", []string{"Tournament legal today (", "): no, as archived:\n- Protect Thine Own is banned since 2008-01-01: take it out"}},
+		// the TWDA deck with the most distinct cards keeps its texts
+		{"2k6munduko", []string{"## Library (", "  > "}},
+	} {
+		out, err := query("deck", tc.deck)
+		if err != nil {
+			t.Fatal(err)
+		}
+		for _, w := range tc.want {
+			if !strings.Contains(out, w) {
+				t.Errorf("missing %q in:\n%s", w, out)
+			}
+		}
+		if len(out) > 40000 {
+			t.Errorf("%d characters, past the bound of 40,000", len(out))
+		}
+	}
+	// a list past the bound: 40 vampires and 90 library cards, the longest texts
+	b, err := bundle.Load(testBundle)
+	if err != nil {
+		t.Fatal(err)
+	}
+	cards := slices.Clone(b.Cards)
+	slices.SortFunc(cards, func(x, y bundle.Card) int { return len(y.Text) - len(x.Text) })
+	var long []string
+	crypt := 0
+	for _, c := range cards {
+		vampire := slices.Contains(c.Types, "Vampire")
+		if c.Banned != "" || vampire && (c.Group != "G5" || crypt == 40) || !vampire && len(long)-crypt == 90 {
+			continue
+		}
+		if vampire {
+			crypt++
+		}
+		long = append(long, "1x "+c.Name)
+	}
+	if out, err := query("deck", strings.Join(long, "\n")); err != nil || len(out) > 40000 || !strings.Contains(out, "Left out to fit this result: the texts of the library's cards.") {
+		t.Errorf("a list past the bound: %v, %d characters", err, len(out))
+	}
+	if out, err := query("-detail", "deck", "12434"); err != nil || strings.Contains(out, "cut at") {
+		t.Errorf("the detailed dossier cuts the comment: %v", err)
+	}
+
+	for _, tc := range []struct{ deck, err string }{
+		{strings.Replace(herne, "Mr. Winthrop", "Mr Wintrop Supreme", 1), `No card is named "Mr Wintrop Supreme". Closest names: Mr. Winthrop;`},
+		{strings.Replace(herne, "1x Ruslan Fedorenko", "1x Lucinde", 1), `"Lucinde" is several cards: Lucinde, Alastor (G3); Lucinde, Alastor (G7). Give the one meant`},
+		{strings.NewReplacer("9x Earth Meld", "40x Earth Meld", "2x Club Illusion", "2x Return to Innocence", "1x Ruslan Fedorenko", "1x Anson").Replace(herne),
+			"not tournament legal today"},
+		{"nosuchdeck", `no deck of the TWDA has the id "nosuchdeck"`},
+		{"https://vdb.im/decks/deck?name=x#100001", "not id=count pairs"},
+		{strings.Join(vampires(b), "\n") + "\n60x Villein", "distinct cards does not fit a result of 40000 characters even without its texts"},
+	} {
+		_, err := query("deck", tc.deck)
+		if err == nil || !strings.Contains(err.Error(), tc.err) {
+			t.Errorf("error %v, want %q", err, tc.err)
+		}
+		if strings.Contains(tc.err, "legal") {
+			for _, w := range []string{"the library has 121 cards: 60 to 90 (cut 31)", "The Return to Innocence is banned since 1999-04-01", "the crypt mixes groups 1, 6"} {
+				if !strings.Contains(err.Error(), w) {
+					t.Errorf("missing %q in %v", w, err)
+				}
+			}
+		}
+	}
+	for _, w := range testWarnings {
+		if strings.Contains(w, "decks of the TWDA name a card") {
+			t.Error(w)
+		}
+	}
+}
+
+// vampires lists every vampire of groups 5 and 6 not banned, a legal crypt
+// too large for any result.
+func vampires(b *bundle.Bundle) []string {
+	var out []string
+	for _, c := range b.Cards {
+		if slices.Contains(c.Types, "Vampire") && (c.Group == "G5" || c.Group == "G6") && c.Banned == "" {
+			out = append(out, "1x "+c.Name)
+		}
+	}
+	return out
 }
 
 // TestQueryRules calls the rules tools as a model does.
@@ -607,6 +832,13 @@ func TestServe(t *testing.T) {
 		t.Fatal(err, res)
 	}
 	expect("the hosted archive", res.Content[0].(*mcp.TextContent).Text, "the sitting rules director")
+	cs = connect()
+	res, err = cs.CallTool(ctx, &mcp.CallToolParams{Name: "vtes_deck", Arguments: map[string]any{"deck": "12947"}})
+	cs.Close()
+	if err != nil || res.IsError {
+		t.Fatal(err, res)
+	}
+	expect("a hosted deck", res.Content[0].(*mcp.TextContent).Text, "## Crypt (12 cards, 9 distinct", "# Procedure: a deck analysis")
 	out, _ := local(published)
 	expect("first local run", out, "## Freak Drive", "cards of static.krcg.org 2026-11-01 00:00 UTC")
 	local(published)

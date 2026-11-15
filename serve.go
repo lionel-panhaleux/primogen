@@ -210,6 +210,10 @@ func (r *refresher) build(ctx context.Context, now time.Time, live *bundle.Bundl
 	if live != nil && len(b.Cards) < len(live.Cards) {
 		return nil, errors.Join(stale, fmt.Errorf("the new bundle has %d cards, the live one %d", len(b.Cards), len(live.Cards)))
 	}
+	// a deck may leave the TWDA; a cut file loses many
+	if live != nil && len(b.Decks) < len(live.Decks)*99/100 {
+		return nil, errors.Join(stale, fmt.Errorf("the new bundle has %d TWDA decks, the live one %d", len(b.Decks), len(live.Decks)))
+	}
 	if err := b.Save(r.path); err != nil {
 		return nil, errors.Join(stale, err)
 	}

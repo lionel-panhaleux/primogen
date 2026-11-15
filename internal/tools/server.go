@@ -18,7 +18,7 @@ import (
 )
 
 const instructions = `Primogen grounds answers about Vampire: The Eternal Struggle (VTES).
-Never state a card's text, a ruling or a rule from memory: call vtes_cards for every card the answer relies on, and vtes_rules_case first for any rules question; quote what they return.
+Never state a card's text, a ruling or a rule from memory: call vtes_cards for every card the answer relies on, vtes_rules_case first for any rules question, and vtes_deck first for a decklist; quote what they return.
 Each item carries its authority and its link; cite the link. When the result says no ruling covers a point, say the point is unsettled rather than filling the gap.`
 
 // The bounds of a result, in characters: under the 50,000 past which Claude
@@ -35,13 +35,17 @@ type Live struct {
 	archive atomic.Pointer[archiveSearch]
 	// LoadArchive fetches the archive on first use, for a server not handed one.
 	LoadArchive func(context.Context) (*bundle.Archive, error)
-	loading     sync.Mutex
+	// VDB replaces the VDB API's deck route, for the tests.
+	VDB     string
+	loading sync.Mutex
 }
 
 type data struct {
 	b     *bundle.Bundle
 	ix    *cardIndex
 	rules *rulesIndex
+	byID  map[int]*bundle.Card
+	decks map[string]*bundle.Deck
 }
 
 func NewLive(b *bundle.Bundle) *Live {
@@ -52,7 +56,14 @@ func NewLive(b *bundle.Bundle) *Live {
 
 func (l *Live) Swap(b *bundle.Bundle) {
 	ix := newCardIndex(b.Cards)
-	l.p.Store(&data{b, ix, newRulesIndex(b, ix)})
+	d := &data{b: b, ix: ix, rules: newRulesIndex(b, ix), byID: map[int]*bundle.Card{}, decks: map[string]*bundle.Deck{}}
+	for i := range b.Cards {
+		d.byID[b.Cards[i].ID] = &b.Cards[i]
+	}
+	for i := range b.Decks {
+		d.decks[b.Decks[i].ID] = &b.Decks[i]
+	}
+	l.p.Store(d)
 }
 
 func (l *Live) Bundle() *bundle.Bundle { return l.p.Load().b }
@@ -71,6 +82,7 @@ func NewServer(l *Live) *mcp.Server {
 	addCase(s, l)
 	addRules(s, l)
 	addArchive(s, l)
+	addDeck(s, l)
 	return s
 }
 

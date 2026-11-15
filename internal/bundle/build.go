@@ -25,6 +25,7 @@ import (
 type Upstream struct {
 	Cards       string // vtes.json
 	Sets        string // expansions.json, the names and release dates the cards' printings refer to by code
+	TWDA        string // twda.json
 	RulingsHead string // answers the vtes-rulings commit to read, as a bare SHA
 	RulingsFile string // a file at that commit, formatted with the SHA and the file name
 	Archive     string // the archive's bulk file
@@ -42,6 +43,7 @@ type Upstream struct {
 var KRCG = Upstream{
 	Cards:         "https://static.krcg.org/data/vtes.json",
 	Sets:          "https://static.krcg.org/data/v5/expansions.json",
+	TWDA:          "https://static.krcg.org/data/twda.json",
 	RulingsHead:   "https://api.github.com/repos/vtes-biased/vtes-rulings/commits/main",
 	RulingsFile:   "https://raw.githubusercontent.com/vtes-biased/vtes-rulings/%s/rulings/%s",
 	Archive:       "https://usenet.krcg.org/archive.json.gz",
@@ -54,6 +56,7 @@ var KRCG = Upstream{
 // The names of Bundle.Sources, which Probe answers in the same terms.
 const (
 	SourceCards     = "cards of static.krcg.org"
+	SourceTWDA      = "TWDA of static.krcg.org"
 	SourceRulings   = "vtes-rulings"
 	SourceKnowledge = "knowledge"
 	SourceArchive   = "rulings archive to"
@@ -87,11 +90,11 @@ func Build(ctx context.Context, up Upstream, archive *Archive) (*Bundle, []strin
 	if err != nil {
 		return nil, nil, err
 	}
-	var history, advanced, procedure, terms, shorthand, catalog []byte
+	var history, advanced, procedure, analysis, advice, terms, shorthand, catalog []byte
 	for name, body := range map[string]*[]byte{
 		"card-changes.md": &history, "rules/advanced-rules.md": &advanced,
-		"guide/rules-answer.md": &procedure, "game-terms.json": &terms, "shorthand.json": &shorthand,
-		"llms.txt": &catalog,
+		"guide/rules-answer.md": &procedure, "guide/deck-analysis.md": &analysis, "guide/deck-advice.md": &advice,
+		"game-terms.json": &terms, "shorthand.json": &shorthand, "llms.txt": &catalog,
 	} {
 		if *body, err = read(name); err != nil {
 			return nil, nil, err
@@ -135,11 +138,13 @@ func Build(ctx context.Context, up Upstream, archive *Archive) (*Bundle, []strin
 		Cards: make([]Card, len(raw)),
 		Sections: slices.Concat(parseArchon(rulebook, DocRulebook, true), parseAdvanced(advanced),
 			parseArchon(tournament, DocTournament, false), parseArchon(judges, DocJudges, false)),
-		Posts:       map[string]Post{},
-		RulesAnswer: string(procedure),
-		GameTerms:   gameTerms,
-		Shorthand:   short.Shorthand,
-		Catalog:     string(catalog),
+		Posts:        map[string]Post{},
+		RulesAnswer:  string(procedure),
+		DeckAnalysis: string(analysis),
+		DeckAdvice:   string(advice),
+		GameTerms:    gameTerms,
+		Shorthand:    short.Shorthand,
+		Catalog:      string(catalog),
 	}
 	setByCode := map[string]krcgSet{}
 	for _, s := range sets {
@@ -150,6 +155,11 @@ func Build(ctx context.Context, up Upstream, archive *Archive) (*Bundle, []strin
 			return nil, nil, fmt.Errorf("%s: %w", up.Cards, err)
 		}
 	}
+	decks, twdaVersion, err := fetchDecks(ctx, up.TWDA, b.Cards, warn)
+	if err != nil {
+		return nil, nil, err
+	}
+	b.Decks, b.Sources = decks, append(b.Sources, Source{SourceTWDA, twdaVersion})
 	b.attachRulings(db, archive, warn)
 	b.attachChanges(history, warn)
 	b.keepPosts(archive, warn)
@@ -169,6 +179,14 @@ func Probe(ctx context.Context, up Upstream) ([]Source, error) {
 	if err != nil {
 		return nil, err
 	}
+	if resp, err = open(ctx, http.MethodHead, up.TWDA, ""); err != nil {
+		return nil, err
+	}
+	resp.Body.Close()
+	twda, err := lastModified(resp)
+	if err != nil {
+		return nil, err
+	}
 	rulings, err := headCommit(ctx, up.RulingsHead)
 	if err != nil {
 		return nil, err
@@ -182,7 +200,7 @@ func Probe(ctx context.Context, up Upstream) ([]Source, error) {
 		return nil, err
 	}
 	return []Source{
-		{SourceCards, cards}, {SourceRulings, rulings[:7]}, {SourceKnowledge, version}, {SourceArchon, archon[:7]},
+		{SourceCards, cards}, {SourceTWDA, twda}, {SourceRulings, rulings[:7]}, {SourceKnowledge, version}, {SourceArchon, archon[:7]},
 	}, nil
 }
 

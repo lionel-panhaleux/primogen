@@ -30,6 +30,7 @@ const usage = `usage:
       search WORDS...            vtes_rules_search
       read ID...                 vtes_rules_read
       archive WORDS...           vtes_rulings_archive
+      deck LIST|ID|LINK|-        vtes_deck: a decklist (its lines as one or several arguments, or - for stdin), a TWDA id or a VDB link
   primogen stdio [-bundle PATH]                    serve the tools over stdio, for a local MCP client
   primogen serve -bundle PATH [-addr ADDR] [-knowledge DIR]   serve the tools over HTTP at /mcp, refreshing the bundle
 
@@ -103,6 +104,7 @@ func query(ctx context.Context, fs *flag.FlagSet, path *string, args []string, s
 	detail := fs.Bool("detail", false, "the detailed result")
 	from := fs.String("from", published, "where to download the bundle when -bundle is not given")
 	archive := fs.String("archive", bundle.KRCG.Archive, "where to download the rulings archive")
+	vdb := fs.String("vdb", tools.VDB, "the VDB API's deck route")
 	if err := fs.Parse(args); err != nil {
 		return err
 	}
@@ -123,6 +125,16 @@ func query(ctx context.Context, fs *flag.FlagSet, path *string, args []string, s
 		tool, in = "vtes_rules_read", map[string]any{"ids": rest}
 	case "archive":
 		tool, in["query"] = "vtes_rulings_archive", strings.Join(rest, " ")
+	case "deck":
+		list := strings.Join(rest, "\n")
+		if list == "-" {
+			raw, err := io.ReadAll(os.Stdin)
+			if err != nil {
+				return err
+			}
+			list = string(raw)
+		}
+		tool, in["deck"] = "vtes_deck", list
 	default:
 		return errors.New(usage)
 	}
@@ -130,6 +142,7 @@ func query(ctx context.Context, fs *flag.FlagSet, path *string, args []string, s
 	if err != nil {
 		return err
 	}
+	live.VDB = *vdb
 	text, err := tools.Call(ctx, tools.NewServer(live), tool, in)
 	if err != nil {
 		return err

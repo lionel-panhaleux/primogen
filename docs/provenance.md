@@ -21,7 +21,9 @@ compares them with upstream and records the commit below.
   codex-of-the-damned strategist and their owner-graded lessons; the
   strategist's graded cases stay in `calibration/codex-cases.md`, unserved.
   `rules-answer.md` closes every `vtes_rules_case` pack as its answer
-  contract.
+  contract, `deck-analysis.md` and `deck-advice.md` every `vtes_deck`
+  dossier; `theory.md`, `modules.md`, `card-comparison.md` and
+  `meta-reading.md` are served by no tool yet.
   `modules.md` is the module catalog the owner canonized on 2026-08-25.
 - `classification.json`: the owner's archetype labels for the
   tournament-winning decks since 2021-07 (the 2026-07 pass), forked from

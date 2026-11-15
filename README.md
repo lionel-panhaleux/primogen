@@ -16,10 +16,12 @@ sign-in.
 - `vtes_rules_case`: the evidence for a rules question in one call: the cards, their rulings with the original posts, the rules directors' posts naming the cards together where no ruling does, the governing rules sections, what no source covers.
 - `vtes_rules_search`, `vtes_rules_read`: the rulebook, the advanced rules, the tournament rules and the judges' guide, searched by keyword or read by section.
 - `vtes_rulings_archive`: full-text search of the rulings archive, each post's author marked when they were the sitting rules director.
+- `vtes_deck`: a decklist (as text, a TWDA id or a VDB link) validated and read: the crypt, which crypt cards have what each card requires and at which level, the library by type with every card's text, the costs.
 
 ## Sources
 
-- [KRCG](https://static.krcg.org) for cards data
+- [KRCG](https://static.krcg.org) for cards data and the Tournament Winning Deck Archive (TWDA)
+- [VDB](https://vdb.im) for the decks shared from it
 - The [rulings database](https://rulings.krcg.org)
 - The [usenet archive](https://usenet.krcg.org)
 - The [rulebook](https://archon.vekn.net/help/rules), the [tournament rules](https://archon.vekn.net/help/tournament-rules) and the [judges' guide](https://archon.vekn.net/help/judges-guide) of the V:EKN, from [Archon](https://archon.vekn.net)

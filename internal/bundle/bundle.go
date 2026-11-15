@@ -28,6 +28,12 @@ type Bundle struct {
 	Posts map[string]Post
 	// RulesAnswer is knowledge/guide/rules-answer.md, the procedure a rules answer follows.
 	RulesAnswer string
+	// DeckAnalysis and DeckAdvice are knowledge/guide/deck-analysis.md and
+	// deck-advice.md, the procedures a deck answer follows.
+	DeckAnalysis string
+	DeckAdvice   string
+	// Decks is the TWDA, by id.
+	Decks []Deck
 	// GameTerms are the game's terms in English, from knowledge/game-terms.json.
 	GameTerms []string
 	// Shorthand is the players' shorthand of knowledge/shorthand.json.

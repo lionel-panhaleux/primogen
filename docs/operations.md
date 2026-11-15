@@ -18,7 +18,7 @@ commands are added here by the lines that create them.
 The server refreshes itself; there is no cron job and no operator.
 
 - A scheduler inside `primogen serve` checks the cheap sources at start and
-  hourly: the card data's `Last-Modified`, the head commits of
+  hourly: the `Last-Modified` of the card data and of the TWDA, the head commits of
   `vtes-rulings` and of primogen's `main` (its `knowledge/`), and the last
   commit touching `archon-vibe`'s documents (its rulebook, tournament rules
   and judges' guide), so that a push elsewhere in the app moves nothing.
@@ -31,8 +31,9 @@ The server refreshes itself; there is no cron job and no operator.
   resident at its peak, measured on a local query, and briefly twice that
   while a nightly fetch replaces it); the bundle keeps only the posts the
   rulings and the advanced rules cite.
-- A refresh builds a new bundle, checks it (no fewer cards than the live one;
-  decks and the evidence tests join the check when they exist), saves it
+- A refresh builds a new bundle, checks it (no fewer cards than the live one,
+  and no fewer TWDA decks than 99% of its, since a deck may leave the TWDA; the evidence tests join the check when they
+  exist), saves it
   beside the live file and renames it over, then swaps it in between two tool
   calls. The saved file is the published bundle, the server's
   `/bundle.json.gz`.
@@ -62,7 +63,7 @@ The server refreshes itself; there is no cron job and no operator.
 Go, jq, node and uv come from mise: `mise install` in the checkout reads
 `mise.toml`.
 
-- `primogen build` fetches the card data, `vtes-rulings` and `archon-vibe`
+- `primogen build` fetches the card data, the TWDA, `vtes-rulings` and `archon-vibe`
   at their latest commits and the archive's bulk file, reads `knowledge/` in
   the current
   directory (`-knowledge` to change it), and writes the bundle (by default
@@ -70,7 +71,8 @@ Go, jq, node and uv come from mise: `mise install` in the checkout reads
   prints what needs a person: a reference the archive does not hold, a ruling
   not in the rulings site's canonical form or citing no reference, a line of
   the history of changes naming no card exactly or under no dated heading,
-  left out of the bundle: the fix is in the gist, then `/sync`; a post the
+  left out of the bundle: the fix is in the gist, then `/sync`; a TWDA deck
+  naming a card the card data lacks, left out until the card data has it; a post the
   advanced rules cite that the archive does not hold, or a ruling's rulebook
   reference no section of the rulebook opens: the fix is upstream, unless
   archon gives that id to a paragraph `archon.go` opens no section at; and
@@ -80,12 +82,14 @@ Go, jq, node and uv come from mise: `mise install` in the checkout reads
 - `primogen query TOOL ARG...` (`-detail` for the detailed mode) calls a
   tool through the MCP server and prints what the model reads: `cards
   NAME...`, `case QUESTION [CARD...]`, `search WORDS...`, `read ID...`,
-  `archive WORDS...`.
+  `archive WORDS...`, `deck LIST|ID|LINK` (the list's lines as one or
+  several arguments, or `-` to read it from stdin).
 - `primogen stdio` serves the tools over stdio for a local MCP client.
 - Without `-bundle`, `query` and `stdio` are a local install: they use the
   published bundle in the user cache directory, which only the download
   writes, as "Data refresh" says (`-from` and `-archive` change where the
-  bundle and the archive are downloaded from, for the tests).
+  bundle and the archive are downloaded from, `-vdb` where a stored VDB deck
+  is read, for the tests).
 - `primogen serve` is the hosted server: the tools over Streamable HTTP at
   `/mcp` (stateless, JSON responses), the published bundle, the catalog of
   the KRCG stack at `/` and `/llms.txt`, and the status page at `/status`,
@@ -102,7 +106,8 @@ Go, jq, node and uv come from mise: `mise install` in the checkout reads
 `gofmt -l .` prints nothing, `go vet ./...` and `go test ./...` pass, in
 about ten seconds. The tests build a bundle from `testdata/upstream`, the
 real upstreams pinned and served by a local file server (the whole card
-data with its sets, `vtes-rulings` and `archon-vibe`'s three documents at one commit
+data with its sets, the TWDA cut to the decks of 2026 and three the tests
+name, one deck as VDB's API answers it, `vtes-rulings` and `archon-vibe`'s three documents at one commit
 each, the ids archon.vekn.net gives those documents' headings by archon's
 own renderer at that commit, which every link of theirs and of the
 advanced rules to them is checked against, the archive cut to
