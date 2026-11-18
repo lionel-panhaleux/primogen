@@ -40,7 +40,8 @@ The server refreshes itself; there is no cron job and no operator.
 - A failed build leaves the previous bundle serving. It shows on the status
   page, the server's `/status`, and in the data date of every answer, which
   stops advancing.
-- Archon data goes into a separate database that is never published.
+- Archon data, once primogen reads it, goes into a separate database that is
+  never published.
 - A local install downloads the published bundle on first run and again when
   a newer one exists, checked at most daily, and the archive's bulk file the
   same way, from `usenet.krcg.org`, the first time a tool needs it

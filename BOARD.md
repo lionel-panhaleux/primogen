@@ -14,4 +14,4 @@ date or an outside event is not a line.
 
 - **An owner-graded deck session** (M:deck): a `/calibrate` session of deck analyses and advice on primogen's tools, including the two deck entries in the regression set (the Toreador vote deck, the Sword of Nuln deck). Done when the entries are recorded and the owner's grade passes them or names the lines that follow. Docs: roadmap.md (M:deck deleted when it passes).
 
-<!-- completed-since-upkeep: 20 -->
+<!-- completed-since-upkeep: 0 -->
