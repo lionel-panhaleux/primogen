@@ -90,17 +90,21 @@ func Build(ctx context.Context, up Upstream, archive *Archive) (*Bundle, []strin
 	if err != nil {
 		return nil, nil, err
 	}
-	var history, advanced, procedure, analysis, advice, terms, shorthand, catalog []byte
+	var history, advanced, procedure, analysis, advice, terms, shorthand, catalog, classification []byte
 	for name, body := range map[string]*[]byte{
 		"card-changes.md": &history, "rules/advanced-rules.md": &advanced,
 		"guide/rules-answer.md": &procedure, "guide/deck-analysis.md": &analysis, "guide/deck-advice.md": &advice,
-		"game-terms.json": &terms, "shorthand.json": &shorthand, "llms.txt": &catalog,
+		"game-terms.json": &terms, "shorthand.json": &shorthand, "llms.txt": &catalog, "classification.json": &classification,
 	} {
 		if *body, err = read(name); err != nil {
 			return nil, nil, err
 		}
 	}
 	gameTerms, err := readGameTerms(terms)
+	if err != nil {
+		return nil, nil, err
+	}
+	labels, err := readClassification(classification)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -138,13 +142,14 @@ func Build(ctx context.Context, up Upstream, archive *Archive) (*Bundle, []strin
 		Cards: make([]Card, len(raw)),
 		Sections: slices.Concat(parseArchon(rulebook, DocRulebook, true), parseAdvanced(advanced),
 			parseArchon(tournament, DocTournament, false), parseArchon(judges, DocJudges, false)),
-		Posts:        map[string]Post{},
-		RulesAnswer:  string(procedure),
-		DeckAnalysis: string(analysis),
-		DeckAdvice:   string(advice),
-		GameTerms:    gameTerms,
-		Shorthand:    short.Shorthand,
-		Catalog:      string(catalog),
+		Posts:          map[string]Post{},
+		RulesAnswer:    string(procedure),
+		DeckAnalysis:   string(analysis),
+		DeckAdvice:     string(advice),
+		GameTerms:      gameTerms,
+		Shorthand:      short.Shorthand,
+		Catalog:        string(catalog),
+		Classification: labels,
 	}
 	setByCode := map[string]krcgSet{}
 	for _, s := range sets {
@@ -160,6 +165,10 @@ func Build(ctx context.Context, up Upstream, archive *Archive) (*Bundle, []strin
 		return nil, nil, err
 	}
 	b.Decks, b.Sources = decks, append(b.Sources, Source{SourceTWDA, twdaVersion})
+	if unmatched := NewRelatives(b).Unmatched(); len(unmatched) > 0 {
+		warn("%d TWDA decks since %s, not in the archetype labels of %s, match no archetype (a new one, or a pass over the labels): %s",
+			len(unmatched), labels.Since, labels.Generated, strings.Join(unmatched, "; "))
+	}
 	b.attachRulings(db, archive, warn)
 	b.attachChanges(history, warn)
 	b.keepPosts(archive, warn)
@@ -538,7 +547,7 @@ type krcgSet struct {
 func (k krcgCard) card(sets map[string]krcgSet) (Card, error) {
 	c := Card{
 		ID: k.ID, Name: k.PrintedName, PrintedName: k.PrintedName, Image: k.URL, Types: k.Types,
-		Text: reCardMark.ReplaceAllString(k.Text, "$1"), Legal: k.Legal, Banned: k.Banned,
+		Text: reCardMark.ReplaceAllString(k.Text, "$1"), Legal: k.Legal, Banned: k.Banned, Advanced: k.Advanced,
 	}
 	if k.Suffix != "" {
 		c.Name += " (" + k.Suffix + ")"

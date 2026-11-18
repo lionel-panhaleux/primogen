@@ -34,6 +34,8 @@ type Bundle struct {
 	DeckAdvice   string
 	// Decks is the TWDA, by id.
 	Decks []Deck
+	// Classification is the owner's archetype labels, knowledge/classification.json.
+	Classification Classification
 	// GameTerms are the game's terms in English, from knowledge/game-terms.json.
 	GameTerms []string
 	// Shorthand is the players' shorthand of knowledge/shorthand.json.
@@ -63,6 +65,7 @@ type Card struct {
 	// combines them (Combo) or effects use different ones (Multidisc).
 	Combo          bool
 	Multidisc      bool
+	Advanced       bool
 	Capacity       int
 	Group          string
 	Title          string
@@ -80,6 +83,10 @@ type Card struct {
 
 	Rulings []Ruling
 	Changes []Change
+}
+
+func (c *Card) IsCrypt() bool {
+	return slices.Contains(c.Types, "Vampire") || slices.Contains(c.Types, "Imbued")
 }
 
 // Names are the card's English names.

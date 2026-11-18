@@ -1,8 +1,8 @@
 #!/bin/sh
 # Pins the real upstreams for the tests: the card data, the TWDA cut to the
-# decks of 2026 and three the tests name, one VDB deck, vtes-rulings at its
-# head, archon-vibe's rules documents at its head with the ids archon.vekn.net
-# gives them, zero-vtes's rules-qa and rulings ledger, and the archive cut to
+# archetype labels' window (their params.since) and three decks the tests
+# name, one VDB deck, vtes-rulings at its head, archon-vibe's rules documents
+# at its head with the ids archon.vekn.net gives them, zero-vtes's rules-qa and rulings ledger, and the archive cut to
 # its ids and titles, with the text of the posts the rulings and the advanced
 # rules cite and of the threads the calibration corpus's settled-by names.
 # Needs curl, jq, node and npm (mise install).
@@ -15,8 +15,9 @@ for f in rulings groups references; do
 done
 curl -fsS -o vtes.json https://static.krcg.org/data/vtes.json
 curl -fsS -o expansions.json https://static.krcg.org/data/v5/expansions.json
+since=$(jq -r .params.since ../../knowledge/classification.json)
 curl -fsS https://static.krcg.org/data/twda.json |
-	jq -c '[to_entries[] | select(.value.event.date >= "2026-01-01" or (.key | IN("2k6munduko", "12434", "zink2k1")))] | from_entries' > twda.json
+	jq -c --arg since "$since" '[to_entries[] | select(.value.event.date >= $since or (.key | IN("2k6munduko", "12434", "zink2k1")))] | from_entries' > twda.json
 # a TWDA deck as VDB's API answers it, under an id the TWDA lacks, which the tests read from VDB
 curl -fsS --create-dirs -o vdb/api/deck/notwda https://vdb.im/api/deck/12947
 # the last commits touching archon-vibe's documents and its renderer

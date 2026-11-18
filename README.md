@@ -16,7 +16,7 @@ sign-in.
 - `vtes_rules_case`: the evidence for a rules question in one call: the cards, their rulings with the original posts, the rules directors' posts naming the cards together where no ruling does, the governing rules sections, what no source covers.
 - `vtes_rules_search`, `vtes_rules_read`: the rulebook, the advanced rules, the tournament rules and the judges' guide, searched by keyword or read by section.
 - `vtes_rulings_archive`: full-text search of the rulings archive, each post's author marked when they were the sitting rules director.
-- `vtes_deck`: a decklist (as text, a TWDA id or a VDB link) validated and read: the crypt, which crypt cards have what each card requires and at which level, the library by type with every card's text, the costs.
+- `vtes_deck`: a decklist (as text, a TWDA id or a VDB link) validated and read: the crypt, which crypt cards have what each card requires and at which level, the library by type with every card's text, the costs, the nearest archetypes and tournament decks.
 
 ## Sources
 

@@ -306,9 +306,9 @@ func TestQueryDeck(t *testing.T) {
 		err := run(t.Context(), append([]string{"query", "-bundle", testBundle, "-vdb", u.srv.URL + "/vdb/api/deck/"}, args...), &stdout, &stderr)
 		return stdout.String(), err
 	}
-	// the computed facts, from the crypt to the procedures
+	// the computed facts, from the crypt to the relatives, which leave a TWDA deck out
 	facts := func(out string) string {
-		i, j := strings.Index(out, "## Crypt"), strings.Index(out, "## How to answer")
+		i, j := strings.Index(out, "## Crypt"), strings.Index(out, "## Relatives")
 		if i < 0 || j < i {
 			t.Fatalf("no dossier in:\n%s", out)
 		}
@@ -331,7 +331,12 @@ func TestQueryDeck(t *testing.T) {
 		`Its text also requires, unchecked here: "Requires an Anarch."`,
 		"- 11× **Thing** (card 101972). Clans its requirement names: Gangrel.\n  Crypt cards with the clan Gangrel it requires: all 12.",
 		"  > [pro] Strike: combat ends.\n  > [PRO] As above, and unlock this vampire before combat ends.\n",
-		"This dossier computes no modules, no hand expectation and no relatives",
+		"This dossier computes no modules and no hand expectation,",
+		// its relatives, the deck left out of them, and how well the labels classify back
+		"pass of 2026-07-05, curated and revisable; each of their decks left out in turn, 97% are placed back in their archetype, 99% in its family (variants merged).",
+		"Nearest archetypes (95 in 100 of an archetype's own decks are at 0.49 or more from it):\n- **Gangrel Resistance** (C11): 0.92; 44 decks, its representative decks 12101.\n- **Gangrel Grinder** (C64), a variant of **Gangrel Resistance**: ",
+		"### 12511, Intelligent Gangrel: 0.99\n\nWon by Milos Krstic at Shell Game in Belgrade, Belgrade, Serbia, 2025-11-15, 13 players. Event report: https://www.vekn.net/event-calendar/event/12511 Labelled **Gangrel Resistance** (C11).",
+		"Only in this deck: 1× Monkey Wrench; 1× Revolutionary Council.\nOnly in 12511: 1× The Barrens; 1× The Parthenon.\nOther counts: Thing, 11 here and 9 there;",
 		"Costs, every copy counted: 22 pool over 15 cards; 11 blood over 11 cards; variable: Monkey Wrench (X blood).",
 		"# Procedure: a deck analysis", "# Procedure: advice on a deck or an idea",
 		"TWDA of static.krcg.org ",
@@ -380,7 +385,14 @@ func TestQueryDeck(t *testing.T) {
 			`"Combat Shotgn" reads as no card with its count: left out`,
 			// a combination card, one of whose effects needs [for] alone
 			"Crypt cards with the [for] or [obf] it requires (each effect's symbols in the text say which): 7 of 12: Massimiliano (G6) ×2 [FOR];",
+			// a list outside the TWDA, and its relatives
+			"- **Gangrel Resistance** (C11): 0.85;",
+			"### 12947, (unnamed): 0.93\n\nWon by Jozef Patrnciak at Year of the Sabbat Paths IV: Amaranth, Herne, Germany, 2026-10-24, 20 players. Event report: https://archon.vekn.net/t/12947\n" +
+				"Only in this deck: 3× Elemental Stoicism; 1× Theo Bell (G6).\nOnly in 12947: 3× Earth Control; 1× Indira (G6).\n",
 		}},
+		// a deck near no archetype, its twin the nearest deck
+		{"13019", []string{"- **Matawall** (C53): 0.15;", "This deck is near no archetype: even the closest is under 0.49.",
+			"### 13163, Agnieszka: 1.00\n\nWon by Martin Weinmayer at The Vozhd of JOL, Online, 2026-03-17, 45 players. Event report: https://www.vekn.net/event-calendar/event/13163\nThe same list as this deck.\n"}},
 		{"12434", []string{"(cut at 1500 of 6967 characters: detail gives it whole)"}},
 		// a deck the TWDA archives, illegal today
 		{"zink2k1", []string{"Tournament legal today (", "): no, as archived:\n- Protect Thine Own is banned since 2008-01-01: take it out"}},
@@ -407,7 +419,7 @@ func TestQueryDeck(t *testing.T) {
 	}
 	cards := slices.Clone(b.Cards)
 	slices.SortFunc(cards, func(x, y bundle.Card) int { return len(y.Text) - len(x.Text) })
-	var long []string
+	var long, vamps []string
 	crypt := 0
 	for _, c := range cards {
 		vampire := slices.Contains(c.Types, "Vampire")
@@ -416,14 +428,37 @@ func TestQueryDeck(t *testing.T) {
 		}
 		if vampire {
 			crypt++
+			vamps = append(vamps, "1x "+c.Name)
 		}
 		long = append(long, "1x "+c.Name)
 	}
 	if out, err := query("deck", strings.Join(long, "\n")); err != nil || len(out) > 40000 || !strings.Contains(out, "Left out to fit this result: the texts of the library's cards.") {
 		t.Errorf("a list past the bound: %v, %d characters", err, len(out))
 	}
-	if out, err := query("-detail", "deck", "12434"); err != nil || strings.Contains(out, "cut at") {
+	// the same crypt and the 90 shortest library texts: only the relatives' details left out
+	var short []string
+	for _, c := range slices.Backward(cards) {
+		if c.Banned == "" && !slices.Contains(c.Types, "Vampire") && !slices.Contains(c.Types, "Imbued") && len(short) < 90 {
+			short = append(short, "1x "+c.Name)
+		}
+	}
+	if out, err := query("deck", strings.Join(slices.Concat(vamps, short), "\n")); err != nil || len(out) > 40000 ||
+		!strings.Contains(out, "the cards that differ from this deck are left out to fit this result.") || strings.Contains(out, "Left out to fit this result: the texts") {
+		t.Errorf("a list fitting without the relatives' details: %v, %d characters", err, len(out))
+	}
+	if out, err := query("-detail", "deck", "12434"); err != nil || strings.Contains(out, "detail gives it whole") {
 		t.Errorf("the detailed dossier cuts the comment: %v", err)
+	}
+	// a bundle built before it carried the archetype labels
+	b.Classification = bundle.Classification{}
+	old := filepath.Join(t.TempDir(), "old.json.gz")
+	if err := b.Save(old); err != nil {
+		t.Fatal(err)
+	}
+	var stdout, stderr strings.Builder
+	if err := run(t.Context(), []string{"query", "-bundle", old, "deck", "12511"}, &stdout, &stderr); err != nil ||
+		!strings.Contains(stdout.String(), "## Relatives\n\nThis data bundle holds no archetype labels: no relatives until it is rebuilt.") {
+		t.Errorf("a bundle without archetype labels: %v\n%s", err, stdout.String())
 	}
 
 	for _, tc := range []struct{ deck, err string }{
@@ -817,7 +852,8 @@ func TestServe(t *testing.T) {
 			}
 		}
 	}
-	expect("status page", get("/status"), "Data: cards of static.krcg.org 2026-11-01 00:00 UTC", "Last refresh")
+	expect("status page", get("/status"), "Data: cards of static.krcg.org 2026-11-01 00:00 UTC", "Last refresh",
+		"TWDA decks since 2021-07-01, not in the archetype labels of 2026-07-05, match no archetype", `13019 "Agnieszka, The Unbreakable" (2026-06-16, closest Matawall at 0.15)`)
 	for _, path := range []string{"/", "/llms.txt"} {
 		expect("catalog", get(path), "# KRCG\n", "(https://mcp.krcg.org/mcp)", "(https://static.krcg.org/data/vtes.json)")
 	}

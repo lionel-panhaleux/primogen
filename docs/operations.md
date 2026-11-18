@@ -53,8 +53,7 @@ The server refreshes itself; there is no cron job and no operator.
   journal: the build's warnings (below), and every link of the catalog
   (`knowledge/llms.txt`) that does not answer a GET: no answer within 30
   seconds, a 404, a 410 or a server error (an endpoint that refuses a GET or
-  wants a token answers). Decks that matched no archetype,
-  cards with no module tag, evidence tests that started failing, an upstream
+  wants a token answers). Cards with no module tag, evidence tests that started failing, an upstream
   rules diff waiting for sync and an archive whose newest post is old join
   them once primogen can compute them.
 
@@ -72,7 +71,9 @@ Go, jq, node and uv come from mise: `mise install` in the checkout reads
   not in the rulings site's canonical form or citing no reference, a line of
   the history of changes naming no card exactly or under no dated heading,
   left out of the bundle: the fix is in the gist, then `/sync`; a TWDA deck
-  naming a card the card data lacks, left out until the card data has it; a post the
+  naming a card the card data lacks, left out until the card data has it;
+  the TWDA decks of the archetype labels' window the owner has not labelled
+  that match no archetype (a new one, or a pass over the labels); a post the
   advanced rules cite that the archive does not hold, or a ruling's rulebook
   reference no section of the rulebook opens: the fix is upstream, unless
   archon gives that id to a paragraph `archon.go` opens no section at; and
@@ -104,10 +105,10 @@ Go, jq, node and uv come from mise: `mise install` in the checkout reads
 ## Checks
 
 `gofmt -l .` prints nothing, `go vet ./...` and `go test ./...` pass, in
-about ten seconds. The tests build a bundle from `testdata/upstream`, the
+about half a minute. The tests build a bundle from `testdata/upstream`, the
 real upstreams pinned and served by a local file server (the whole card
-data with its sets, the TWDA cut to the decks of 2026 and three the tests
-name, one deck as VDB's API answers it, `vtes-rulings` and `archon-vibe`'s three documents at one commit
+data with its sets, the TWDA cut to the archetype labels' window and three
+decks the tests name, one deck as VDB's API answers it, `vtes-rulings` and `archon-vibe`'s three documents at one commit
 each, the ids archon.vekn.net gives those documents' headings by archon's
 own renderer at that commit, which every link of theirs and of the
 advanced rules to them is checked against, the archive cut to

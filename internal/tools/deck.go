@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"io"
 	"maps"
+	"math"
 	"net/http"
 	"net/url"
 	"regexp"
@@ -50,7 +51,7 @@ func addDeck(s *mcp.Server, l *Live) {
 			"of its cards. Takes a decklist as text, a TWDA deck id or a VDB link; validates it (sizes, crypt groups, banned cards, " +
 			"legality today) and returns the computed facts: the crypt table with capacities, disciplines, titles and texts, " +
 			"which crypt cards have what each library card requires and at which level, the library by type with every card's official text, " +
-			"the costs, and the procedure a deck analysis and advice follow.",
+			"the costs, the nearest archetypes and tournament decks with the cards that differ, and the procedure a deck analysis and advice follow.",
 		InputSchema: deckSchema,
 		Annotations: &mcp.ToolAnnotations{ReadOnlyHint: true, IdempotentHint: true, OpenWorldHint: new(false)},
 	}, func(ctx context.Context, _ *mcp.CallToolRequest, in deckInput) (*mcp.CallToolResult, any, error) {
@@ -76,7 +77,7 @@ func addDeck(s *mcp.Server, l *Live) {
 		var out strings.Builder
 		for fit := full; ; fit++ {
 			out.Reset()
-			if dk.write(&out, d.b, today, fixes, in.Detail, fit); out.Len()+len(DataLine(d.b)) <= limit {
+			if dk.write(&out, d, today, fixes, in.Detail, fit); out.Len()+len(DataLine(d.b)) <= limit {
 				break
 			}
 			if fit == bare {
@@ -342,13 +343,9 @@ func atoi(s string) int {
 	return n
 }
 
-func isCrypt(c *bundle.Card) bool {
-	return slices.Contains(c.Types, "Vampire") || slices.Contains(c.Types, "Imbued")
-}
-
 func (dk *deck) split() (crypt, library []deckEntry, nCrypt, nLibrary int) {
 	for _, e := range dk.entries {
-		if isCrypt(e.card) {
+		if e.card.IsCrypt() {
 			crypt, nCrypt = append(crypt, e), nCrypt+e.count
 		} else {
 			library, nLibrary = append(library, e), nLibrary+e.count
@@ -406,11 +403,13 @@ const commentCut = 1500
 // How much of the dossier is written, to fit the result's bound.
 const (
 	full      = iota
+	lean      // the relatives' events, comments and differences left out
 	noLibrary // the library's texts left out
 	bare      // every text and the crypt's rosters left out
 )
 
-func (dk *deck) write(out *strings.Builder, b *bundle.Bundle, today string, fixes []string, detail bool, fit int) {
+func (dk *deck) write(out *strings.Builder, d *data, today string, fixes []string, detail bool, fit int) {
+	b := d.b
 	crypt, library, nCrypt, nLibrary := dk.split()
 	fmt.Fprintf(out, "# Deck: %s\n", cmp.Or(dk.name, "(unnamed)"))
 	if t := dk.twda; t != nil {
@@ -432,16 +431,13 @@ func (dk *deck) write(out *strings.Builder, b *bundle.Bundle, today string, fixe
 	if dk.twda != nil {
 		comment = dk.twda.Comment
 	}
-	if comment = strings.TrimSpace(comment); comment != "" {
-		out.WriteString("\nThe author's comment:\n")
-		if r := []rune(comment); !detail && len(r) > commentCut {
-			kept := string(r[:commentCut])
-			comment = kept[:max(strings.LastIndexAny(kept, " \n"), 0)] + fmt.Sprintf(" […] (cut at %d of %d characters: detail gives it whole)", commentCut, len(r))
-		}
-		for line := range strings.Lines(comment) {
-			fmt.Fprintf(out, "> %s", line)
-		}
+	if strings.TrimSpace(comment) != "" {
 		out.WriteString("\n")
+		cut := commentCut
+		if detail {
+			cut = math.MaxInt
+		}
+		writeComment(out, comment, cut, "detail gives it whole")
 	}
 	if len(dk.notes) > 0 {
 		out.WriteString("\nHow the list was read:\n")
@@ -458,16 +454,17 @@ func (dk *deck) write(out *strings.Builder, b *bundle.Bundle, today string, fixe
 		}
 	}
 
-	if fit > full {
+	if fit >= noLibrary {
 		fmt.Fprintf(out, "\nLeft out to fit this result: the texts of the %s. Call vtes_cards with the names, 10 at a time.\n",
 			map[int]string{noLibrary: "library's cards", bare: "crypt's and the library's cards, and each discipline's vampires"}[fit])
 	}
 	writeCrypt(out, crypt, nCrypt, fit)
 	writeLibrary(out, library, crypt, nLibrary, nCrypt, fit)
+	dk.writeRelatives(out, d, detail, fit)
 
 	out.WriteString("## How to answer\n\nThese facts are computed from the card data; the texts above are official. " +
 		"Rulings are not in this dossier: call vtes_cards for a card's rulings and history, vtes_rules_case for a rules point. " +
-		"This dossier computes no modules, no hand expectation and no relatives (nearest archetypes and tournament decks), " +
+		"This dossier computes no modules and no hand expectation, " +
 		"and primogen does not serve theory.md and modules.md, which the procedures name: what you say of them is your own reading, " +
 		"to be said so.\n\n")
 	out.WriteString(strings.TrimSpace(b.DeckAnalysis))
@@ -633,7 +630,7 @@ func writeLibrary(out *strings.Builder, library, crypt []deckEntry, n, nCrypt, f
 			if who != "" {
 				fmt.Fprintf(out, "  %s\n", who)
 			}
-			if fit == full {
+			if fit < noLibrary {
 				quote(out, e.card.Text)
 			} else if m := reTextRequires.FindString(e.card.Text); m != "" && who == "" {
 				fmt.Fprintf(out, "  Its text requires: %q\n", m)
@@ -734,4 +731,163 @@ func quote(out *strings.Builder, text string) {
 		fmt.Fprintf(out, "  > %s", line)
 	}
 	out.WriteString("\n")
+}
+
+const (
+	relativesShown      = 3
+	relativeCommentCut  = 600
+	relativeCommentWide = 1500
+	differencesShown    = 12 // of each kind, the most copies first
+)
+
+// writeRelatives places the deck among the archetypes of the labels and the
+// TWDA decks of their window.
+func (dk *deck) writeRelatives(out *strings.Builder, d *data, detail bool, fit int) {
+	out.WriteString("## Relatives\n\n")
+	r := d.rel
+	if r == nil {
+		out.WriteString("This data bundle holds no archetype labels: no relatives until it is rebuilt.\n\n")
+		return
+	}
+	c := r.Class
+	var cards []bundle.DeckCard
+	for _, e := range dk.entries {
+		cards = append(cards, bundle.DeckCard{ID: e.card.ID, Count: e.count})
+	}
+	id := ""
+	if dk.twda != nil {
+		id = dk.twda.ID
+	}
+	fmt.Fprintf(out, "Similarity from card counts against the %d TWDA decks since %s, rare cards weighing more, the crypt %.0f%% and the library %.0f%%: "+
+		"1 for the same list, 0 for no card in common. Archetypes: codex-of-the-damned's labels (codex-of-the-damned.org), by its maintainer, "+
+		"pass of %s, curated and revisable; each of their decks left out in turn, %.0f%% are placed back in their archetype, %.0f%% in its family (variants merged).\n\n",
+		len(r.Decks), c.Since, 100*c.CryptWeight, 100*(1-c.CryptWeight), c.Generated, 100*r.GroupRate, 100*r.RootRate)
+	v := r.Vector(cards)
+	if v.Empty() {
+		fmt.Fprintf(out, "No card of this deck is played by %d or more of those decks: it has no relatives there.\n\n", c.MinDF)
+		return
+	}
+	if a := r.Label(id); a != nil {
+		fmt.Fprintf(out, "This deck is labelled %s.\n\n", archetypeName(r, a))
+	}
+	matches := r.Archetypes(v, id, relativesShown)
+	fmt.Fprintf(out, "Nearest archetypes (95 in 100 of an archetype's own decks are at %.2f or more from it):\n", r.Threshold)
+	for _, m := range matches {
+		a := &c.Archetypes[m.Index]
+		fmt.Fprintf(out, "- %s: %.2f; %d decks", archetypeName(r, a), m.Similarity, r.Size(m.Index))
+		if len(a.Representative) > 0 {
+			fmt.Fprintf(out, ", its representative decks %s", strings.Join(a.Representative, ", "))
+		}
+		out.WriteString(".\n")
+	}
+	if matches[0].Similarity < r.Threshold {
+		fmt.Fprintf(out, "\nThis deck is near no archetype: even the closest is under %.2f. Read it on its own mechanics; "+
+			"the decks below are its nearest lists, not its archetype.\n", r.Threshold)
+	}
+	out.WriteString("\nNearest tournament decks (call vtes_deck with an id for the whole list):\n\n")
+	if fit > full {
+		out.WriteString("Their events, their authors' comments and the cards that differ from this deck are left out to fit this result.\n")
+	}
+	here := map[int]int{}
+	for _, e := range dk.entries {
+		here[e.card.ID] += e.count
+	}
+	for _, m := range r.Nearest(v, id, relativesShown) {
+		t := r.Decks[m.Index]
+		if fit > full {
+			fmt.Fprintf(out, "- %s, %s: %.2f", t.ID, cmp.Or(t.Name, "(unnamed)"), m.Similarity)
+			if a := r.Label(t.ID); a != nil {
+				fmt.Fprintf(out, "; labelled %s", archetypeName(r, a))
+			}
+			out.WriteString(".\n")
+			continue
+		}
+		fmt.Fprintf(out, "### %s, %s: %.2f\n\nWon by %s at %s, %s, %s, %d players.", t.ID, cmp.Or(t.Name, "(unnamed)"), m.Similarity, t.Player, t.Event, t.Place, t.Date, t.Players)
+		if t.URL != "" {
+			fmt.Fprintf(out, " Event report: %s", t.URL)
+		}
+		if a := r.Label(t.ID); a != nil {
+			fmt.Fprintf(out, " Labelled %s.", archetypeName(r, a))
+		}
+		out.WriteString("\n")
+		cut, whole := relativeCommentCut, "vtes_deck "+t.ID+" gives it"
+		if detail {
+			cut = relativeCommentWide
+		}
+		writeComment(out, t.Comment, cut, whole)
+		out.WriteString(d.differences(here, t))
+		out.WriteString("\n")
+	}
+	if fit > full {
+		out.WriteString("\n")
+	}
+}
+
+// writeComment quotes an author's comment, cut at a word past cut runes,
+// saying where to read it whole.
+func writeComment(out *strings.Builder, comment string, cut int, whole string) {
+	if comment = strings.TrimSpace(comment); comment == "" {
+		return
+	}
+	if r := []rune(comment); len(r) > cut {
+		kept := string(r[:cut])
+		comment = kept[:max(strings.LastIndexAny(kept, " \n"), 0)] + fmt.Sprintf(" […] (cut at %d of %d characters: %s)", cut, len(r), whole)
+	}
+	out.WriteString("The author's comment:\n")
+	for line := range strings.Lines(comment) {
+		fmt.Fprintf(out, "> %s", line)
+	}
+	out.WriteString("\n")
+}
+
+func archetypeName(r *bundle.Relatives, a *bundle.Archetype) string {
+	if root := r.Root(a); root != a {
+		return fmt.Sprintf("**%s** (%s), a variant of **%s**", a.Name, a.Ref, root.Name)
+	}
+	return fmt.Sprintf("**%s** (%s)", a.Name, a.Ref)
+}
+
+// differences names the cards a relative plays otherwise than the deck.
+func (d *data) differences(here map[int]int, t *bundle.Deck) string {
+	there := map[int]int{}
+	for _, c := range t.Cards {
+		there[c.ID] += c.Count
+	}
+	var onlyHere, onlyThere, counts []string
+	ids := slices.Collect(maps.Keys(here))
+	for id := range there {
+		if _, ok := here[id]; !ok {
+			ids = append(ids, id)
+		}
+	}
+	slices.SortFunc(ids, func(a, b int) int {
+		return cmp.Or(cmp.Compare(max(here[b], there[b]), max(here[a], there[a])), strings.Compare(d.byID[a].Name, d.byID[b].Name))
+	})
+	for _, id := range ids {
+		name := d.byID[id].Name
+		switch h, th := here[id], there[id]; {
+		case th == 0:
+			onlyHere = append(onlyHere, fmt.Sprintf("%d× %s", h, name))
+		case h == 0:
+			onlyThere = append(onlyThere, fmt.Sprintf("%d× %s", th, name))
+		case h != th:
+			counts = append(counts, fmt.Sprintf("%s, %d here and %d there", name, h, th))
+		}
+	}
+	if len(onlyHere)+len(onlyThere)+len(counts) == 0 {
+		return "The same list as this deck.\n"
+	}
+	var out strings.Builder
+	for _, part := range []struct {
+		head  string
+		cards []string
+	}{{"Only in this deck", onlyHere}, {"Only in " + t.ID, onlyThere}, {"Other counts", counts}} {
+		if n := len(part.cards); n > differencesShown {
+			part.cards = append(part.cards[:differencesShown], fmt.Sprintf("and %d more", n-differencesShown))
+		}
+		if len(part.cards) > 0 {
+			fmt.Fprintf(&out, "%s: %s.\n", part.head, strings.Join(part.cards, "; "))
+		}
+	}
+	return out.String()
 }

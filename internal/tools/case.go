@@ -900,7 +900,7 @@ var (
 // breakdown reads a library card's text into its effects by level and the
 // sentences limiting when it is played.
 func breakdown(c *bundle.Card) []string {
-	if slices.Contains(c.Types, "Vampire") || slices.Contains(c.Types, "Imbued") {
+	if c.IsCrypt() {
 		return nil
 	}
 	var lines []string

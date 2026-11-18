@@ -27,7 +27,10 @@ compares them with upstream and records the commit below.
   `modules.md` is the module catalog the owner canonized on 2026-08-25.
 - `classification.json`: the owner's archetype labels for the
   tournament-winning decks since 2021-07 (the 2026-07 pass), forked from
-  codex-of-the-damned @ `18be59e`. The input of the archetype tools.
+  codex-of-the-damned @ `18be59e`. `vtes_deck` places a deck among its
+  archetypes ([product.md](product.md)); the build names the decks since
+  that the labels lack and no archetype matches. A variant is of an archetype
+  that is itself no variant; a file breaking that fails the build.
 - `game-terms.json`: the game terms in English (the 2024 rulebook's, plus
   the two 2025 terms and Seraph, a trait printed on Black Hand vampires)
   and their translations in six languages, from

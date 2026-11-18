@@ -46,6 +46,7 @@ type data struct {
 	rules *rulesIndex
 	byID  map[int]*bundle.Card
 	decks map[string]*bundle.Deck
+	rel   *bundle.Relatives
 }
 
 func NewLive(b *bundle.Bundle) *Live {
@@ -63,6 +64,7 @@ func (l *Live) Swap(b *bundle.Bundle) {
 	for i := range b.Decks {
 		d.decks[b.Decks[i].ID] = &b.Decks[i]
 	}
+	d.rel = bundle.NewRelatives(b)
 	l.p.Store(d)
 }
 

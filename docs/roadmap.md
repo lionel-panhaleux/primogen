@@ -39,8 +39,9 @@ owner's decision.
   what it misses.
 - The legality check on the engine (`vtes_engine_check`), which needs a
   position-check endpoint in zero-vtes.
-- The meta: the Go port of the TWDA analytics, `vtes_meta`,
-  `vtes_card_stats`; codex-of-the-damned reads primogen's output.
+- The meta: clustering the decks no archetype matches into new ones, and
+  `vtes_meta` with its archetype shares; codex-of-the-damned reads
+  primogen's output.
 - Members: Archon login, tournaments, full-field meta, rankings, community
   links.
 - Bot-based deck testing, once the engine covers the pool and the bot is
