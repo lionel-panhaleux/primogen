@@ -2187,9 +2187,9 @@ may choose the same again, e.g. {Supernatural Resistance}.[^4-3-9]
 
 #### 4.3.3 Strike resolution
 
-Everything printed on a strike happens at strike resolution, and none of it if the strike does not resolve:
-{Contagion}'s steal is dodgeable, {Escaped Mental Patient} does not burn, and burning a committed weapon leaves that
-strike with no effect.[^4-3-10]
+Everything printed on a strike happens at strike resolution, and none of it if the strike does not resolve: against a
+strike: combat ends, {Escaped Mental Patient} does not burn, and burning a committed weapon leaves that strike with no
+effect.[^4-3-10]
 
 The strike's effects apply, then damage is resolved. Blood a strike moves is moved before damage is mended, e.g.
 {Darkness Within}; blood from burning a minion with a strike arrives after strike resolution and cannot mend that
@@ -2347,16 +2347,16 @@ combat but not the wound, e.g. {Coma}.[^4-5-21]
 **Base rules.** A dodge is a strike that deals no damage and protects the dodging minion and their possessions from the
 effects of the opposing strike; retainers are not protected.
 
-#### 4.6.1 A dodge negates the whole strike
+#### 4.6.1 A dodge negates the whole strike against the dodger
 
-A dodge stops the strike, not merely its damage: {Serpent's Numbing Kiss} places no card and locks no one; {Blissful
-Agony} [VAL] starts no new combat.[^4-6-1]
+A dodge stops everything the strike does to the dodging minion, not merely its damage: {Serpent's Numbing Kiss} places
+no card and locks no one; {Blissful Agony} [VAL] starts no new combat.[^4-6-1]
 
 A strike that would move its own card onto the opposing minion leaves that card where it was: a weapon so worded stays
 equipped on the bearer, e.g. {Rowan Ring}, {Enhanced Coagulant}.
 
-An effect worded as a step following strike resolution is still part of the strike and is dodged with it, e.g.
-{Contagion} [DAI] steals the minion only if the strike resolves.
+An effect worded as a step following strike resolution is still part of the strike and does not apply to the dodging
+minion: a dodged strike resolves, but {Contagion} [DAI] does not steal the minion that dodged it.
 
 A secondary effect that disables the opponent's weapons fails too. Dodge the {Blood Fury} template and the dodging
 minion's weapon strikes inflict damage normally that round.[^4-6-2]
@@ -2364,8 +2364,10 @@ minion's weapon strikes inflict damage normally that round.[^4-6-2]
 #### 4.6.2 Dodge against prevention
 
 Preventing the damage leaves the strike resolved, so the rest of the strike's effect still applies unless it requires
-damage successfully inflicted ([§4.5.5](#455-immunity)). Dodging means the strike never resolved and none of it
-applies. {Fleshcraft} prevented still places the card; {Fleshcraft} dodged does not.[^4-6-3]
+damage successfully inflicted ([§4.5.5](#455-immunity)). A dodged strike resolves too, but none of it applies to the
+dodging minion or their possessions; what it does to its own striker still happens, e.g. {Escaped Mental Patient} still
+burns at the end of combat and {Molotov Cocktail} still goes on its striker. A strike that never happens because the
+combat ended first has not resolved. {Fleshcraft} prevented still places the card; {Fleshcraft} dodged does not.[^4-6-3]
 
 #### 4.6.3 What survives a dodge
 
@@ -3581,7 +3583,8 @@ exemplar cards.
   (e.g. {Rowan Ring}, {Wooden Stake}). [§2.5.3](#253-effects-outliving-their-source)
 - **"cannot be prevented by cards requiring …"** — a "cannot" naming the cards it forbids bars playing them entirely,
   even to cycle ("cannot use any additional strikes" is read the same way); dodging the strike defeats the disabling
-  (e.g. {Blood Fury}, {Rigor Mortis}). [§1.1.3](#113-cannot), [§4.6.1](#461-a-dodge-negates-the-whole-strike)
+  (e.g. {Blood Fury}, {Rigor Mortis}). [§1.1.3](#113-cannot),
+  [§4.6.1](#461-a-dodge-negates-the-whole-strike-against-the-dodger)
 - **"do not replace until"** — the delayed card is drawn at the first moment its condition is met, ahead of anything
   else triggering then, even if the card was since burned; canceled with the card, and governing only normal plays.
   [§1.9.2](#192-delayed-replacement), [§1.9.3](#193-abnormal-entry-and-cancellation)
@@ -5908,14 +5911,11 @@ exemplar cards.
     20230111]](https://usenet.krcg.org/t/vekn-80258/#m2)
     — {Supernatural Resistance}, {Death Seeker}, {Primal Instincts}, {Rigor Mortis}.
 
-[^4-3-10]: [[ANK
-    20200909]](https://usenet.krcg.org/t/vekn-78845/#m2)
-    [[LSJ 20040130]](https://usenet.krcg.org/t/wvuR79dNCDU/#m2) [[LSJ
-    20001127-2]](https://usenet.krcg.org/t/KInac4MQMuA/#m4) [[LSJ 20070508]](https://usenet.krcg.org/t/FOLkbrSh0Ns/#m5)
-    [[LSJ 20010806-1]](https://usenet.krcg.org/t/PuawBcgSIKI/#m5) [[PIB
-    20141026]](https://usenet.krcg.org/t/vekn-66960/#m3) [[LSJ
-    20100310]](https://usenet.krcg.org/t/hYN6L3COpqw/#m1) — {Contagion}, {Escaped Mental Patient}, {Flash Grenade},
-    {Gianna di Canneto}, {Zip Gun}.
+[^4-3-10]: [[LSJ 20001127-2]](https://usenet.krcg.org/t/KInac4MQMuA/#m4) [[LSJ
+    20070508]](https://usenet.krcg.org/t/FOLkbrSh0Ns/#m5) [[LSJ 20010806-1]](https://usenet.krcg.org/t/PuawBcgSIKI/#m5)
+    [[PIB 20141026]](https://usenet.krcg.org/t/vekn-66960/#m3) [[LSJ
+    20100310]](https://usenet.krcg.org/t/hYN6L3COpqw/#m1) — {Escaped Mental Patient}, {Flash Grenade}, {Gianna di
+    Canneto}, {Zip Gun}.
 
 [^4-3-11]: [[LSJ 20051123]](https://usenet.krcg.org/t/Ww3zSY8cVNs/#m2) [[LSJ
     20080212]](https://usenet.krcg.org/t/Yg1nZfgkpGM/#m3) [[RBK
@@ -6102,7 +6102,9 @@ exemplar cards.
 [^4-6-2]: [[LSJ 20040928]](https://usenet.krcg.org/t/GBcR6aNjIk4/#m1) — {Blood Fury}, {Blood Rage}, {Personal Scourge},
     {Soul Burn}.
 
-[^4-6-3]: [[LSJ 19990106-2]](https://usenet.krcg.org/t/6dDhJmBlpXY/#m0) — {Fleshcraft}, {Bonecraft}.
+[^4-6-3]: [[LSJ 19990106-2]](https://usenet.krcg.org/t/6dDhJmBlpXY/#m0)
+    [[RBK strike-effects]](https://archon.vekn.net/help/rules#strike-effects) — {Escaped Mental Patient}, {Molotov
+    Cocktail}, {Fleshcraft}, {Bonecraft}.
 
 [^4-6-4]: [[RTR 19941109]](https://usenet.krcg.org/t/_6CXoKTSLnw/#m0) [[TOM
     19951216]](https://usenet.krcg.org/t/0G-jqB_fcyE/#m1) [[PIB
