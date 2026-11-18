@@ -38,10 +38,9 @@ in? Is the board getting shorter?
 ## 3. Retrospective
 
 The only way the harness changes. Read the `Friction:` trailers since the
-last pass (`git log --grep '^Friction:'`) and the reviewer's advisory
-findings. The same friction seen twice becomes a proposed rule, with its
-evidence and one line of reason; a correction the owner had to repeat becomes
-a proposed hook. Remove rules that lapsed as readily as you add new ones.
+last pass (`git log --grep '^Friction:'`). The same friction seen twice
+becomes a proposed rule, with its evidence and one line of reason; a
+correction the owner had to repeat becomes a proposed hook. Remove rules that lapsed as readily as you add new ones.
 Nothing joins the harness because it seems useful. Proposals go to the owner.
 
 Then reset `<!-- completed-since-upkeep: 0 -->` in `BOARD.md`.

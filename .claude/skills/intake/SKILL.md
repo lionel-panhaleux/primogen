@@ -16,9 +16,11 @@ answer four questions, briefly:
    decision to overturn, naming the page and the sentence; a duplicate
    sharpens the existing line.
 2. **Completability.** Can "done" be stated, checkable where possible (a
-   command's output, a test, a graded session)? If not it is documentation:
-   put it on the right docs page. Waiting on a date or an outside event is
-   not a line either: say so to the owner.
+   command's output, a test, a graded session), within the session that
+   ships it? If not it is documentation: put it on the right docs page.
+   Waiting on a date or an outside event is not a line either, nor a
+   done-condition's part: what needs a deploy or a day to pass is a watch,
+   said to the owner.
 3. **Scope.** Split only on a real boundary, never to put part of it off. If
    it is small and nothing is in flight, do it now instead of adding a line.
    Work that belongs to another repository is done there, through that

@@ -19,7 +19,9 @@ has a `board/<slug>.md`, read it and keep working notes there.
 Hold to `docs/principles.md`. Before using a library, a protocol or a tool,
 read its current documentation (`docs/operations.md` "Looking things up").
 Before writing any card or rules claim into `knowledge/`, a test or a tool's
-text, check it against the sources; never from memory.
+text, check it against the sources; never from memory. Rebuild
+`data/bundle.json.gz` (`primogen build`) before tuning or checking anything
+against it.
 
 Scope grows in place: what exploration turns up and shares the change is done
 in it. Only a genuinely separate topic goes back through `/intake`. Work in
@@ -39,8 +41,8 @@ the code.
 
 Start the `reviewer` agent with the diff (or the commit range), the board
 line's text and nothing else: it has not seen this conversation and reads the
-docs and the code itself. A docs-only change is not reviewed; a change to
-`knowledge/` is.
+docs and the code itself. A change to `knowledge/` is reviewed, and so is a
+docs change stating a domain or code claim; a wording change is not.
 
 Blocking and advisory findings are both fixed in the same change. A finding
 you think wrong is argued in the next round; after two rounds of

@@ -49,4 +49,4 @@ Two lists, nothing else.
 
 - **BLOCKING**: each with `file:line`, the problem in one line, the fix.
   Real findings only, all of them.
-- **ADVISORY**: recorded, fixed in the same change, read by upkeep.
+- **ADVISORY**: fixed in the same change.

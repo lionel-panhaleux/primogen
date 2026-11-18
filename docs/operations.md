@@ -32,8 +32,8 @@ The server refreshes itself; there is no cron job and no operator.
   while a nightly fetch replaces it); the bundle keeps only the posts the
   rulings and the advanced rules cite.
 - A refresh builds a new bundle, checks it (no fewer cards than the live one,
-  and no fewer TWDA decks than 99% of its, since a deck may leave the TWDA; the evidence tests join the check when they
-  exist), saves it
+  and no fewer TWDA decks than 99% of its, since a deck may leave the TWDA),
+  saves it
   beside the live file and renames it over, then swaps it in between two tool
   calls. The saved file is the published bundle, the server's
   `/bundle.json.gz`.
@@ -54,7 +54,7 @@ The server refreshes itself; there is no cron job and no operator.
   journal: the build's warnings (below), and every link of the catalog
   (`knowledge/llms.txt`) that does not answer a GET: no answer within 30
   seconds, a 404, a 410 or a server error (an endpoint that refuses a GET or
-  wants a token answers). Cards with no module tag, evidence tests that started failing, an upstream
+  wants a token answers). Cards with no module tag, an upstream
   rules diff waiting for sync and an archive whose newest post is old join
   them once primogen can compute them.
 
