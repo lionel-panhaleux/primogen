@@ -211,6 +211,10 @@ func TestQueryCards(t *testing.T) {
 		{args: []string{"cards", "Patagia: Flaps Allowing Limited Flight"}, want: []string{
 			"- 1995-10, VTES (https://archive.org/details/Duelist7/page/n109): Can only be played once on a given vampire.\n",
 		}, not: []string{"1995-11-01"}},
+		// a card named like a Sabbat Path; The Path of Blood is named like no Path a vampire follows
+		{args: []string{"cards", "Path of Death and the Soul", "The Path of Blood"}, want: []string{
+			"Not a Path: Path of Death and the Soul is also the name of a Sabbat Path, which a vampire follows (its \"Path:\" line; vtes_rules_read rulebook:paths-of-enlightenment).",
+		}, not: []string{"Not a Path: The Path of Blood"}},
 		{args: []string{"cards", "Anson"}, want: []string{"## Anson (G1)", "Rulings: the rulings database has none for this card."}},
 		{args: []string{"cards", " "}, err: "give 1 to 10 non-empty card names"},
 		{args: []string{"cards", "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k"}, err: "give 1 to 10 non-empty card names"},
@@ -403,6 +407,8 @@ func TestQueryDeck(t *testing.T) {
 		{"12434", []string{"(cut at 1500 of 6967 characters: detail gives it whole)"}},
 		// a deck the TWDA archives, illegal today
 		{"zink2k1", []string{"Tournament legal today (", "): no, as archived:\n- Protect Thine Own is banned since 2008-01-01: take it out"}},
+		// a card named like a Sabbat Path says so in the library
+		{"11979", []string{"**Path of Death and the Soul** (card 101360). Not a Path: "}},
 		// the TWDA deck with the most distinct cards keeps its texts
 		{"2k6munduko", []string{"## Library (", "  > "}},
 	} {

@@ -184,6 +184,7 @@ func Build(ctx context.Context, up Upstream, archive *Archive) (*Bundle, []strin
 	b.attachChanges(history, warn)
 	b.keepPosts(archive, warn)
 	b.linkRulebook(warn)
+	b.namePaths(warn)
 	return b, warnings, nil
 }
 
@@ -441,6 +442,28 @@ func (b *Bundle) linkRulebook(warn func(string, ...any)) {
 				}
 			}
 		}
+	}
+}
+
+const PathsSection = "rulebook:paths-of-enlightenment"
+
+// namePaths marks each card named "Path of" or "The Path of" a Path some
+// vampire follows: a player naming the Path may be read as naming the card.
+func (b *Bundle) namePaths(warn func(string, ...any)) {
+	paths := map[string]string{}
+	for _, c := range b.Cards {
+		if c.IsCrypt() && c.Path != "" {
+			paths[Fold("path of "+c.Path)] = c.Path
+		}
+	}
+	for i := range b.Cards {
+		c := &b.Cards[i]
+		if !c.IsCrypt() {
+			c.NamedLikePath = paths[strings.TrimPrefix(Fold(c.Name), "the ")]
+		}
+	}
+	if !slices.ContainsFunc(b.Sections, func(s Section) bool { return s.ID == PathsSection }) {
+		warn("no rulebook section %s, which a card named like a Path points to", PathsSection)
 	}
 }
 

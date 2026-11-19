@@ -65,13 +65,16 @@ type Card struct {
 	Disciplines []string
 	// krcg's flags for a library card with several disciplines: one effect
 	// combines them (Combo) or effects use different ones (Multidisc).
-	Combo          bool
-	Multidisc      bool
-	Advanced       bool
-	Capacity       int
-	Group          string
-	Title          string
-	Path           string
+	Combo     bool
+	Multidisc bool
+	Advanced  bool
+	Capacity  int
+	Group     string
+	Title     string
+	Path      string
+	// NamedLikePath is the Sabbat Path a card other than a vampire is named
+	// after ("Path of Death and the Soul"), though it is not that Path.
+	NamedLikePath  string
 	BloodCost      string
 	PoolCost       string
 	ConvictionCost string

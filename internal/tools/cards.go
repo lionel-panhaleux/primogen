@@ -329,6 +329,10 @@ func requirements(c *bundle.Card) []string {
 	if c.Path != "" {
 		add("Path: %s.", c.Path)
 	}
+	if c.NamedLikePath != "" {
+		add("Not a Path: %s is also the name of a Sabbat Path, which a vampire follows (its \"Path:\" line; vtes_rules_read %s). "+
+			"This card is not that Path: a player naming the Path may mean either.", c.Name, bundle.PathsSection)
+	}
 	var costs []string
 	for _, cost := range [][2]string{{c.BloodCost, "blood"}, {c.PoolCost, "pool"}, {c.ConvictionCost, "conviction"}} {
 		if cost[0] != "" {
