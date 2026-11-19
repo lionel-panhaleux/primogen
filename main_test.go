@@ -319,7 +319,7 @@ func TestQueryDeck(t *testing.T) {
 		if i < 0 || j < i {
 			t.Fatalf("no dossier in:\n%s", out)
 		}
-		return out[i:j]
+		return strings.Replace(out[i:j], " (this deck left out of the counts)", "", 1)
 	}
 	byID, err := query("deck", "12947")
 	if err != nil {
@@ -466,6 +466,9 @@ func TestQueryDeck(t *testing.T) {
 		"Answered here by Hunter's Mark, denies the strike, needs [CEL][THA]: no crypt card here has it.\n",
 		"most often Immortal Grapple (", ". Not answered here.\n",
 		"This deck is near no archetype", "This is a deck idea: the advice procedure applies to it", "# Procedure: advice on a deck or an idea",
+		// its track record: the Sword in no winning deck since it became legal
+		"  - Sword of Nuln: legal since 2003-06-18, ", " years; in no TWDA deck.\n",
+		"- A deck idea's share of rarely played copies is not computed: its counts are not a list's.\n",
 	} {
 		if !strings.Contains(idea, w) {
 			t.Errorf("the deck idea: missing %q in:\n%s", w, idea)
@@ -500,6 +503,57 @@ func TestQueryDeck(t *testing.T) {
 	} {
 		if !strings.Contains(banu, w) {
 			t.Errorf("the Banu list beside its reference: missing %q in:\n%s", w, banu[strings.Index(banu, "## Beside its reference"):strings.Index(banu, "## Relatives")])
+		}
+	}
+	if !strings.Contains(banu, "- Every card of this deck is played by at least one of these decks.\n") {
+		t.Errorf("the Banu list's track record:\n%s", banu[strings.Index(banu, "## Track record"):strings.Index(banu, "## Relatives")])
+	}
+	// two precons from the card data's set information: an old one past the window's 90th percentile of rarely
+	// played cards, a recent one within its reference's range
+	var precons []struct {
+		PrintedName string `json:"printed_name"`
+		Suffix      string `json:"suffix"`
+		Prints      []struct {
+			Set struct {
+				Code string `json:"code"`
+			} `json:"set"`
+			Occurrences []struct {
+				Type   string `json:"type"`
+				Bundle string `json:"bundle"`
+				Copies int    `json:"copies"`
+			} `json:"occurrences"`
+		} `json:"prints"`
+	}
+	cardData, err := os.ReadFile("testdata/upstream/vtes.json")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := json.Unmarshal(cardData, &precons); err != nil {
+		t.Fatal(err)
+	}
+	for _, tc := range []struct{ set, bundle, want string }{
+		{"KoT", "PV", "The reference: all the 1494 TWDA decks since 2021-07-01: no archetype of 10 decks or more"},
+		{"V5", "PM", "The reference: its nearest archetype, **Malk 22** (C3), its decks and its variants'"},
+	} {
+		var list []string
+		for _, c := range precons {
+			for _, p := range c.Prints {
+				for _, o := range p.Occurrences {
+					if p.Set.Code == tc.set && o.Type == "Precon" && o.Bundle == tc.bundle {
+						list = append(list, fmt.Sprintf("%dx %s", o.Copies, strings.TrimSuffix(c.PrintedName+" ("+c.Suffix+")", " ()")))
+					}
+				}
+			}
+		}
+		out, err := query(append([]string{"deck"}, list...)...)
+		if err != nil {
+			t.Fatal(err)
+		}
+		record := out[strings.Index(out, "## Track record"):strings.Index(out, "## Relatives")]
+		if !strings.Contains(out, tc.want) ||
+			tc.set == "KoT" && !strings.Contains(record, "rarely played cards: 43% of those not new. Beside the reference decks of the section above, each against the others, in %: 0, 0, 0, 4, 13, 27, 80 (min, 10%, 25%, median, 75%, 90%, max); 51 of the 1494 above it, 1442 below.") ||
+			tc.set == "V5" && !strings.Contains(record, "rarely played cards: 0% of those not new. Beside the reference decks of the section above, each against the others, in %: 0, 0, 0, 1, 2, 7, 11 (min, 10%, 25%, median, 75%, 90%, max); 13 of the 26 above it, 0 below.") {
+			t.Errorf("the %s %s precon's track record:\n%s", tc.set, tc.bundle, record)
 		}
 	}
 	if strings.Contains(idea, "### Budgets") {

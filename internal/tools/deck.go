@@ -52,7 +52,7 @@ func addDeck(s *mcp.Server, l *Live) {
 			"legality today) and returns the computed facts: the crypt table with capacities, disciplines, titles and texts, " +
 			"which crypt cards have what each library card requires and at which level, the library by type with every card's official text, " +
 			"the library by module with each module's density and expected copies per hand, " +
-			"its answers to the field's combat defenses, the costs, its budgets, concentration and staples beside its reference decks, the nearest archetypes and tournament decks with the cards that differ, and the procedure a deck analysis and advice follow.",
+			"its answers to the field's combat defenses, the costs, its budgets, concentration and staples beside its reference decks, its track record among winning decks (rarely played cards, cards no winner plays), the nearest archetypes and tournament decks with the cards that differ, and the procedure a deck analysis and advice follow.",
 		InputSchema: deckSchema,
 		Annotations: &mcp.ToolAnnotations{ReadOnlyHint: true, IdempotentHint: true, OpenWorldHint: new(false)},
 	}, func(ctx context.Context, _ *mcp.CallToolRequest, in deckInput) (*mcp.CallToolResult, any, error) {
@@ -605,7 +605,7 @@ const commentCut = 1500
 // How much of the dossier is written, to fit the result's bound.
 const (
 	full      = iota
-	lean      // the relatives' events, comments and differences left out, and the reference's cards
+	lean      // the relatives' events, comments and differences left out, the reference's cards and the track record's
 	noLibrary // the library's texts left out
 	bare      // every text and the crypt's rosters left out
 )
@@ -676,7 +676,8 @@ func (dk *deck) write(out *strings.Builder, d *data, today string, fixes []strin
 	writeLibrary(out, library, crypt, nLibrary, nCrypt, fit)
 	writeModules(out, b.Modules, library, crypt, nLibrary, dk.draft, fit)
 	writePosture(out, b, library, crypt, nCrypt)
-	dk.writeReference(out, d, fit)
+	ref := dk.writeReference(out, d, fit)
+	dk.writeRecord(out, d, ref, today, fit)
 	dk.writeRelatives(out, d, detail, fit)
 
 	out.WriteString("## How to answer\n\nThese facts are computed from the card data; the texts above are official. " +

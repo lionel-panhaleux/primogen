@@ -55,6 +55,11 @@ type data struct {
 
 	measuresOnce sync.Once
 	measures     map[string]*measures // of the window's decks, by id
+
+	windowOnce sync.Once
+	windowPlay map[string]int     // the window's decks playing each card, by feature
+	windowRare map[string]float64 // each window deck's share of rarely played copies, by id
+	newSince   string             // the date from which a card is new
 }
 
 func NewLive(b *bundle.Bundle) *Live {

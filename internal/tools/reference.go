@@ -181,20 +181,21 @@ func (d *data) referenceOf(cards []bundle.DeckCard, id string) reference {
 		window, referenceMin, r.Threshold, referenceMin), decks: decks}
 }
 
-// writeReference sets the list beside its reference decks.
-func (dk *deck) writeReference(out *strings.Builder, d *data, fit int) {
+// writeReference sets the list beside its reference decks, and returns
+// them, nil when it sets none.
+func (dk *deck) writeReference(out *strings.Builder, d *data, fit int) *reference {
 	out.WriteString("## Beside its reference\n\n")
 	_, _, _, nLibrary := dk.split()
 	switch {
 	case d.rel == nil:
 		out.WriteString("This data bundle holds no archetype labels: no reference until it is rebuilt.\n\n")
-		return
+		return nil
 	case dk.draft:
 		out.WriteString("A deck idea is not set beside winning lists: its sizes are not a list's.\n\n")
-		return
+		return nil
 	case nLibrary == 0:
 		out.WriteString("No library card given: nothing to set beside a reference.\n\n")
-		return
+		return nil
 	}
 	cards := map[int]int{}
 	var list []bundle.DeckCard
@@ -217,7 +218,7 @@ func (dk *deck) writeReference(out *strings.Builder, d *data, fit int) {
 
 	fmt.Fprintf(out, "The reference: %s. These decks won a tournament: their figures say what winners play, not what is strong. "+
 		"Each figure is this list's, then the reference decks' as min, 10%%, 25%%, median, 75%%, 90%% and max, then how many of them are above and below it by count.\n\n", ref.what)
-	fmt.Fprintf(out, "- Library: %d cards; the reference's %s.\n", here.lib, spread(ms, func(m *measures) float64 { return float64(m.lib) }))
+	fmt.Fprintf(out, "- Library: %d cards; the reference's %s.\n", here.lib, spread(values(ms, func(m *measures) float64 { return float64(m.lib) })))
 
 	out.WriteString("\n### Budgets\n\n")
 	lines := func(figures []figure) {
@@ -227,9 +228,9 @@ func (dk *deck) writeReference(out *strings.Builder, d *data, fit int) {
 				detail = f.detail(here)
 			}
 			fmt.Fprintf(out, "- %s: %d, %.0f per 100 library cards%s. Reference: %s; per 100 library cards: %s; %s.\n", f.name, v, pct(v, here.lib), detail,
-				spread(ms, func(m *measures) float64 { return float64(f.get(m)) }),
-				spread(ms, func(m *measures) float64 { return pct(f.get(m), m.lib) }),
-				rank(ms, float64(v), func(m *measures) float64 { return float64(f.get(m)) }))
+				spread(values(ms, func(m *measures) float64 { return float64(f.get(m)) })),
+				spread(values(ms, func(m *measures) float64 { return pct(f.get(m), m.lib) })),
+				rank(values(ms, func(m *measures) float64 { return float64(f.get(m)) }), float64(v)))
 		}
 	}
 	lines(budgets)
@@ -262,6 +263,7 @@ func (dk *deck) writeReference(out *strings.Builder, d *data, fit int) {
 	writeStaples(out, d, here, ms, plays, fit == full)
 	writeFew(out, d, here, ms, plays, fit == full)
 	out.WriteString("\n")
+	return &ref
 }
 
 // writeStaples names the reference's staples this list lacks or plays below
@@ -414,8 +416,8 @@ func quantile(s []float64, p float64) float64 {
 	return s[lo] + (x-float64(lo))*(s[lo+1]-s[lo])
 }
 
-func spread(ms []*measures, get func(*measures) float64) string {
-	s := values(ms, get)
+// spread is a sorted slice's min, deciles, quartiles, median and max.
+func spread(s []float64) string {
 	var parts []string
 	for _, p := range []float64{0, 0.1, 0.25, 0.5, 0.75, 0.9, 1} {
 		parts = append(parts, fmt.Sprintf("%.0f", quantile(s, p)))
@@ -431,17 +433,17 @@ func fiveNumbers(s []float64) string {
 	return strings.Join(parts, ", ") + " (10%, 25%, median, 75%, 90%)"
 }
 
-func rank(ms []*measures, v float64, get func(*measures) float64) string {
+func rank(s []float64, v float64) string {
 	above, below := 0, 0
-	for _, m := range ms {
-		switch x := get(m); {
+	for _, x := range s {
+		switch {
 		case x > v:
 			above++
 		case x < v:
 			below++
 		}
 	}
-	return fmt.Sprintf("%d of the %d above it, %d below", above, len(ms), below)
+	return fmt.Sprintf("%d of the %d above it, %d below", above, len(s), below)
 }
 
 func num(f float64) string {

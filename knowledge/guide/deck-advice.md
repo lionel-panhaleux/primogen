@@ -31,7 +31,13 @@ steps 1 to 4 and 7 on the draft), then:
    a defense a rush plan leaves unanswered is the first weakness to name.
    A defense matters only against what it stops: a grapple denies only
    strikes that are not hand strikes, and a deck winning combat by blocking
-   lands its block regardless.
+   lands its block regardless. `vtes_deck`'s track record gives the cards
+   no winner of the window plays, each with its years legal and its count
+   in the whole TWDA. A rarely played card marks distance (`theory.md`);
+   an engine legal for years and in no winning deck, or in none for years,
+   has had its chances and not won. Say the idea built on it is not
+   competitive, in those words, before any praise of the engine, then what
+   it would need to compete; a casual plan is still worth helping.
 8. **Name the cut and the add**, in copies, with the pillar each serves.
    The staples a list lacks and its cards few of its reference play are
    where to look first, never a prescription: a deviation may be the

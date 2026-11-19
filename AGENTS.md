@@ -75,7 +75,7 @@ trailer; upkeep reads them.
 
 `vtes_cards`, the four rules tools (`vtes_rules_case`,
 `vtes_rules_search`, `vtes_rules_read`, `vtes_rulings_archive`),
-`vtes_deck` (a list validated, its crypt, library, modules, combat posture, costs, budgets beside its reference decks and relatives computed) and
+`vtes_deck` (a list validated, its crypt, library, modules, combat posture, costs, budgets beside its reference decks, track record and relatives computed) and
 `vtes_card_stats` (a card's play rates, companions and competitors for its slot) hosted at
 `https://mcp.krcg.org/mcp` and refreshing themselves (not announced yet), and
 from a local install (`primogen stdio`) downloading the published bundle.
