@@ -413,7 +413,7 @@ func TestQueryDeck(t *testing.T) {
 			`"Vilein" reads as no card with its count: left out`,
 			`"Combat Shotgn" reads as no card with its count: left out`,
 			// a combination card, one of whose effects needs [for] alone
-			"Crypt cards with the [for] or [obf] it requires (each effect's symbols in the text say which): 7 of 12: Massimiliano (G6) ×2 [FOR];",
+			"Crypt cards with every discipline one of its effects names ([for]): 7 of 12: Massimiliano (G6) ×2 [FOR];",
 			// a list outside the TWDA, and its relatives
 			"- **Gangrel Resistance** (C11): 0.85;",
 			"### 12947, (unnamed): 0.93\n\nWon by Jozef Patrnciak at Year of the Sabbat Paths IV: Amaranth, Herne, Germany, 2026-10-24, 20 players. Event report: https://archon.vekn.net/t/12947\n" +
@@ -457,7 +457,9 @@ func TestQueryDeck(t *testing.T) {
 		"A deck idea: 1 crypt and 5 library cards, a line without a count read as one copy",
 		"Tournament legal today (", "), its sizes aside: yes.",
 		"Crypt cards with the [obl] or [tha] and path Death and the Soul it requires (each effect's symbols in the text say which): 1 of 1: Eulogio Sánchez de los Reyes (G6) [OBL THA].",
-		"- 2× **Villein**", "- **Zillah + Villein ramp-bloat** (Bloat & pool economy): 2 copies; core: Villein ×2",
+		"- 2× **Villein**",
+		// a combination card's effect needing both its disciplines
+		"Crypt cards with every discipline one of its effects names ([cel][tha]): none.", "- **Zillah + Villein ramp-bloat** (Bloat & pool economy): 2 copies; core: Villein ×2",
 		"In no module shown (3 copies): Hunter's Mark, Morbidity, Sword of Nuln",
 		"This deck is near no archetype", "This is a deck idea: the advice procedure applies to it", "# Procedure: advice on a deck or an idea",
 	} {

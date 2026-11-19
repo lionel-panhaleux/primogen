@@ -1003,7 +1003,37 @@ func densityClass(d float64) string {
 	return "tactical"
 }
 
-var reTextRequires = regexp.MustCompile(`Requires [^.]*\.`)
+var (
+	reTextRequires = regexp.MustCompile(`Requires [^.]*\.`)
+	reLeading      = regexp.MustCompile(`^(?:\s*\[[A-Za-z]+\])+`)
+	reSymbol       = regexp.MustCompile(`\[([A-Za-z]+)\]`)
+)
+
+// comboEffects are the fewest disciplines an effect of a combination card
+// requires: the symbols leading a line, not those it cites ("As [qui] above").
+func comboEffects(c *bundle.Card) [][]string {
+	if !c.Combo {
+		return nil
+	}
+	var effects [][]string
+	for line := range strings.Lines(c.Text) {
+		var eff []string
+		for _, m := range reSymbol.FindAllStringSubmatch(reLeading.FindString(line), -1) {
+			d := strings.ToLower(m[1])
+			if slices.ContainsFunc(c.Disciplines, func(r string) bool { return strings.EqualFold(r, d) }) && !slices.Contains(eff, d) {
+				eff = append(eff, d)
+			}
+		}
+		if slices.Sort(eff); len(eff) > 0 && !slices.ContainsFunc(effects, func(e []string) bool { return slices.Equal(e, eff) }) {
+			effects = append(effects, eff)
+		}
+	}
+	return slices.DeleteFunc(effects, func(e []string) bool {
+		return slices.ContainsFunc(effects, func(f []string) bool {
+			return len(f) < len(e) && !slices.ContainsFunc(f, func(d string) bool { return !slices.Contains(e, d) })
+		})
+	})
+}
 
 // playable says which crypt cards have what a library card requires as the
 // card data holds it (disciplines, clans, path), at which level; empty when
@@ -1013,7 +1043,15 @@ func playable(c *bundle.Card, crypt []deckEntry, nCrypt int) string {
 		return ""
 	}
 	var needs []string
-	if len(c.Disciplines) > 0 {
+	effects := comboEffects(c)
+	switch {
+	case len(effects) > 0:
+		ds := make([]string, len(effects))
+		for i, eff := range effects {
+			ds[i] = "[" + strings.Join(eff, "][") + "]"
+		}
+		needs = append(needs, strings.Join(ds, " or "))
+	case len(c.Disciplines) > 0:
 		ds := make([]string, len(c.Disciplines))
 		for i, d := range c.Disciplines {
 			ds[i] = "[" + d + "]"
@@ -1026,9 +1064,17 @@ func playable(c *bundle.Card, crypt []deckEntry, nCrypt int) string {
 	if c.Path != "" {
 		needs = append(needs, "path "+c.Path)
 	}
-	head := "Crypt cards with the " + strings.Join(needs, " and ") + " it requires"
-	if len(c.Disciplines) > 1 {
-		head += " (each effect's symbols in the text say which)"
+	var head string
+	if len(effects) > 0 {
+		head = "Crypt cards with every discipline one of its effects names (" + needs[0] + ")"
+		for _, n := range needs[1:] {
+			head += " and the " + n
+		}
+	} else {
+		head = "Crypt cards with the " + strings.Join(needs, " and ") + " it requires"
+		if len(c.Disciplines) > 1 {
+			head += " (each effect's symbols in the text say which)"
+		}
 	}
 	var able []string
 	n, superior := 0, 0
@@ -1048,7 +1094,12 @@ func playable(c *bundle.Card, crypt []deckEntry, nCrypt int) string {
 				}
 			}
 		}
-		if len(c.Disciplines) > 0 && len(levels) == 0 {
+		meetsAnEffect := slices.ContainsFunc(effects, func(eff []string) bool {
+			return len(eff) <= len(levels) && !slices.ContainsFunc(eff, func(d string) bool {
+				return !slices.ContainsFunc(levels, func(l string) bool { return strings.EqualFold(l, d) })
+			})
+		})
+		if len(c.Disciplines) > 0 && len(levels) == 0 || len(effects) > 0 && !meetsAnEffect {
 			continue
 		}
 		name := copies(e)
