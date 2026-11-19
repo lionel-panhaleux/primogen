@@ -1,0 +1,41 @@
+#!/usr/bin/env bash
+#MISE description="Release: checks, tag the next v0.N.0, deploy to frankfurt, push main and the tag, probe mcp.krcg.org"
+set -euo pipefail
+
+# The binary is built from the working tree and stamped with the tag: both must be HEAD.
+if [ -n "$(git status --porcelain)" ]; then
+	echo "release: the working tree is not clean" >&2
+	exit 1
+fi
+[ "$(git branch --show-current)" = main ] || { echo "release: not on main" >&2; exit 1; }
+git fetch --quiet origin main
+git merge-base --is-ancestor origin/main HEAD || { echo "release: main is behind origin/main" >&2; exit 1; }
+
+if tag=$(git describe --tags --exact-match HEAD 2>/dev/null); then
+	echo "release: HEAD is already $tag, deploying it again"
+else
+	last=$(git tag --list 'v0.*' --sort=-v:refname | head -1)
+	minor=${last#v0.}
+	minor=${minor%%.*}
+	tag="v0.$(( ${minor:-0} + 1 )).0"
+	[ -z "$last" ] && tag=v0.1.0
+
+	unformatted=$(gofmt -l .)
+	[ -z "$unformatted" ] || { echo "release: gofmt: $unformatted" >&2; exit 1; }
+	go vet ./...
+	go test ./...
+
+	git tag -a "$tag" -m "primogen $tag"
+	echo "release: tagged $tag"
+fi
+
+# Deployed before pushed: a pushed knowledge change is read by the binary already running.
+(cd deploy && uv run pyinfra -y inventory.py deploy.py)
+git push origin main "$tag"
+
+version=$(curl -fsS https://mcp.krcg.org/mcp \
+	-H 'Content-Type: application/json' -H 'Accept: application/json, text/event-stream' \
+	-d '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-06-18","capabilities":{},"clientInfo":{"name":"release","version":"0"}}}' |
+	jq -r .result.serverInfo.version)
+[ "$version" = "$tag" ] || { echo "release: mcp.krcg.org serves $version, not $tag" >&2; exit 1; }
+echo "release: mcp.krcg.org serves $tag"

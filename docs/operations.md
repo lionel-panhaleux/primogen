@@ -112,10 +112,14 @@ Go, jq, node and uv come from mise: `mise install` in the checkout reads
   refreshed as "Data refresh" says, keeping current the file given
   with `-bundle`. It builds one first if there is none, and reads
   `knowledge/` from GitHub unless given `-knowledge`.
+- `mise run release` releases: on a clean `main` not behind `origin`, it
+  runs the checks, tags the next `v0.N.0` (none if HEAD has a tag already),
+  deploys with pyinfra without asking, pushes `main` and the tag, and fails
+  unless `mcp.krcg.org` then reports that tag as its version.
 - `mise run deploy` (`--dry` only shows) cross-compiles the binary for
   frankfurt and converges it there with pyinfra from `deploy/`, which pins
-  `server-setup`'s package. It refuses to run until `mcp.krcg.org` resolves
-  to frankfurt.
+  `server-setup`'s package, showing every change and asking first. It
+  refuses to run until `mcp.krcg.org` resolves to frankfurt.
 
 ## Checks
 
@@ -143,12 +147,15 @@ updates that test in the same change.
 
 ## Releases and deploys
 
-Trunk-based. A release is a tag; the owner tags and deploys. Knowledge files
+Trunk-based. Every deploy is a release, a tag `v0.N.0` the binary reports
+as its version; `mise run release` does it all. When the owner says
+deploy, a session runs it; nothing is deployed untagged. Knowledge files
 travel inside the data bundle, and the hosted server reads them from `main`
 on GitHub: a pushed knowledge change reaches users within the hour, without
 a deploy. Pushing `knowledge/` is publishing it, and the deployed binary
 reads it: a change to a knowledge file's format is deployed before it is
-pushed, and a binary reading a new knowledge file after it is pushed.
+pushed, and a binary reading a new knowledge file after it is pushed (that
+file pushed on its own first, since a release deploys before it pushes).
 
 ## Looking things up
 
