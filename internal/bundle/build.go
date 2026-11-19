@@ -163,7 +163,7 @@ func Build(ctx context.Context, up Upstream, archive *Archive) (*Bundle, []strin
 			return nil, nil, fmt.Errorf("%s: %w", up.Cards, err)
 		}
 	}
-	if b.Modules, err = readModules(tags, modules, theory, b.Cards, warn); err != nil {
+	if b.Modules, b.Defenses, err = readModules(tags, modules, theory, b.Cards, warn); err != nil {
 		return nil, nil, err
 	}
 	decks, twdaVersion, err := fetchDecks(ctx, up.TWDA, b.Cards, warn)

@@ -1,7 +1,8 @@
 {
   "_meta": {
     "about": "The cards of each module of modules.md, by the module's name and section there. pieces: how many of its cards, one at least core, a deck holds for the module to show (1 when absent). core: the cards a module's entry names first; support: those it adds in parentheses or as refills, enablers and fetch targets. A card may belong to several modules. Names are the card data's; a vampire's name without its group stands for every group of it.",
-    "source": "guide/modules.md"
+    "source": "guide/modules.md",
+    "defenses": "The combat defenses of modules.md's section of that name, by its entries' names. cards: the cards giving the defense, which make a deck count as carrying it. answers: the cards answering it, grouped by how; a card's level, when it has one, follows its name (capitals: superior; several symbols: every one; or: either)."
   },
   "untagged": {
     "Swarm-of-ones": "a crypt and library shape: its cards (weenies, Legionnaires, Servitors, embraces) belong to other modules",
@@ -264,5 +265,55 @@
      "core": ["Lutz von Hohenzollern"]},
     {"section": "Star engines (signature combos, one-liners)", "pieces": 2, "module": "Powerbase: Savannah + Salt of Thoth",
      "core": ["Powerbase: Savannah", "Salt of Thoth"]}
+  ],
+  "defenses": [
+    {"defense": "Combat ends",
+     "cards": ["Earth Meld", "Form of Mist", "Majesty", "Rapid Change", "Memory Rift", "No Trace", "Force of Personality",
+       "Shroud of Absence", "Pass Through Shadow", "Charismatic Aura", "Oubliette", "Staredown", "Shadow Body",
+       "Spiritual Intervention", "Night Terrors", "Torrent", "Meld with the Land", "Serpent's Numbing Kiss", "Mirror Image",
+       "Kiss of Cathari", "Unholy Penance", "Alpha Glint", "Bond with the Mountain", "Catatonic Fear", "Flash Grenade",
+       "Preternatural Evasion", "Flesh Bond", "Flow Within the Mountain", "Mercy for the Weak"],
+     "answers": [
+       {"how": "denies the strike", "cards": ["Immortal Grapple [pot]", "Hunter's Mark [CEL][THA]", "Sanguine Entrapment [CEL][QUI]",
+         "Lapse [TEM]", "Thoughts Betrayed [DOM]", "Dog Pack", "NSA Trio", "Mind of the Wilds [ani][aus]", "Fast Reaction [aus]",
+         "The Status Perfectus"]},
+       {"how": "undoes it, combat going on, whatever ended it", "cards": ["Psyche! [CEL]", "Telepathic Tracking [AUS]", "Relentless Reaper [THN]"]},
+       {"how": "cancels the strike card, a battle of numbers that misses a strike another card grants", "cards": ["Death Seeker", "Charismatic Aura [aus][pre]", "Anticipation [AUS]", "The Jones [SER]"]}
+     ]},
+    {"defense": "Dodge",
+     "cards": ["Form of Mist", "Dust Up", "Sideslip", "Side Strike", "Hell-for-Leather",
+       "Voracious Vermin", "Spiritual Intervention", "Plasmic Form", "Treasured Samadji", "Staredown", "Outside the Hourglass",
+       "Dodge", "Behind You!", "Wind Dance", "Preternatural Evasion", "Anesthetic Touch", "Occlusion", "Swift Cover",
+       "Rockheart", "Read Intentions", "Gemini's Mirror", "Bond with the Mountain", "Arms of the Abyss", "Arms of Ahriman",
+       "Acrobatics", "Stutter-Step", "The Jones", "Absorb the Mind", "Amria", "Dust to Dust"],
+     "answers": [
+       {"how": "denies the strike", "cards": ["Immortal Grapple [pot]", "Sanguine Entrapment [cel][qui]", "Lapse [TEM]",
+         "Thoughts Betrayed [DOM]", "Fast Reaction [aus]", "The Status Perfectus"]},
+       {"how": "damage that is not a strike", "cards": ["Carrion Crows [ani]", "Weather Control [tha]", "Drawing Out the Beast [ANI]",
+         "Necrosis [THN]", "Outside the Hourglass [TEM]", "Gianna di Canneto"]},
+       {"how": "a strike that cannot be dodged", "cards": ["Dust Up [ani]", "Earthshock [pot]", "Aggressive Corpse"]},
+       {"how": "cancels the strike card, a battle of numbers", "cards": ["Death Seeker", "Charismatic Aura [aus][pre]", "Anticipation [AUS]", "The Jones [SER]"]}
+     ]},
+    {"defense": "Prevention",
+     "cards": ["Rolling with the Punches", "Hidden Strength", "Indomitability", "Soak", "Skin of Steel", "Superior Mettle",
+       "Unflinching Persistence", "Resilience", "Skin of Rock", "Armor of Vitality", "Undead Persistence", "Relentless Reaper",
+       "Rego Motum", "Sideslip", "Flesh of Marble", "Glancing Blow", "Kevlar Vest", "Flak Jacket", "Leather Jacket",
+       "Guardian Angel", "Blood Tears of Kephran", "Bear's Skin", "Typhonic Beast", "Horrid Form", "Obedient Flesh",
+       "Tranquility Shield", "Wall of Filth", "Stonestrength", "Rockheart", "Touch of Valeren", "Diversion"],
+     "answers": [
+       {"how": "steals blood, which is not damage", "cards": ["Theft of Vitae [tha]", "Hunger of Marduk [tha]", "Diversion [tha]",
+         "Donnybrook [ser]", "Absorb the Mind [myt]"]},
+       {"how": "unpreventable damage", "cards": ["Weather Control [tha]", "Drawing Out the Beast [ANI]", "Necrosis [THN]",
+         "Gianna di Canneto", "Enhanced Coagulant"]},
+       {"how": "damage past Fortitude only", "cards": ["Bollix [tha]", "Blood Rage [tha]", "Blood Fury [tha]", "Soul Burn [tha]",
+         "Soulgrinder [POT] or [THA]"]},
+       {"how": "not a strike, past prevention of a strike's damage only", "cards": ["Carrion Crows [ani]", "Outside the Hourglass [TEM]"]},
+       {"how": "cancels the card, a battle of numbers", "cards": ["Death Seeker"]}
+     ]},
+    {"defense": "Grapple",
+     "cards": ["Immortal Grapple"],
+     "answers": [
+       {"how": "cancels it", "cards": ["Bollix [pre]", "Charismatic Aura [aus][pre]", "Groundfighting", "Disengage", "Death Seeker"]}
+     ]}
   ]
 }

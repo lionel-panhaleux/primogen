@@ -25,6 +25,11 @@ steps 1 to 4 and 7 on the draft), then:
    consecutive), strike cards competing for the one strike a minion has per
    round unless a card grants more, requirements of every recruit.
 7. **Judge a new idea against its baseline**: the established archetype
-   doing the same job, and the standard answers it must survive (Strike:
-   combat ends and Immortal Grapple for a combat plan).
+   doing the same job, and the standard answers it must survive. For a
+   combat plan, `vtes_deck`'s combat posture gives how many winners carry
+   each defense and the deck's answers at the level its crypt plays them:
+   a defense a rush plan leaves unanswered is the first weakness to name.
+   A defense matters only against what it stops: a grapple denies only
+   strikes that are not hand strikes, and a deck winning combat by blocking
+   lands its block regardless.
 8. **Name the cut and the add**, in copies, with the pillar each serves.

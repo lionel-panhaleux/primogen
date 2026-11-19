@@ -25,12 +25,17 @@ compares them with upstream and records the commit below.
   dossier; `theory.md`, `modules.md`, `card-comparison.md` and
   `meta-reading.md` are served by no tool yet.
   `modules.md` is the module catalog the owner canonized on 2026-08-25,
-  checked against the card texts on 2026-11-19. `module-tags.json` gives
-  each of its modules, by its name and section there, its cards: the core
-  its entry names first, the support it adds (refills, enablers, fetch
-  targets), each checked against its text in the card data, and gives the
-  reason a module has no card of its own. `vtes_deck` reads a library
-  by module with it, serving the modules' names, not the catalog's prose.
+  checked against the card texts on 2026-11-19, but for its "Combat
+  defenses", written on 2026-11-19 after codex-of-the-damned's
+  combat-modules article, each card read from its text, not canonized by
+  the owner. `module-tags.json` gives each of its modules, by its name and
+  section there, its cards: the core its entry names first, the support it
+  adds (refills, enablers, fetch targets), each checked against its text in
+  the card data, and gives the reason a module has no card of its own; and
+  each combat defense its cards and its answers, grouped by how they answer
+  it, each with the level it needs. `vtes_deck` reads a library by module
+  with it, serving the modules' names, not the catalog's prose, and its
+  combat posture, serving the defenses' names and their answers' `how`.
 - `classification.json`: the owner's archetype labels for the
   tournament-winning decks since 2021-07 (the 2026-07 pass), forked from
   codex-of-the-damned @ `18be59e`. `vtes_deck` places a deck among its

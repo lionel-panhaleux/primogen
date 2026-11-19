@@ -21,8 +21,10 @@ curl -fsS https://static.krcg.org/data/twda.json |
 	jq -c --arg since "$since" '[to_entries[] | select(.value.event.date >= $since or (.key | IN("2k6munduko", "12434", "zink2k1")))] | from_entries' > twda.json
 # the deckbuilders' APIs, each under its host: a TWDA deck as VDB's and VTES
 # Decks's answer it, under an id the TWDA lacks, which the tests read from them;
-# an Amaranth deck, the answer for a deck Amaranth lacks, and its card catalog
+# the graded Banu list from VDB; an Amaranth deck, the answer for a deck
+# Amaranth lacks, and its card catalog
 curl -fsS --create-dirs -o vdb.im/api/deck/notwda https://vdb.im/api/deck/12947
+curl -fsS -o vdb.im/api/deck/7dcfd9fcb https://vdb.im/api/deck/7dcfd9fcb
 curl -fsS --create-dirs -o api.vtesdecks.com/1.0/decks/notwda https://api.vtesdecks.com/1.0/decks/tournament-12947
 for id in 4d3aa426-70da-44b7-8cb7-92377a1a0dbd notpinned; do
 	curl -fsS --create-dirs -o "amaranth.vtes.co.nz/api/deck/$id" "https://amaranth.vtes.co.nz/api/deck?id=$id"

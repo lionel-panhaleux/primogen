@@ -38,6 +38,8 @@ type Bundle struct {
 	Classification Classification
 	// Modules are the module catalog's cards, knowledge/guide/module-tags.json.
 	Modules []Module
+	// Defenses are the combat defenses of the module catalog, from the same files.
+	Defenses []Defense
 	// GameTerms are the game's terms in English, from knowledge/game-terms.json.
 	GameTerms []string
 	// Shorthand is the players' shorthand of knowledge/shorthand.json.

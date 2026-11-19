@@ -78,7 +78,7 @@ Go, jq, node and uv come from mise: `mise install` in the checkout reads
   `knowledge/guide/module-tags.json` no card has, left out, a module there
   that `modules.md` does not name under its section, or a module of
   `modules.md` with no tags and no reason under `untagged`, a reason there
-  for no such module, a module needing more pieces than it tags, or
+  for no such module, a module needing more pieces than it tags, a defense there that `modules.md`'s "Combat defenses" does not name or one it names without tags, an answer's level naming a discipline its card does not require, or
   `theory.md` no longer reading the density classes `vtes_deck` applies; how many library cards the TWDA
   decks of that window play and no module tags, the 50 most played named
   with how many decks play them (a pass over the tags); a post the
@@ -119,7 +119,7 @@ Go, jq, node and uv come from mise: `mise install` in the checkout reads
 about half a minute. The tests build a bundle from `testdata/upstream`, the
 real upstreams pinned and served by a local file server (the whole card
 data with its sets, the TWDA cut to the archetype labels' window and three
-decks the tests name, the deckbuilders' APIs, each under its host (one deck as VDB's and VTES Decks's answer it, an Amaranth deck, the answer for a deck Amaranth lacks, and Amaranth's card catalog), `vtes-rulings` and `archon-vibe`'s three documents at one commit
+decks the tests name, the deckbuilders' APIs, each under its host (one deck as VDB's and VTES Decks's answer it, the graded Banu list as VDB's, an Amaranth deck, the answer for a deck Amaranth lacks, and Amaranth's card catalog), `vtes-rulings` and `archon-vibe`'s three documents at one commit
 each, the ids archon.vekn.net gives those documents' headings by archon's
 own renderer at that commit, which every link of theirs and of the
 advanced rules to them is checked against, the archive cut to

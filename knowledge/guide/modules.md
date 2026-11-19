@@ -301,6 +301,53 @@ defense and economy come first (except when analyzing an actual combat deck).
   *allies* wield it; in an ally-swarm deck the allies are the fighters, not the crypt. See Allies
   → Ally-armed combat swarm.
 
+## Combat defenses
+
+What a combat plan must get through, after codex-of-the-damned.org's combat-modules article ("rush
+decks need to make sure their rush actions produce results, so they need solid solutions against
+Combat Ends and other defenses"), the cards read from their text (2026-11-19). `vtes_deck` reports,
+for every deck, each defense's share of the TWDA decks of the archetype labels' window and the
+deck's answers to it, checked against its crypt. Left out: Obedience and Mental Maze, which keep
+combat from starting against a younger vampire or an ally (answered by acting with an older
+vampire, not by a card), and the cards ending combat before range is determined (Living Manse,
+Powerbase: Savannah, superior Alpha Glint), which only an answer undoing the end reaches.
+
+- **Combat ends** — Strike: combat ends (Earth Meld, Form of Mist, Majesty, Rapid Change, Memory
+  Rift, No Trace…), from a card or granted by one (Memory Rift, Shroud of Absence, Night Terrors).
+  The most prominent defense. Answers denying the strike: Immortal Grapple (only hand strikes this
+  round), superior Hunter's Mark (its first round), superior Sanguine Entrapment, superior Lapse
+  (the initial strike), superior Thoughts Betrayed (strike cards only), Dog Pack, NSA Trio (a block's
+  first round), Mind of the Wilds (the blocker), and, for a wall, Fast Reaction and The Status
+  Perfectus (a new combat whose first round the acting minion cannot strike). Answers undoing it,
+  combat going on, whatever ended it: superior Psyche!, superior Telepathic Tracking, superior
+  Relentless Reaper. Answers cancelling the strike card, a battle of numbers that misses a strike
+  another card grants: Death Seeker, Charismatic Aura, superior Anticipation, superior The Jones.
+- **Dodge** — Strike: dodge, from a card (Form of Mist, Sideslip, Side Strike, Dust Up,
+  Hell-for-Leather…) or once each combat from equipment (Treasured Samadji). An ally's own dodge
+  (Carlton Van Wyk, Mylan Horseed) covers only the ally, and is not counted. Answers denying the
+  strike: Immortal Grapple, Sanguine Entrapment, superior Lapse, superior Thoughts Betrayed (strike
+  cards only), Fast Reaction, The Status Perfectus. Damage that is not a strike: Carrion Crows,
+  Weather Control, superior Drawing Out the Beast, superior Necrosis, superior Outside the
+  Hourglass, Gianna di Canneto. Strikes that cannot be dodged: Dust Up's Animalism, Earthshock,
+  Aggressive Corpse. Cancelling the strike card: Death Seeker, Charismatic Aura, superior
+  Anticipation, superior The Jones.
+- **Prevention** — Fortitude (Rolling with the Punches, Hidden Strength, Indomitability, Soak, Skin
+  of Steel…), Rego Motum, superior Sideslip, Flesh of Marble, Glancing Blow, armor and other
+  prevention in play (Kevlar Vest, Guardian Angel, Leather Jacket…). Answers: stealing blood, which
+  is not damage (Theft of Vitae, Hunger of Marduk, Diversion, Donnybrook, Absorb the Mind);
+  unpreventable damage (Weather Control, superior Drawing Out the Beast, superior Necrosis, Gianna di
+  Canneto, Enhanced Coagulant); damage past Fortitude only (Bollix, Blood Rage, Blood Fury, Soul
+  Burn, superior Soulgrinder); damage that is not a strike (Carrion Crows, superior Outside the
+  Hourglass), past prevention of a strike's damage only (superior Rolling with the Punches, Rego
+  Motum, Skin of Steel, Superior Mettle, Glancing Blow); Death Seeker cancelling the card.
+- **Grapple** — Immortal Grapple, played at close range by the opposing minion: only hand strikes
+  for the round, so weapons, ranged strikes and steals (Hunger of Marduk, Theft of Vitae) are
+  denied. Answers cancelling it: Bollix, Charismatic Aura, Groundfighting, Disengage, Death Seeker.
+  Otherwise: strike with the hands, or keep the range long.
+
+An answer's own requirements hold: `vtes_deck` checks its level, clan and path against the crypt,
+and quotes a requirement only its text states (an Anarch) as unchecked.
+
 ## Counters & tech
 
 - **Anti-vote** — Delaying Tactics (forces vote diversity table-wide), Poison Pill (cheaper,

@@ -461,6 +461,10 @@ func TestQueryDeck(t *testing.T) {
 		// a combination card's effect needing both its disciplines
 		"Crypt cards with every discipline one of its effects names ([cel][tha]): none.", "- **Zillah + Villein ramp-bloat** (Bloat & pool economy): 2 copies; core: Villein ×2",
 		"In no module shown (3 copies): Hunter's Mark, Morbidity, Sword of Nuln",
+		// the combat posture: an answer to combat ends no vampire here plays at its level
+		"## Combat posture against the field", "TWDA decks since 2021-07-01 carry a card giving it",
+		"Answered here by Hunter's Mark, denies the strike, needs [CEL][THA]: no crypt card here has it.\n",
+		"most often Immortal Grapple (", ". Not answered here.\n",
 		"This deck is near no archetype", "This is a deck idea: the advice procedure applies to it", "# Procedure: advice on a deck or an idea",
 	} {
 		if !strings.Contains(idea, w) {
@@ -469,6 +473,19 @@ func TestQueryDeck(t *testing.T) {
 	}
 	if strings.Contains(idea[strings.Index(idea, "## Library by module"):strings.Index(idea, "## Relatives")], "per hand") {
 		t.Errorf("a density computed for a deck idea:\n%s", idea)
+	}
+	// the graded Banu list: its answers to combat ends and to prevention, with the crypt cards at their level
+	banu, err := query("deck", "https://vdb.im/decks/7dcfd9fcb")
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, w := range []string{
+		"Answered here by Hunter's Mark ×4, denies the strike, needs [CEL][THA]: 6 of 12 crypt cards; Psyche! ×2, undoes it, combat going on, whatever ended it, needs [CEL]: 9 of 12 crypt cards.\n",
+		"Answered here by Hunger of Marduk ×7, steals blood, which is not damage, needs [tha] and clan Banu Haqim: 12 of 12 crypt cards; Blood Fury ×2, damage past Fortitude only, needs [tha]: 12 of 12 crypt cards.\n",
+	} {
+		if !strings.Contains(banu, w) {
+			t.Errorf("the Banu list: missing %q in:\n%s", w, banu)
+		}
 	}
 	if _, err := query("deck", "Sword of Nuln", "Morbidity"); err == nil || !strings.Contains(err.Error(), "for a deck idea, draft reads a line without a count as one copy") {
 		t.Errorf("an idea's cards without draft: %v", err)

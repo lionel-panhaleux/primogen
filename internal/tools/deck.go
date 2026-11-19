@@ -51,7 +51,8 @@ func addDeck(s *mcp.Server, l *Live) {
 			"of its cards. Takes a decklist as text, a TWDA deck id or a deck link from VDB, VTES Decks or Amaranth, or an idea's cards with draft; validates it (sizes, crypt groups, banned cards, " +
 			"legality today) and returns the computed facts: the crypt table with capacities, disciplines, titles and texts, " +
 			"which crypt cards have what each library card requires and at which level, the library by type with every card's official text, " +
-			"the library by module with each module's density and expected copies per hand, the costs, the nearest archetypes and tournament decks with the cards that differ, and the procedure a deck analysis and advice follow.",
+			"the library by module with each module's density and expected copies per hand, " +
+			"its answers to the field's combat defenses, the costs, the nearest archetypes and tournament decks with the cards that differ, and the procedure a deck analysis and advice follow.",
 		InputSchema: deckSchema,
 		Annotations: &mcp.ToolAnnotations{ReadOnlyHint: true, IdempotentHint: true, OpenWorldHint: new(false)},
 	}, func(ctx context.Context, _ *mcp.CallToolRequest, in deckInput) (*mcp.CallToolResult, any, error) {
@@ -674,6 +675,7 @@ func (dk *deck) write(out *strings.Builder, d *data, today string, fixes []strin
 	writeCrypt(out, crypt, nCrypt, fit)
 	writeLibrary(out, library, crypt, nLibrary, nCrypt, fit)
 	writeModules(out, b.Modules, library, crypt, nLibrary, dk.draft, fit)
+	writePosture(out, b, library, crypt, nCrypt)
 	dk.writeRelatives(out, d, detail, fit)
 
 	out.WriteString("## How to answer\n\nThese facts are computed from the card data; the texts above are official. " +
@@ -1080,10 +1082,7 @@ func playable(c *bundle.Card, crypt []deckEntry, nCrypt int) string {
 	n, superior := 0, 0
 	for _, e := range crypt {
 		v := e.card
-		if len(c.Clans) > 0 && !slices.ContainsFunc(v.Clans, func(cl string) bool { return slices.Contains(c.Clans, cl) }) {
-			continue
-		}
-		if c.Path != "" && (v.Path == "" || !strings.Contains(c.Path, v.Path)) {
+		if !clanAndPath(c, v) {
 			continue
 		}
 		var levels []string
@@ -1127,6 +1126,13 @@ func playable(c *bundle.Card, crypt []deckEntry, nCrypt int) string {
 		line += fmt.Sprintf(" Its text also requires, unchecked here: %q", m)
 	}
 	return line
+}
+
+// clanAndPath says whether a crypt card has the clan and the path a library
+// card requires as the card data holds them.
+func clanAndPath(c, v *bundle.Card) bool {
+	return (len(c.Clans) == 0 || slices.ContainsFunc(v.Clans, func(cl string) bool { return slices.Contains(c.Clans, cl) })) &&
+		(c.Path == "" || v.Path != "" && strings.Contains(c.Path, v.Path))
 }
 
 func copies(e deckEntry) string {
