@@ -13,6 +13,9 @@ of real questions ([product.md](product.md) "Evaluation").
 
 Served at `mcp.krcg.org`, not announced. Ends when the owner announces it
 to the community; real users change the ranking and may change the harness.
+The announcement waits for M:meta, so it covers the three questions of
+[product.md](product.md), and for a feedback tool that turns what users
+report into issues intake reads (owner, 2026-11-20).
 
 ## Ranking
 
@@ -28,20 +31,21 @@ At most three open, each named by what someone can do afterwards. A board
 line serving one carries its token; done is deleted. Opening one is the
 owner's decision.
 
-- **M:deck**: a player gets their deck explained and improved. Done when an
-  owner-graded session of deck analyses and advice passes.
+- **M:meta**: a player gets the current meta read with numbers. Done when
+  an owner-graded session of meta questions passes. First `vtes_meta` over
+  the archetype labels, the decks since the labels placed by their nearest
+  archetype; then the decks still unplaced clustered into new archetypes,
+  curated by the owner (owner, 2026-11-20).
 
 ## Later, in this order unless the owner reorders
 
+- The announcement (the phase above).
 - A pass over the rulings database, with primogen's tools finding what the
   rules directors settled and no ruling holds, the curated rulings kept by
   the rulemongers (owner, 2026-11-12). Until then the tools work around
   what it misses.
 - The legality check on the engine (`vtes_engine_check`), which needs a
   position-check endpoint in zero-vtes.
-- The meta: clustering the decks no archetype matches into new ones, and
-  `vtes_meta` with its archetype shares; codex-of-the-damned reads
-  primogen's output.
 - Members: Archon login, tournaments, full-field meta, rankings, community
   links.
 - Bot-based deck testing, once the engine covers the pool and the bot is
