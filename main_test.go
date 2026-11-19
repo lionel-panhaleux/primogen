@@ -124,6 +124,9 @@ func (u *upstream) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, `[{"sha": %q}]`, strings.TrimSpace(string(sha)))
 		return
 	}
+	if r.URL.Path == "/amaranth.vtes.co.nz/api/deck" {
+		r.URL.Path += "/" + r.URL.Query().Get("id")
+	}
 	if name, ok := strings.CutPrefix(r.URL.Path, "/primogen/"+u.knowledge+"/knowledge/"); ok {
 		http.ServeFile(w, r, filepath.Join("knowledge", name))
 		return
@@ -297,8 +300,8 @@ Heart of Nizchetus x2
 4x Form of Mist
 `
 
-// TestQueryDeck reads one deck by its TWDA id, as text and by its VDB links,
-// and the lists it must refuse.
+// TestQueryDeck reads one deck by its TWDA id, as text and by the links of the
+// deckbuilders, an Amaranth deck, and the lists it must refuse.
 func TestQueryDeck(t *testing.T) {
 	u, _, err := newUpstream()
 	if err != nil {
@@ -307,7 +310,7 @@ func TestQueryDeck(t *testing.T) {
 	defer u.srv.Close()
 	query := func(args ...string) (string, error) {
 		var stdout, stderr strings.Builder
-		err := run(t.Context(), append([]string{"query", "-bundle", testBundle, "-vdb", u.srv.URL + "/vdb/api/deck/"}, args...), &stdout, &stderr)
+		err := run(t.Context(), append([]string{"query", "-bundle", testBundle, "-sites", u.srv.URL}, args...), &stdout, &stderr)
 		return stdout.String(), err
 	}
 	// the computed facts, from the crypt to the relatives, which leave a TWDA deck out
@@ -364,14 +367,29 @@ func TestQueryDeck(t *testing.T) {
 		strings.Replace(facts(asText), "\n  The author: the only cancel", "", 1) != facts(byID) {
 		t.Errorf("the list as text reads otherwise than by id:\n%s", asText)
 	}
-	for _, link := range []string{"https://vdb.im/decks/12947", "https://vdb.im/decks/notwda"} {
-		vdb, err := query("deck", link)
-		if err != nil || facts(vdb) != facts(byID) {
-			t.Errorf("%s reads otherwise than by id: %v\n%s", link, err, vdb)
+	for _, link := range []string{"https://vdb.im/decks/12947", "https://vdb.im/decks/notwda", "https://vtesdecks.com/deck/tournament-12947", "https://vtesdecks.com/deck/notwda"} {
+		linked, err := query("deck", link)
+		if err != nil || facts(linked) != facts(byID) || !strings.Contains(linked, "Read from "+link+"\n") {
+			t.Errorf("%s reads otherwise than by id: %v\n%s", link, err, linked)
+		}
+	}
+	// a link pasted without its scheme, its host in capitals
+	if linked, err := query("deck", "VTESDECKS.COM/deck/notwda"); err != nil || facts(linked) != facts(byID) {
+		t.Errorf("a link without its scheme reads otherwise than by id: %v\n%s", err, linked)
+	}
+	amaranth, err := query("deck", "https://amaranth.vtes.co.nz/#deck/4d3aa426-70da-44b7-8cb7-92377a1a0dbd")
+	for _, w := range []string{
+		"# Deck: First Blood: Tremere\nBy BCP.\nRead from https://amaranth.vtes.co.nz/#deck/4d3aa426-70da-44b7-8cb7-92377a1a0dbd\n",
+		"## Crypt (12 cards, 6 distinct; capacity 5 to 8, average 6.3; groups G4, G5)",
+		"| 2 | Muhsin Samir (G4) | 201020 | 6 | G4 | Tremere | aus pot DOM THA |  |",
+		"## Library (86 cards, 21 distinct)",
+	} {
+		if err != nil || !strings.Contains(amaranth, w) {
+			t.Errorf("the Amaranth deck: %v, missing %q in:\n%s", err, w, amaranth)
 		}
 	}
 	var stored struct{ Cards map[string]int }
-	raw, _ := os.ReadFile("testdata/upstream/vdb/api/deck/notwda")
+	raw, _ := os.ReadFile("testdata/upstream/vdb.im/api/deck/notwda")
 	json.Unmarshal(raw, &stored)
 	var pairs []string
 	for id, n := range stored.Cards {
@@ -487,6 +505,9 @@ func TestQueryDeck(t *testing.T) {
 			"not tournament legal today"},
 		{"nosuchdeck", `no deck of the TWDA has the id "nosuchdeck"`},
 		{"https://vdb.im/decks/deck?name=x#100001", "not id=count pairs"},
+		{"https://amaranth.vtes.co.nz/#deck/notpinned", `Amaranth has no public deck "notpinned" (Deck not found)`},
+		{"https://vtesdecks.com/deck/notpinned", `VTES Decks has no public deck "notpinned" (404 Not Found)`},
+		{"https://example.com/deck/12947", "primogen reads deck links from VDB (vdb.im), VTES Decks (vtesdecks.com) and Amaranth (amaranth.vtes.co.nz), not example.com: give the list as text"},
 		{strings.Join(vampires(b), "\n") + "\n60x Villein", "distinct cards does not fit a result of 40000 characters even without its texts"},
 	} {
 		_, err := query("deck", tc.deck)

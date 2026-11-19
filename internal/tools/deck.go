@@ -23,9 +23,6 @@ import (
 	"github.com/lionel-panhaleux/primogen/internal/bundle"
 )
 
-// VDB is the VDB API's route for a stored deck, its id appended.
-const VDB = "https://vdb.im/api/deck/"
-
 const maxDeckInput = 20000
 
 type deckInput struct {
@@ -37,7 +34,7 @@ var deckSchema = &jsonschema.Schema{
 	Type: "object",
 	Properties: map[string]*jsonschema.Schema{
 		"deck": {Type: "string", Description: `the deck: a decklist as text, one card per line with its count ("3x Conditioning", ` +
-			`"Anson x2", crypt lines with their capacity and disciplines accepted), a TWDA deck id ("2k6munduko"), or a VDB link (https://vdb.im/decks/...)`},
+			`"Anson x2", crypt lines with their capacity and disciplines accepted), a TWDA deck id ("2k6munduko"), or a deck link from VDB (https://vdb.im/decks/...), VTES Decks (https://vtesdecks.com/deck/...) or Amaranth (https://amaranth.vtes.co.nz/#deck/...)`},
 		"detail": {Type: "boolean", Description: "the deck author's whole comment, where the default cuts it, and a larger result, keeping texts a large list's default drops"},
 	},
 	Required: []string{"deck"},
@@ -48,7 +45,7 @@ func addDeck(s *mcp.Server, l *Live) {
 		Name:  "vtes_deck",
 		Title: "VTES deck",
 		Description: "Call first to analyze or improve a Vampire: The Eternal Struggle (VTES) deck: never read a decklist from memory " +
-			"of its cards. Takes a decklist as text, a TWDA deck id or a VDB link; validates it (sizes, crypt groups, banned cards, " +
+			"of its cards. Takes a decklist as text, a TWDA deck id or a deck link from VDB, VTES Decks or Amaranth; validates it (sizes, crypt groups, banned cards, " +
 			"legality today) and returns the computed facts: the crypt table with capacities, disciplines, titles and texts, " +
 			"which crypt cards have what each library card requires and at which level, the library by type with every card's official text, " +
 			"the library by module with each module's density and expected copies per hand, the costs, the nearest archetypes and tournament decks with the cards that differ, and the procedure a deck analysis and advice follow.",
@@ -57,10 +54,10 @@ func addDeck(s *mcp.Server, l *Live) {
 	}, func(ctx context.Context, _ *mcp.CallToolRequest, in deckInput) (*mcp.CallToolResult, any, error) {
 		text := strings.TrimSpace(in.Deck)
 		if text == "" || len(text) > maxDeckInput {
-			return nil, nil, fmt.Errorf(`give one deck of at most %d characters: a decklist as text, a TWDA id or a VDB link, e.g. {"deck": "2k6munduko"}`, maxDeckInput)
+			return nil, nil, fmt.Errorf(`give one deck of at most %d characters: a decklist as text, a TWDA id or a deck link, e.g. {"deck": "2k6munduko"}`, maxDeckInput)
 		}
 		d := l.p.Load()
-		dk, err := d.readDeck(ctx, cmp.Or(l.VDB, VDB), text)
+		dk, err := d.readDeck(ctx, l, text)
 		if err != nil {
 			return nil, nil, err
 		}
@@ -103,15 +100,28 @@ type deck struct {
 	notes                     []string // how the list was read
 }
 
-func (d *data) readDeck(ctx context.Context, vdb, text string) (*deck, error) {
-	if u, err := url.Parse(text); err == nil && strings.TrimPrefix(u.Host, "www.") == "vdb.im" {
-		return d.readVDB(ctx, vdb, u)
+var reSchemeless = regexp.MustCompile(`(?i)^(www\.)?(vdb\.im|vtesdecks\.com|amaranth\.vtes\.co\.nz)/`)
+
+func (d *data) readDeck(ctx context.Context, l *Live, text string) (*deck, error) {
+	if reSchemeless.MatchString(text) {
+		text = "https://" + text
+	}
+	if u, err := url.Parse(text); err == nil && u.Host != "" && (u.Scheme == "https" || u.Scheme == "http") {
+		switch strings.TrimPrefix(strings.ToLower(u.Host), "www.") {
+		case "vdb.im":
+			return d.readVDB(ctx, l, u)
+		case "vtesdecks.com":
+			return d.readVTESDecks(ctx, l, u)
+		case "amaranth.vtes.co.nz":
+			return d.readAmaranth(ctx, l, u)
+		}
+		return nil, fmt.Errorf("primogen reads deck links from VDB (vdb.im), VTES Decks (vtesdecks.com) and Amaranth (amaranth.vtes.co.nz), not %s: give the list as text, one card per line with its count", u.Host)
 	}
 	if !strings.ContainsAny(text, " \t\n") {
 		if t := d.decks[text]; t != nil {
 			return d.fromTWDA(t), nil
 		}
-		return nil, fmt.Errorf("no deck of the TWDA has the id %q: give a TWDA id (e.g. 2k6munduko), a VDB link, or the list as text, one card per line with its count", text)
+		return nil, fmt.Errorf("no deck of the TWDA has the id %q: give a TWDA id (e.g. 2k6munduko), a deck link, or the list as text, one card per line with its count", text)
 	}
 	return d.readText(text)
 }
@@ -124,28 +134,88 @@ func (d *data) fromTWDA(t *bundle.Deck) *deck {
 	return dk
 }
 
-func (d *data) readVDB(ctx context.Context, api string, u *url.URL) (*deck, error) {
+// fetch reads a deckbuilder's API answer into v; site and what name the
+// deckbuilder and what is fetched in the errors.
+func (l *Live) fetch(ctx context.Context, site, host, path, what string, v any) error {
+	ctx, cancel := context.WithTimeout(ctx, 30*time.Second)
+	defer cancel()
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, cmp.Or(l.Sites, "https:/")+"/"+host+path, nil)
+	if err != nil {
+		return err
+	}
+	req.Header.Set("User-Agent", "primogen")
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return fmt.Errorf("%s did not answer for %s: %v; give the list as text instead", site, what, err)
+	}
+	defer resp.Body.Close()
+	switch resp.StatusCode {
+	case http.StatusOK:
+	case http.StatusNotFound:
+		return fmt.Errorf("%s has no public %s (%s): check the link, or give the list as text", site, what, resp.Status)
+	default:
+		return fmt.Errorf("%s did not answer for %s (%s); give the list as text instead", site, what, resp.Status)
+	}
+	body, err := io.ReadAll(io.LimitReader(resp.Body, 4<<20))
+	if err != nil {
+		return err
+	}
+	if err := json.Unmarshal(body, v); err != nil {
+		return fmt.Errorf("%s's answer for %s: %w; give the list as text instead", site, what, err)
+	}
+	return nil
+}
+
+// stored is a deck as a deckbuilder stores it, its cards by card id.
+type stored struct {
+	Name, Author, Description string
+	Cards                     map[string]int
+}
+
+func (d *data) fromStored(site string, u *url.URL, s stored) (*deck, error) {
+	source := *u
+	source.Fragment = ""
+	dk := &deck{name: s.Name, author: s.Author, description: s.Description, source: source.String()}
+	var unknown []string
+	for _, k := range slices.Sorted(maps.Keys(s.Cards)) {
+		id, _ := strconv.Atoi(k)
+		c := d.byID[id]
+		if c == nil {
+			unknown = append(unknown, k)
+			continue
+		}
+		if s.Cards[k] > 0 {
+			dk.entries = append(dk.entries, deckEntry{card: c, count: s.Cards[k]})
+		}
+	}
+	if len(unknown) > 0 {
+		return nil, fmt.Errorf("the %s deck names cards the card data does not hold (ids %s): give the list as text", site, strings.Join(unknown, ", "))
+	}
+	if len(dk.entries) == 0 {
+		return nil, fmt.Errorf("the %s deck %s holds no card", site, u)
+	}
+	return dk, nil
+}
+
+func (d *data) readVDB(ctx context.Context, l *Live, u *url.URL) (*deck, error) {
 	id := strings.TrimPrefix(u.Path, "/decks/")
 	// VDB names a TWDA deck of a nine-character id with a trailing 0
 	twda := d.decks[id]
 	if len(id) == 10 && twda == nil {
 		twda = d.decks[strings.TrimSuffix(id, "0")]
 	}
-	var vdb struct {
-		Name, Author, Description string
-		Cards                     map[string]int
-	}
+	var s stored
 	switch {
 	case u.Path == "/decks/deck":
-		vdb.Name, vdb.Author, vdb.Description = u.Query().Get("name"), u.Query().Get("author"), u.Query().Get("description")
-		vdb.Cards = map[string]int{}
+		s.Name, s.Author, s.Description = u.Query().Get("name"), u.Query().Get("author"), u.Query().Get("description")
+		s.Cards = map[string]int{}
 		for pair := range strings.SplitSeq(u.Fragment, ";") {
 			k, v, _ := strings.Cut(pair, "=")
 			n, err := strconv.Atoi(v)
 			if k == "" || err != nil {
 				return nil, fmt.Errorf("the VDB link's cards, after #, are not id=count pairs separated by ';': %q", u.Fragment)
 			}
-			vdb.Cards[k] += n
+			s.Cards[k] += n
 		}
 	case id == "" || strings.Contains(id, "/"):
 		return nil, fmt.Errorf("not a VDB deck link: %s; give https://vdb.im/decks/<id> or the link VDB's \"Copy URL\" makes", u)
@@ -154,49 +224,131 @@ func (d *data) readVDB(ctx context.Context, api string, u *url.URL) (*deck, erro
 		dk.source = u.String()
 		return dk, nil
 	default:
-		ctx, cancel := context.WithTimeout(ctx, 30*time.Second)
-		defer cancel()
-		req, err := http.NewRequestWithContext(ctx, http.MethodGet, api+url.PathEscape(id), nil)
-		if err != nil {
+		if err := l.fetch(ctx, "VDB", "vdb.im", "/api/deck/"+url.PathEscape(id), fmt.Sprintf("deck %q", id), &s); err != nil {
 			return nil, err
 		}
-		req.Header.Set("User-Agent", "primogen")
-		resp, err := http.DefaultClient.Do(req)
-		if err != nil {
-			return nil, fmt.Errorf("VDB did not answer for %s: %v; give the list as text instead", u, err)
-		}
-		defer resp.Body.Close()
-		if resp.StatusCode != http.StatusOK {
-			return nil, fmt.Errorf("VDB has no public deck %q (%s): check the link, or give the list as text", id, resp.Status)
-		}
-		body, err := io.ReadAll(io.LimitReader(resp.Body, 1<<20))
-		if err != nil {
-			return nil, err
-		}
-		if err := json.Unmarshal(body, &vdb); err != nil {
-			return nil, fmt.Errorf("VDB's answer for %s: %w", u, err)
+	}
+	return d.fromStored("VDB", u, s)
+}
+
+// readVTESDecks reads a deck of vtesdecks.com, a TWDA deck (its id
+// "tournament-" and the TWDA's) from the bundle.
+func (d *data) readVTESDecks(ctx context.Context, l *Live, u *url.URL) (*deck, error) {
+	id, ok := strings.CutPrefix(u.Path, "/deck/")
+	if !ok || id == "" || strings.Contains(id, "/") {
+		return nil, fmt.Errorf("not a VTES Decks deck link: %s; give https://vtesdecks.com/deck/<id>", u)
+	}
+	if twda, ok := strings.CutPrefix(id, "tournament-"); ok && d.decks[twda] != nil {
+		dk := d.fromTWDA(d.decks[twda])
+		dk.source = u.String()
+		return dk, nil
+	}
+	var answer struct {
+		Name, Author, Description string
+		Crypt, Library            []struct{ ID, Number int }
+	}
+	if err := l.fetch(ctx, "VTES Decks", "api.vtesdecks.com", "/1.0/decks/"+url.PathEscape(id), fmt.Sprintf("deck %q", id), &answer); err != nil {
+		return nil, err
+	}
+	s := stored{Name: answer.Name, Author: answer.Author, Description: answer.Description, Cards: map[string]int{}}
+	for _, c := range slices.Concat(answer.Crypt, answer.Library) {
+		s.Cards[strconv.Itoa(c.ID)] += c.Number
+	}
+	return d.fromStored("VTES Decks", u, s)
+}
+
+// Amaranth names an advanced vampire "Theo Bell (ADV2)", the card data "Theo
+// Bell (G2 ADV)".
+var reAmaranthAdvanced = regexp.MustCompile(`^(.+) \(ADV(\d)\)$`)
+
+// readAmaranth reads a deck of Amaranth, whose cards are its own ids, named by
+// its catalog: a name is the card's own, never a misspelling or another card's.
+func (d *data) readAmaranth(ctx context.Context, l *Live, u *url.URL) (*deck, error) {
+	// the link Amaranth shares routes in its fragment: /#deck/<id>
+	id, ok := strings.CutPrefix(cmp.Or(u.Fragment, strings.TrimPrefix(u.Path, "/")), "deck/")
+	if !ok || id == "" || strings.Contains(id, "/") {
+		return nil, fmt.Errorf("not an Amaranth deck link: %s; give the link Amaranth shares, https://amaranth.vtes.co.nz/#deck/<id>", u)
+	}
+	var answer struct {
+		Success bool
+		Error   struct{ Message string }
+		Result  struct {
+			Title, Author, Description string
+			Cards                      map[string]int
 		}
 	}
-	source := *u
-	source.Fragment = ""
-	dk := &deck{name: vdb.Name, author: vdb.Author, description: vdb.Description, source: source.String()}
-	var unknown []string
-	for _, k := range slices.Sorted(maps.Keys(vdb.Cards)) {
-		id, _ := strconv.Atoi(k)
-		c := d.byID[id]
-		if c == nil {
-			unknown = append(unknown, k)
-			continue
-		}
-		dk.entries = append(dk.entries, deckEntry{card: c, count: vdb.Cards[k]})
+	if err := l.fetch(ctx, "Amaranth", "amaranth.vtes.co.nz", "/api/deck?id="+url.QueryEscape(id), fmt.Sprintf("deck %q", id), &answer); err != nil {
+		return nil, err
 	}
-	if len(unknown) > 0 {
-		return nil, fmt.Errorf("the VDB deck names cards the card data does not hold (ids %s): give the list as text", strings.Join(unknown, ", "))
+	if !answer.Success {
+		return nil, fmt.Errorf("Amaranth has no public deck %q (%s): check the link, or give the list as text", id, answer.Error.Message)
+	}
+	names, err := l.amaranthNames(ctx, slices.Collect(maps.Keys(answer.Result.Cards)))
+	if err != nil {
+		return nil, err
+	}
+	dk := &deck{name: answer.Result.Title, author: answer.Result.Author, description: answer.Result.Description,
+		source: "https://amaranth.vtes.co.nz/#deck/" + id}
+	var lines []nameLine
+	var errs []string
+	for _, k := range slices.Sorted(maps.Keys(answer.Result.Cards)) {
+		name, ok := names[k]
+		switch {
+		case !ok:
+			errs = append(errs, fmt.Sprintf("Amaranth's card %s is not in its catalog", k))
+		case answer.Result.Cards[k] > 0:
+			var cards []*bundle.Card
+			if m := reAmaranthAdvanced.FindStringSubmatch(name); m != nil {
+				cards = d.ix.lookup(bundle.Fold(m[1] + " (G" + m[2] + " ADV)"))
+			} else {
+				cards = slices.DeleteFunc(slices.Clone(d.ix.lookup(bundle.Fold(name))), func(c *bundle.Card) bool {
+					return bundle.Fold(c.PrintedName) != bundle.Fold(name) || strings.Contains(c.Name, "ADV")
+				})
+			}
+			if len(cards) == 0 {
+				errs = append(errs, fmt.Sprintf("Amaranth's card %s, %q, is not in the card data", k, name))
+				continue
+			}
+			lines = append(lines, nameLine{name: name, count: answer.Result.Cards[k], cards: cards})
+		}
+	}
+	errs = append(errs, d.resolveLines(dk, lines, true)...)
+	if len(errs) > 0 {
+		return nil, fmt.Errorf("some cards of the Amaranth deck %s cannot be read; give the list as text instead:\n- %s", id, strings.Join(errs, "\n- "))
 	}
 	if len(dk.entries) == 0 {
-		return nil, fmt.Errorf("the VDB deck %s holds no card", u)
+		return nil, fmt.Errorf("the Amaranth deck %s holds no card", u)
 	}
 	return dk, nil
+}
+
+// amaranthNames answers Amaranth's card names by its ids, its catalog fetched
+// on first use and again, at most hourly, when a deck names an id it lacks.
+func (l *Live) amaranthNames(ctx context.Context, ids []string) (map[string]string, error) {
+	l.amaranth.Lock()
+	defer l.amaranth.Unlock()
+	if l.amaranth.names != nil && (time.Since(l.amaranth.fetched) < time.Hour ||
+		!slices.ContainsFunc(ids, func(id string) bool { _, ok := l.amaranth.names[id]; return !ok })) {
+		return l.amaranth.names, nil
+	}
+	var catalog struct {
+		Result []struct {
+			ID   int
+			Name string
+		}
+	}
+	if err := l.fetch(ctx, "Amaranth", "amaranth.vtes.co.nz", "/api/cards", "card catalog", &catalog); err != nil {
+		if l.amaranth.names != nil {
+			return l.amaranth.names, nil
+		}
+		return nil, err
+	}
+	names := map[string]string{}
+	for _, c := range catalog.Result {
+		names[strconv.Itoa(c.ID)] = c.Name
+	}
+	l.amaranth.names, l.amaranth.fetched = names, time.Now()
+	return names, nil
 }
 
 var (
@@ -213,19 +365,10 @@ var (
 	reAuthorField = regexp.MustCompile(`(?i)^\s*(?:author|created by|deck by)\s*:?\s*(.+)$`)
 )
 
-// readText reads a decklist line by line, resolving each name as vtes_cards
-// does; a vampire's name shared by several groups takes the group of the rest
-// of the crypt.
+// readText reads a decklist line by line.
 func (d *data) readText(text string) (*deck, error) {
 	dk := &deck{}
-	type line struct {
-		name    string
-		cards   []*bundle.Card
-		count   int
-		comment string
-	}
-	var lines []line
-	var errs []string
+	var lines []nameLine
 	for raw := range strings.Lines(text) {
 		raw = strings.TrimSpace(raw)
 		if raw == "" {
@@ -261,9 +404,41 @@ func (d *data) readText(text string) (*deck, error) {
 			continue
 		}
 		name, group := d.cryptColumns(rest)
-		cards, note := d.ix.resolve(name, "vtes_deck")
-		if group != "" {
-			if grouped := d.ix.lookup(bundle.Fold(name + " (G" + group + ")")); grouped != nil {
+		lines = append(lines, nameLine{name: name, group: group, count: count, comment: comment})
+	}
+	if errs := d.resolveLines(dk, lines, false); len(errs) > 0 {
+		return nil, errors.New("some lines name no card; correct them and call vtes_deck again:\n- " + strings.Join(errs, "\n- "))
+	}
+	if len(dk.entries) == 0 {
+		return nil, errors.New(`no line of the list reads as a card with its count: give one card per line, e.g. "3x Conditioning" or "2 Anson"`)
+	}
+	return dk, nil
+}
+
+// nameLine is a card of a list by its name, with the group its line gives,
+// and the cards the name may be.
+type nameLine struct {
+	name, group string
+	count       int
+	comment     string
+	cards       []*bundle.Card
+}
+
+// resolveLines adds the lines' cards to the deck, resolved as vtes_cards
+// resolves them; a vampire's name shared by several groups takes the group of
+// the rest of the crypt. It answers what names no card. A deckbuilder's link
+// gives each line's cards, which no one can then choose among.
+func (d *data) resolveLines(dk *deck, lines []nameLine, link bool) []string {
+	var rs []nameLine
+	var errs []string
+	for _, l := range lines {
+		if link {
+			rs = append(rs, l)
+			continue
+		}
+		cards, note := d.ix.resolve(l.name, "vtes_deck")
+		if l.group != "" {
+			if grouped := d.ix.lookup(bundle.Fold(l.name + " (G" + l.group + ")")); grouped != nil {
 				cards, note = grouped, ""
 			}
 		}
@@ -274,45 +449,44 @@ func (d *data) readText(text string) (*deck, error) {
 		case note != "":
 			dk.notes = append(dk.notes, note)
 		}
-		lines = append(lines, line{name, cards, count, comment})
+		l.cards = cards
+		rs = append(rs, l)
 	}
 	groups := map[string]bool{}
-	for _, l := range lines {
-		if len(l.cards) == 1 && l.cards[0].Group != "" {
-			groups[l.cards[0].Group] = true
+	for _, r := range rs {
+		if len(r.cards) == 1 && r.cards[0].Group != "" {
+			groups[r.cards[0].Group] = true
 		}
 	}
-	for _, l := range lines {
-		c := l.cards[0]
-		if len(l.cards) > 1 {
-			fits := slices.DeleteFunc(slices.Clone(l.cards), func(c *bundle.Card) bool { return !groups[c.Group] })
+	for _, r := range rs {
+		c := r.cards[0]
+		if len(r.cards) > 1 {
+			fits := slices.DeleteFunc(slices.Clone(r.cards), func(c *bundle.Card) bool { return !groups[c.Group] })
 			if len(fits) > 1 {
 				fits = slices.DeleteFunc(fits, func(c *bundle.Card) bool { return strings.Contains(c.Name, "ADV") })
 			}
 			if len(fits) != 1 {
 				var names []string
-				for _, c := range l.cards {
+				for _, c := range r.cards {
 					names = append(names, c.Name)
 				}
-				errs = append(errs, fmt.Sprintf("%q is several cards: %s. Give the one meant, e.g. %q.", l.name, strings.Join(names, "; "), names[0]))
+				if link {
+					errs = append(errs, fmt.Sprintf("%q is several cards (%s), and the rest of the crypt does not say which", r.name, strings.Join(names, "; ")))
+				} else {
+					errs = append(errs, fmt.Sprintf("%q is several cards: %s. Give the one meant, e.g. %q.", r.name, strings.Join(names, "; "), names[0]))
+				}
 				continue
 			}
 			c = fits[0]
-			dk.notes = append(dk.notes, fmt.Sprintf("%q read as %s, of the group of the rest of the crypt (several vampires bear the name).", l.name, c.Name))
+			dk.notes = append(dk.notes, fmt.Sprintf("%q read as %s, of the group of the rest of the crypt (several vampires bear the name).", r.name, c.Name))
 		}
 		if i := slices.IndexFunc(dk.entries, func(e deckEntry) bool { return e.card == c }); i >= 0 {
-			dk.entries[i].count += l.count
+			dk.entries[i].count += r.count
 		} else {
-			dk.entries = append(dk.entries, deckEntry{c, l.count, l.comment})
+			dk.entries = append(dk.entries, deckEntry{c, r.count, r.comment})
 		}
 	}
-	if len(errs) > 0 {
-		return nil, errors.New("some lines name no card; correct them and call vtes_deck again:\n- " + strings.Join(errs, "\n- "))
-	}
-	if len(dk.entries) == 0 {
-		return nil, errors.New(`no line of the list reads as a card with its count: give one card per line, e.g. "3x Conditioning" or "2 Anson"`)
-	}
-	return dk, nil
+	return errs
 }
 
 // cryptColumns cuts a crypt line's columns after the name (capacity,

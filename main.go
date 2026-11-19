@@ -30,7 +30,7 @@ const usage = `usage:
       search WORDS...            vtes_rules_search
       read ID...                 vtes_rules_read
       archive WORDS...           vtes_rulings_archive (-directors: the sitting rules directors' posts only)
-      deck LIST|ID|LINK|-        vtes_deck: a decklist (its lines as one or several arguments, or - for stdin), a TWDA id or a VDB link
+      deck LIST|ID|LINK|-        vtes_deck: a decklist (its lines as one or several arguments, or - for stdin), a TWDA id or a deck link (VDB, VTES Decks, Amaranth)
       stats CARD [ARCHETYPE]     vtes_card_stats: a card's play rates, companions and competitors, overall or within an archetype
   primogen stdio [-bundle PATH]                    serve the tools over stdio, for a local MCP client
   primogen serve -bundle PATH [-addr ADDR] [-knowledge DIR]   serve the tools over HTTP at /mcp, refreshing the bundle
@@ -106,7 +106,7 @@ func query(ctx context.Context, fs *flag.FlagSet, path *string, args []string, s
 	directors := fs.Bool("directors", false, "archive: only posts by the rules director sitting when they were written")
 	from := fs.String("from", published, "where to download the bundle when -bundle is not given")
 	archive := fs.String("archive", bundle.KRCG.Archive, "where to download the rulings archive")
-	vdb := fs.String("vdb", tools.VDB, "the VDB API's deck route")
+	sites := fs.String("sites", "", "where the deckbuilders' APIs are read, each under its host, instead of https://")
 	if err := fs.Parse(args); err != nil {
 		return err
 	}
@@ -149,7 +149,7 @@ func query(ctx context.Context, fs *flag.FlagSet, path *string, args []string, s
 	if err != nil {
 		return err
 	}
-	live.VDB = *vdb
+	live.Sites = *sites
 	text, err := tools.Call(ctx, tools.NewServer(live), tool, in)
 	if err != nil {
 		return err

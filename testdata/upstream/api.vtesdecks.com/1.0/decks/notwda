@@ -1,0 +1,258 @@
+{
+  "id" : "tournament-12947",
+  "type" : "TOURNAMENT",
+  "name" : "Year of the Sabbat Paths IV: Amaranth",
+  "views" : 236,
+  "rate" : 1.0,
+  "votes" : 1,
+  "bookmarks" : 1,
+  "comments" : 0,
+  "tournament" : "Year of the Sabbat Paths IV: Amaranth",
+  "eventId" : "12947",
+  "finalVp" : 0.5,
+  "position" : 1,
+  "finalSeat" : 4,
+  "players" : 20,
+  "rounds" : 2,
+  "place" : "Herne, Germany",
+  "country" : "Germany",
+  "year" : 2026,
+  "author" : "1muflon1",
+  "url" : "https://archon.vekn.net/t/12947",
+  "source" : "http://www.vekn.fr/decks/twd.htm#12947",
+  "customTags" : [ ],
+  "published" : true,
+  "collection" : false,
+  "hasVideo" : false,
+  "crypt" : [ {
+    "id" : 201602,
+    "number" : 2
+  }, {
+    "id" : 201521,
+    "number" : 2
+  }, {
+    "id" : 201574,
+    "number" : 2
+  }, {
+    "id" : 201597,
+    "number" : 1
+  }, {
+    "id" : 201590,
+    "number" : 1
+  }, {
+    "id" : 201606,
+    "number" : 1
+  }, {
+    "id" : 201592,
+    "number" : 1
+  }, {
+    "id" : 201595,
+    "number" : 1
+  }, {
+    "id" : 201611,
+    "number" : 1
+  } ],
+  "library" : [ {
+    "id" : 102113,
+    "number" : 3,
+    "type" : "Master"
+  }, {
+    "id" : 102121,
+    "number" : 3,
+    "type" : "Master"
+  }, {
+    "id" : 100366,
+    "number" : 2,
+    "type" : "Master"
+  }, {
+    "id" : 100545,
+    "number" : 2,
+    "type" : "Master"
+  }, {
+    "id" : 100809,
+    "number" : 2,
+    "type" : "Master"
+  }, {
+    "id" : 101442,
+    "number" : 2,
+    "type" : "Master"
+  }, {
+    "id" : 100054,
+    "number" : 1,
+    "type" : "Master"
+  }, {
+    "id" : 100126,
+    "number" : 1,
+    "type" : "Master"
+  }, {
+    "id" : 100297,
+    "number" : 1,
+    "type" : "Master"
+  }, {
+    "id" : 100609,
+    "number" : 1,
+    "type" : "Master"
+  }, {
+    "id" : 100646,
+    "number" : 1,
+    "type" : "Master"
+  }, {
+    "id" : 100984,
+    "number" : 1,
+    "type" : "Master"
+  }, {
+    "id" : 101350,
+    "number" : 1,
+    "type" : "Master"
+  }, {
+    "id" : 101435,
+    "number" : 1,
+    "type" : "Master"
+  }, {
+    "id" : 101439,
+    "number" : 1,
+    "type" : "Master"
+  }, {
+    "id" : 101536,
+    "number" : 1,
+    "type" : "Master"
+  }, {
+    "id" : 102212,
+    "number" : 1,
+    "type" : "Master"
+  }, {
+    "id" : 101972,
+    "number" : 11,
+    "type" : "Action"
+  }, {
+    "id" : 101550,
+    "number" : 5,
+    "type" : "Retainer"
+  }, {
+    "id" : 101249,
+    "number" : 1,
+    "type" : "Retainer"
+  }, {
+    "id" : 100903,
+    "number" : 2,
+    "type" : "Equipment"
+  }, {
+    "id" : 102223,
+    "number" : 4,
+    "type" : "Action Modifier/Reaction"
+  }, {
+    "id" : 100600,
+    "number" : 3,
+    "type" : "Action Modifier"
+  }, {
+    "id" : 101239,
+    "number" : 1,
+    "type" : "Action Modifier"
+  }, {
+    "id" : 100601,
+    "number" : 9,
+    "type" : "Combat"
+  }, {
+    "id" : 100771,
+    "number" : 4,
+    "type" : "Combat"
+  }, {
+    "id" : 101631,
+    "number" : 1,
+    "type" : "Political Action"
+  }, {
+    "id" : 102230,
+    "number" : 9,
+    "type" : "Reaction"
+  }, {
+    "id" : 102218,
+    "number" : 7,
+    "type" : "Reaction"
+  }, {
+    "id" : 102219,
+    "number" : 5,
+    "type" : "Reaction"
+  }, {
+    "id" : 100519,
+    "number" : 3,
+    "type" : "Reaction"
+  } ],
+  "clanIcons" : [ "gangrel" ],
+  "disciplineIcons" : [ "animalism", "fortitude", "protean" ],
+  "stats" : {
+    "crypt" : 12,
+    "library" : 90,
+    "event" : 0,
+    "master" : 25,
+    "action" : 11,
+    "politicalAction" : 1,
+    "equipment" : 2,
+    "retainer" : 6,
+    "ally" : 0,
+    "actionModifier" : 8,
+    "combat" : 13,
+    "reaction" : 28,
+    "masterTrifle" : 6,
+    "poolCost" : 22,
+    "bloodCost" : 11,
+    "avgCrypt" : 4.44,
+    "minCrypt" : 12,
+    "maxCrypt" : 24,
+    "price" : 95.62,
+    "currency" : "EUR",
+    "cryptDisciplines" : [ {
+      "disciplines" : [ "Protean" ],
+      "inferior" : 4,
+      "superior" : 5
+    }, {
+      "disciplines" : [ "Animalism" ],
+      "inferior" : 4,
+      "superior" : 2
+    }, {
+      "disciplines" : [ "Fortitude" ],
+      "inferior" : 4,
+      "superior" : 1
+    }, {
+      "disciplines" : [ "Celerity" ],
+      "inferior" : 1,
+      "superior" : 0
+    } ],
+    "libraryDisciplines" : [ {
+      "disciplines" : [ ],
+      "inferior" : 8,
+      "superior" : 0
+    }, {
+      "disciplines" : [ "Protean" ],
+      "inferior" : 4,
+      "superior" : 0
+    }, {
+      "disciplines" : [ "Animalism" ],
+      "inferior" : 1,
+      "superior" : 0
+    }, {
+      "disciplines" : [ "Protean", "Animalism", "Fortitude" ],
+      "inferior" : 1,
+      "superior" : 0
+    } ],
+    "libraryClans" : [ {
+      "clans" : [ "Gangrel" ],
+      "number" : 4
+    }, {
+      "clans" : [ "Gangrel antitribu", "Gangrel" ],
+      "number" : 1
+    } ]
+  },
+  "favorite" : false,
+  "rated" : false,
+  "owner" : false,
+  "tags" : [ "ramp", "block" ],
+  "reactions" : [ ],
+  "creationDate" : "2026-10-24T00:00:00",
+  "modifyDate" : "2026-10-30T19:25:01",
+  "archetype" : {
+    "id" : 1,
+    "name" : "Gangrel Thing",
+    "icon" : "gangrel",
+    "type" : "Wall"
+  }
+}

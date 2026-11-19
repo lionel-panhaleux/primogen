@@ -93,14 +93,15 @@ Go, jq, node and uv come from mise: `mise install` in the checkout reads
   NAME...`, `case QUESTION [CARD...]`, `search WORDS...`, `read ID...`,
   `archive WORDS...` (`-directors` for the sitting rules directors' posts
   only), `deck LIST|ID|LINK` (the list's lines as one or
-  several arguments, or `-` to read it from stdin), `stats CARD
+  several arguments, or `-` to read it from stdin; a link of VDB, VTES Decks
+  or Amaranth), `stats CARD
   [ARCHETYPE]`.
 - `primogen stdio` serves the tools over stdio for a local MCP client.
 - Without `-bundle`, `query` and `stdio` are a local install: they use the
   published bundle in the user cache directory, which only the download
   writes, as "Data refresh" says (`-from` and `-archive` change where the
-  bundle and the archive are downloaded from, `-vdb` where a stored VDB deck
-  is read, for the tests).
+  bundle and the archive are downloaded from, `-sites` where the
+  deckbuilders' APIs are read, each under its host, for the tests).
 - `primogen serve` is the hosted server: the tools over Streamable HTTP at
   `/mcp` (stateless, JSON responses), the published bundle, the catalog of
   the KRCG stack at `/` and `/llms.txt`, and the status page at `/status`,
@@ -118,7 +119,7 @@ Go, jq, node and uv come from mise: `mise install` in the checkout reads
 about half a minute. The tests build a bundle from `testdata/upstream`, the
 real upstreams pinned and served by a local file server (the whole card
 data with its sets, the TWDA cut to the archetype labels' window and three
-decks the tests name, one deck as VDB's API answers it, `vtes-rulings` and `archon-vibe`'s three documents at one commit
+decks the tests name, the deckbuilders' APIs, each under its host (one deck as VDB's and VTES Decks's answer it, an Amaranth deck, the answer for a deck Amaranth lacks, and Amaranth's card catalog), `vtes-rulings` and `archon-vibe`'s three documents at one commit
 each, the ids archon.vekn.net gives those documents' headings by archon's
 own renderer at that commit, which every link of theirs and of the
 advanced rules to them is checked against, the archive cut to

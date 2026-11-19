@@ -35,9 +35,14 @@ type Live struct {
 	archive atomic.Pointer[archiveSearch]
 	// LoadArchive fetches the archive on first use, for a server not handed one.
 	LoadArchive func(context.Context) (*bundle.Archive, error)
-	// VDB replaces the VDB API's deck route, for the tests.
-	VDB     string
-	loading sync.Mutex
+	// Sites replaces "https:/" before a deckbuilder's host, for the tests.
+	Sites    string
+	loading  sync.Mutex
+	amaranth struct {
+		sync.Mutex
+		names   map[string]string
+		fetched time.Time
+	}
 }
 
 type data struct {

@@ -1,7 +1,7 @@
 #!/bin/sh
 # Pins the real upstreams for the tests: the card data, the TWDA cut to the
 # archetype labels' window (their params.since) and three decks the tests
-# name, one VDB deck, vtes-rulings at its head, archon-vibe's rules documents
+# name, decks of three deckbuilders, vtes-rulings at its head, archon-vibe's rules documents
 # at its head with the ids archon.vekn.net gives them, zero-vtes's rules-qa and rulings ledger, and the archive cut to
 # its ids and titles, with the text of the posts the rulings and the advanced
 # rules cite, of the threads the calibration corpus's settled-by names and of
@@ -19,8 +19,15 @@ curl -fsS -o expansions.json https://static.krcg.org/data/v5/expansions.json
 since=$(jq -r .params.since ../../knowledge/classification.json)
 curl -fsS https://static.krcg.org/data/twda.json |
 	jq -c --arg since "$since" '[to_entries[] | select(.value.event.date >= $since or (.key | IN("2k6munduko", "12434", "zink2k1")))] | from_entries' > twda.json
-# a TWDA deck as VDB's API answers it, under an id the TWDA lacks, which the tests read from VDB
-curl -fsS --create-dirs -o vdb/api/deck/notwda https://vdb.im/api/deck/12947
+# the deckbuilders' APIs, each under its host: a TWDA deck as VDB's and VTES
+# Decks's answer it, under an id the TWDA lacks, which the tests read from them;
+# an Amaranth deck, the answer for a deck Amaranth lacks, and its card catalog
+curl -fsS --create-dirs -o vdb.im/api/deck/notwda https://vdb.im/api/deck/12947
+curl -fsS --create-dirs -o api.vtesdecks.com/1.0/decks/notwda https://api.vtesdecks.com/1.0/decks/tournament-12947
+for id in 4d3aa426-70da-44b7-8cb7-92377a1a0dbd notpinned; do
+	curl -fsS --create-dirs -o "amaranth.vtes.co.nz/api/deck/$id" "https://amaranth.vtes.co.nz/api/deck?id=$id"
+done
+curl -fsS -o amaranth.vtes.co.nz/api/cards https://amaranth.vtes.co.nz/api/cards
 # the last commits touching archon-vibe's documents and its renderer
 last() { curl -fsS "https://api.github.com/repos/vtes-biased/archon-vibe/commits?per_page=1&path=$1" | jq -r '.[0].sha'; }
 archon=$(last frontend/src/lib/help-content)
