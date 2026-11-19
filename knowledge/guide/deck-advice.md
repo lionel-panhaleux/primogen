@@ -27,7 +27,10 @@ steps 1 to 4 and 7 on the draft), then:
    tutor for equipment brings an equipment toolbox).
 6. **Check the structure the rules impose**: crypt groups (one group or two
    consecutive), strike cards competing for the one strike a minion has per
-   round unless a card grants more, requirements of every recruit.
+   round unless a card grants more, requirements of every recruit. A
+   structure the list already meets goes unsaid, and so does a ruling that
+   only confirms what the card's text plainly says: name a rule or a ruling
+   only where it changes the advice.
 7. **Judge a new idea against its baseline**: the established archetype
    doing the same job, and the standard answers it must survive. For a
    combat plan, `vtes_deck`'s combat posture gives how many winners carry
@@ -45,4 +48,7 @@ steps 1 to 4 and 7 on the draft), then:
 8. **Name the cut and the add**, in copies, with the pillar each serves.
    The staples a list lacks and its cards few of its reference play are
    where to look first, never a prescription: a deviation may be the
-   player's plan (step 1).
+   player's plan (step 1). A draft is not set beside its reference: call
+   `vtes_card_stats` within the nearest archetype on that archetype's
+   defensive staples, and offer the ones the idea lacks with what adopting
+   them costs the build (a title, a crypt group).

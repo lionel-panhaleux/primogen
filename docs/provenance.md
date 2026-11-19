@@ -24,6 +24,12 @@ compares them with upstream and records the commit below.
   contract, `deck-analysis.md` and `deck-advice.md` every `vtes_deck`
   dossier; `theory.md`, `modules.md`, `card-comparison.md` and
   `meta-reading.md` are served by no tool yet.
+  `examples/` holds the served examples (principles.md, principle 8): each
+  an excerpt of one of primogen's own answers the owner graded clean, named
+  after its task, naming its corpus entry and the dates of the answer and
+  of its data, its entry in the regression set. `card-comparison-trap-conquer-the-beast.md`,
+  from `calibration/corpus/2026-11-20-trap-or-conquer-the-beast.md`, promoted
+  on 2026-11-20. Served by no tool until `vtes_guide` ships.
   `modules.md` is the module catalog the owner canonized on 2026-08-25,
   checked against the card texts on 2026-11-19, but for its "Combat
   defenses", written on 2026-11-19 after codex-of-the-damned's
