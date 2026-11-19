@@ -33,3 +33,6 @@ steps 1 to 4 and 7 on the draft), then:
    strikes that are not hand strikes, and a deck winning combat by blocking
    lands its block regardless.
 8. **Name the cut and the add**, in copies, with the pillar each serves.
+   The staples a list lacks and its cards few of its reference play are
+   where to look first, never a prescription: a deviation may be the
+   player's plan (step 1).

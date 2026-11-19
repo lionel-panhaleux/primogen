@@ -52,6 +52,9 @@ type data struct {
 	byID  map[int]*bundle.Card
 	decks map[string]*bundle.Deck
 	rel   *bundle.Relatives
+
+	measuresOnce sync.Once
+	measures     map[string]*measures // of the window's decks, by id
 }
 
 func NewLive(b *bundle.Bundle) *Live {

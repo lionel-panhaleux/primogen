@@ -487,6 +487,24 @@ func TestQueryDeck(t *testing.T) {
 			t.Errorf("the Banu list: missing %q in:\n%s", w, banu)
 		}
 	}
+	// beside its reference decks (product.md, the vtes_deck row): the budgets, the concentration, the staples, the cards few play
+	for _, w := range []string{
+		"The reference: its nearest archetype, **Haqim Royalty** (C1), its decks and its variants' among the 1494 TWDA decks since 2021-07-01: 41 decks.",
+		"- Cards needing a minion's action (action, political action, equipment, ally, retainer): 26, 31 per 100 library cards; action 14; political action 4; equipment 8. Reference: 6, 8, 11, 15, 18, 20, 24;",
+		"- Distinct library cards: 35, 41 per 100 library cards. Reference: 18, 20, 22, 25, 29, 32, 38;",
+		"How common an outlier is: of the 41 reference decks, each set against the others, 7 (17.1%)",
+		"- Priority Contract: in 40 of 41 reference decks, median 3 copies, lower quartile 2; here 1.\n",
+		"- Blur: in 38 of 41 reference decks, median 4 copies, lower quartile 3; here 0.\n",
+		"This list holds 13 library cards (20 copies) a tenth or fewer of the reference decks play; each reference deck against the others: 1, 2, 4, 6, 7",
+		"2× Blood Fury (in 0)",
+	} {
+		if !strings.Contains(banu, w) {
+			t.Errorf("the Banu list beside its reference: missing %q in:\n%s", w, banu[strings.Index(banu, "## Beside its reference"):strings.Index(banu, "## Relatives")])
+		}
+	}
+	if strings.Contains(idea, "### Budgets") {
+		t.Errorf("a deck idea set beside winning lists:\n%s", idea)
+	}
 	if _, err := query("deck", "Sword of Nuln", "Morbidity"); err == nil || !strings.Contains(err.Error(), "for a deck idea, draft reads a line without a count as one copy") {
 		t.Errorf("an idea's cards without draft: %v", err)
 	}
@@ -501,7 +519,7 @@ func TestQueryDeck(t *testing.T) {
 	if out, err := query("-draft", "deck", "12947"); err != nil || !strings.Contains(out, "draft left aside: a TWDA deck is read whole") || !strings.Contains(out, " per hand") {
 		t.Errorf("a TWDA deck with draft: %v\n%s", err, out)
 	}
-	// a list past the bound: 30 vampires and 90 library cards, the longest texts
+	// a list past the bound: 20 vampires and 90 library cards, the longest texts
 	b, err := bundle.Load(testBundle)
 	if err != nil {
 		t.Fatal(err)
@@ -512,7 +530,7 @@ func TestQueryDeck(t *testing.T) {
 	crypt := 0
 	for _, c := range cards {
 		vampire := slices.Contains(c.Types, "Vampire")
-		if c.Banned != "" || vampire && (c.Group != "G5" || crypt == 30) || !vampire && len(long)-crypt == 90 {
+		if c.Banned != "" || vampire && (c.Group != "G5" || crypt == 20) || !vampire && len(long)-crypt == 90 {
 			continue
 		}
 		if vampire {
@@ -521,7 +539,7 @@ func TestQueryDeck(t *testing.T) {
 		}
 		long = append(long, "1x "+c.Name)
 	}
-	if out, err := query("deck", strings.Join(long, "\n")); err != nil || len(out) > 40000 || !strings.Contains(out, "Left out to fit this result: the texts of the library's cards.") {
+	if out, err := query("deck", strings.Join(long, "\n")); err != nil || len(out) > 40000 || !strings.Contains(out, "Left out to fit this result: the texts of the library's cards.") || !strings.Contains(out, "This reference is loose") {
 		t.Errorf("a list past the bound: %v, %d characters", err, len(out))
 	}
 	// the same crypt and the 90 shortest library texts: only the relatives' details left out

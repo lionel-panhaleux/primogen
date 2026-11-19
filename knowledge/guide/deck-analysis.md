@@ -30,7 +30,10 @@ is why these cards, in these numbers, in that year. Theory and vocabulary:
 6. **Its relatives.** The nearest archetype and tournament decks: is this
    list standard, or a deviation? Deviations are where the player's read
    lives. When nothing fits, say so and read the deck on its own mechanics;
-   lineage must never become the spine of the analysis.
+   lineage must never become the spine of the analysis. Beside its
+   reference, the result says how often a reference deck falls outside the
+   others' range; where that is common, a finding is several figures
+   pointing the same way, read through the cards behind them.
 7. **Verdict.** Strengths; weaknesses, each naming the matchup and the
    mechanism; what the pilot must do well to win (lunge timing, deals, jam
    management).

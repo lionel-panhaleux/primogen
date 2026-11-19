@@ -52,7 +52,7 @@ func addDeck(s *mcp.Server, l *Live) {
 			"legality today) and returns the computed facts: the crypt table with capacities, disciplines, titles and texts, " +
 			"which crypt cards have what each library card requires and at which level, the library by type with every card's official text, " +
 			"the library by module with each module's density and expected copies per hand, " +
-			"its answers to the field's combat defenses, the costs, the nearest archetypes and tournament decks with the cards that differ, and the procedure a deck analysis and advice follow.",
+			"its answers to the field's combat defenses, the costs, its budgets, concentration and staples beside its reference decks, the nearest archetypes and tournament decks with the cards that differ, and the procedure a deck analysis and advice follow.",
 		InputSchema: deckSchema,
 		Annotations: &mcp.ToolAnnotations{ReadOnlyHint: true, IdempotentHint: true, OpenWorldHint: new(false)},
 	}, func(ctx context.Context, _ *mcp.CallToolRequest, in deckInput) (*mcp.CallToolResult, any, error) {
@@ -605,7 +605,7 @@ const commentCut = 1500
 // How much of the dossier is written, to fit the result's bound.
 const (
 	full      = iota
-	lean      // the relatives' events, comments and differences left out
+	lean      // the relatives' events, comments and differences left out, and the reference's cards
 	noLibrary // the library's texts left out
 	bare      // every text and the crypt's rosters left out
 )
@@ -676,6 +676,7 @@ func (dk *deck) write(out *strings.Builder, d *data, today string, fixes []strin
 	writeLibrary(out, library, crypt, nLibrary, nCrypt, fit)
 	writeModules(out, b.Modules, library, crypt, nLibrary, dk.draft, fit)
 	writePosture(out, b, library, crypt, nCrypt)
+	dk.writeReference(out, d, fit)
 	dk.writeRelatives(out, d, detail, fit)
 
 	out.WriteString("## How to answer\n\nThese facts are computed from the card data; the texts above are official. " +
@@ -904,8 +905,11 @@ func writeModules(out *strings.Builder, modules []bundle.Module, library, crypt 
 	for _, m := range modules {
 		var parts [2][]string // core, support
 		var inCrypt, absent []string
+		if !moduleHeld(m, func(id int) bool { _, ok := held[id]; return ok }) {
+			continue
+		}
 		var ids []int
-		copiesHere, coreHeld, pieces := 0, 0, 0
+		copiesHere := 0
 		for i, tags := range [][]bundle.Tag{m.Core, m.Support} {
 			for _, t := range tags {
 				found := false
@@ -923,19 +927,10 @@ func writeModules(out *strings.Builder, modules []bundle.Module, library, crypt 
 					copiesHere += e.count
 					parts[i] = append(parts[i], copies(e))
 				}
-				switch {
-				case found:
-					pieces++
-					if i == 0 {
-						coreHeld++
-					}
-				case i == 0 && fit == full:
+				if !found && i == 0 && fit == full {
 					absent = append(absent, t.Name)
 				}
 			}
-		}
-		if coreHeld == 0 || pieces < m.Pieces {
-			continue
 		}
 		for _, id := range ids {
 			tagged[id] = true
@@ -990,6 +985,23 @@ func writeModules(out *strings.Builder, modules []bundle.Module, library, crypt 
 		fmt.Fprintf(out, "\nIn no module shown (%d copies, %.1f%% of the library): %s\n", count, 100*float64(count)/float64(n), strings.Join(none, ", "))
 	}
 	out.WriteString("\n")
+}
+
+// moduleHeld is whether a deck shows a module: one of its core cards, and
+// as many of its cards as the module names.
+func moduleHeld(m bundle.Module, held func(id int) bool) bool {
+	core, pieces := 0, 0
+	for i, tags := range [][]bundle.Tag{m.Core, m.Support} {
+		for _, t := range tags {
+			if slices.ContainsFunc(t.IDs, held) {
+				pieces++
+				if i == 0 {
+					core++
+				}
+			}
+		}
+	}
+	return core > 0 && pieces >= m.Pieces
 }
 
 // densityClass is theory.md's class of a module's density.
