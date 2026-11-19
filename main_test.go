@@ -339,12 +339,12 @@ func TestQueryDeck(t *testing.T) {
 		"- 11× **Thing** (card 101972). Clans its requirement names: Gangrel.\n  Crypt cards with the clan Gangrel it requires: all 12.",
 		"  > [pro] Strike: combat ends.\n  > [PRO] As above, and unlock this vampire before combat ends.\n",
 		// the library by module: a Gangrel wall, as the catalog describes it
-		"- **PRO stealth** (Stealth & block denial): 20 copies, 22.2%, strong, 1.6 per hand; core: Earth Control ×3, Form of Mist ×4, Form of the Bat ×4, Earth Meld ×9\n" +
-			"- **Baron defense** (Bleed defense): 17 copies, 18.9%, strong, 1.3 per hand; core: Bait and Switch ×7, Organized Resistance ×9, Powerbase: Los Angeles; not here, of its core: The Anarch Free Press\n",
-		"- **Leech package** (Bloat & pool economy): 9 copies, 10.0%, standard, 0.7 per hand; core: Villein ×3, Vessel ×3; support: Zoo Hunting Ground, Carfax Abbey, Papillon;",
-		"- **ANI intercept** (Wakes, intercept & wall kits): 5 copies, 5.6%, tactical, 0.4 per hand; core: Raven Spy ×5;",
-		"- **Protected-permanent payload** (Wakes, intercept & wall kits): 3 copies, 3.3%, tactical, 0.2 per hand; core: The Rack, Powerbase: Montreal; support: Monkey Wrench;",
-		"- With one library copy or none: **Big-cap ramp** (Information Highway); **Permanent intercept** (Mr. Winthrop)\n",
+		"- **PRO stealth** (Stealth & block denial): 20 copies, 22.2%, strong, 1.6 per hand, in 84% of opening hands; core: Earth Control ×3, Form of Mist ×4, Form of the Bat ×4, Earth Meld ×9\n" +
+			"- **Baron defense** (Bleed defense): 17 copies, 18.9%, strong, 1.3 per hand, in 78% of opening hands; core: Bait and Switch ×7, Organized Resistance ×9, Powerbase: Los Angeles; not here, of its core: The Anarch Free Press\n",
+		"- **Leech package** (Bloat & pool economy): 9 copies, 10.0%, standard, 0.7 per hand, in 53% of opening hands; core: Villein ×3, Vessel ×3; support: Zoo Hunting Ground, Carfax Abbey, Papillon;",
+		"- **ANI intercept** (Wakes, intercept & wall kits): 5 copies, 5.6%, tactical, 0.4 per hand, in 34% of opening hands; core: Raven Spy ×5;",
+		"- **Protected-permanent payload** (Wakes, intercept & wall kits): 3 copies, 3.3%, tactical, 0.2 per hand, in 22% of opening hands; core: The Rack, Powerbase: Montreal; support: Monkey Wrench;",
+		"- With one library copy or none (one copy: in 8% of opening hands): **Big-cap ramp** (Information Highway); **Permanent intercept** (Mr. Winthrop)\n",
 		"In no module shown (23 copies, 25.6% of the library): Thing ×11, Deep Ecology ×5, Powerbase: Savannah ×2, Anarch Railroad, Backways, Ecoterrorists, Ennoia's Theater, Revolutionary Council\n",
 		// its relatives, the deck left out of them, and how well the labels classify back
 		"pass of 2026-07-05, curated and revisable; each of their decks left out in turn, 97% are placed back in their archetype, 99% in its family (variants merged).",
@@ -420,7 +420,7 @@ func TestQueryDeck(t *testing.T) {
 				"Only in this deck: 3× Elemental Stoicism; 1× Theo Bell (G6).\nOnly in 12947: 3× Earth Control; 1× Indira (G6).\n",
 		}},
 		// a deck near no archetype, its twin the nearest deck
-		{"13019", []string{"- **Zillah + Villein ramp-bloat** (Bloat & pool economy): 6 copies, 6.7%, tactical, 0.5 per hand; core: Villein ×6;", "- **Matawall** (C53): 0.15;", "This deck is near no archetype: even the closest is under 0.49.",
+		{"13019", []string{"- **Zillah + Villein ramp-bloat** (Bloat & pool economy): 6 copies, 6.7%, tactical, 0.5 per hand, in 39% of opening hands; core: Villein ×6;", "- **Matawall** (C53): 0.15;", "This deck is near no archetype: even the closest is under 0.49.",
 			"### 13163, Agnieszka: 1.00\n\nWon by Martin Weinmayer at The Vozhd of JOL, Online, 2026-03-17, 45 players. Event report: https://www.vekn.net/event-calendar/event/13163\nThe same list as this deck.\n"}},
 		{"12434", []string{"(cut at 1500 of 6967 characters: detail gives it whole)"}},
 		// a deck the TWDA archives, illegal today
@@ -459,7 +459,7 @@ func TestQueryDeck(t *testing.T) {
 		"Crypt cards with the [obl] or [tha] and path Death and the Soul it requires (each effect's symbols in the text say which): 1 of 1: Eulogio Sánchez de los Reyes (G6) [OBL THA].",
 		"- 2× **Villein**",
 		// a combination card's effect needing both its disciplines
-		"Crypt cards with every discipline one of its effects names ([cel][tha]): none.", "- **Zillah + Villein ramp-bloat** (Bloat & pool economy): 2 copies; core: Villein ×2",
+		"Crypt cards with every discipline one of its effects names ([cel][tha]): none.", "- **Zillah + Villein ramp-bloat** (Bloat & pool economy): 2 copies, in 15% of opening hands; core: Villein ×2",
 		"In no module shown (3 copies): Hunter's Mark, Morbidity, Sword of Nuln",
 		// the combat posture: an answer to combat ends no vampire here plays at its level
 		"## Combat posture against the field", "TWDA decks since 2021-07-01 carry a card giving it",
@@ -507,6 +507,60 @@ func TestQueryDeck(t *testing.T) {
 	}
 	if !strings.Contains(banu, "- Every card of this deck is played by at least one of these decks.\n") {
 		t.Errorf("the Banu list's track record:\n%s", banu[strings.Index(banu, "## Track record"):strings.Index(banu, "## Relatives")])
+	}
+	// the odds of a hand: Hunger of Marduk with an additional strike, in the Banu list and in a winner of its
+	// archetype; two copies of one card (1 - (C(80,7) + 10·C(80,6)) / C(90,7)); a draft's library taken as 90 cards
+	marduk := `[[["Hunger of Marduk"], ["Blur", "Lightning Reflexes", "Quickness", "Side Strike", "Pursuit"]]]`
+	for _, tc := range []struct {
+		args []string
+		want []string
+	}{
+		{[]string{"-together", marduk, "deck", "https://vdb.im/decks/7dcfd9fcb"}, []string{
+			"1. One of each: (Hunger of Marduk ×7) + (",
+			"   In an opening hand: 22.0%; seen within 14 cards 56.0%, 21 cards 79.1%, 28 cards 91.3%.\n",
+			"held here requires (the requirement, not the level an effect needs: their levels shown, the texts above say which level gives what): 11 of 12: ", // Arjun Shah has no [cel]
+			"Warmaksan (G6) ×2 [cel THA]",
+			"- **Marduk theft-at-range** (Combat): ",
+		}},
+		{[]string{"-together", marduk, "deck", "12494"}, []string{
+			"   In an opening hand: 36.9%; seen within 14 cards 75.1%, 21 cards 91.8%, 28 cards 97.6%.\n",
+			"Not in this deck: Lightning Reflexes, Quickness, Side Strike.",
+		}},
+		{[]string{"-together", `[[["Hunger of Marduk"], ["Hunger of Marduk"]]]`, "deck", "12494"}, []string{
+			"   In an opening hand: 17.3%; seen within 14 cards 48.4%,",
+			"- **Marduk theft-at-range** (Combat): 27 copies, 30.0%, spam, 2.1 per hand, in 93% of opening hands;",
+		}},
+		{[]string{"-draft", "-together", `[[["Sword of Nuln"], ["Villein"]]]`, "deck", "Sword of Nuln", "2x Villein"}, []string{
+			" This deck idea's library taken as 90 cards; library_size gives another.",
+			"   In an opening hand: 1.0%;",
+			"   No crypt given: who can play every piece is unchecked.\n",
+		}},
+		// a draft of a crypt alone: the library still taken as 90 cards
+		{[]string{"-draft", "-together", `[[["Blur"], ["Pursuit"]]]`, "deck", "Arjun Shah"}, []string{
+			" This deck idea's library taken as 90 cards; library_size gives another.",
+			"   In an opening hand: 0.0%;",
+		}},
+		{[]string{"-draft", "-library-size", "60", "-together", `[[["Sword of Nuln"]]]`, "deck", "Sword of Nuln"}, []string{
+			"Exact odds over a library of 60 cards. The library's size given for this deck idea.",
+			"   In an opening hand: 11.7%;",
+		}},
+		// a piece the deck lacks fills no group, for the odds and for who can play it
+		{[]string{"-together", `[[["Hunger of Marduk"], ["Pursuit", "Lost in Crowds"]]]`, "deck", "https://vdb.im/decks/7dcfd9fcb"}, []string{
+			"Not in this deck: Lost in Crowds.", "): 11 of 12: ",
+		}},
+	} {
+		out, err := query(tc.args...)
+		if err != nil {
+			t.Fatal(err)
+		}
+		for _, w := range tc.want {
+			if !strings.Contains(out, w) {
+				t.Errorf("odds %v: missing %q in:\n%s", tc.args, w, out[strings.Index(out, "## Library by module"):strings.Index(out, "## Combat posture")])
+			}
+		}
+	}
+	if _, err := query("-together", `[[["Hunger of Marduk"], ["Kassandra Tassaki"]]]`, "deck", "12494"); err == nil || !strings.Contains(err.Error(), "is a crypt card: a recipe holds library cards") {
+		t.Errorf("a crypt card in a recipe: %v", err)
 	}
 	// two precons from the card data's set information: an old one past the window's 90th percentile of rarely
 	// played cards, a recent one within its reference's range
@@ -596,10 +650,11 @@ func TestQueryDeck(t *testing.T) {
 	if out, err := query("deck", strings.Join(long, "\n")); err != nil || len(out) > 40000 || !strings.Contains(out, "Left out to fit this result: the texts of the library's cards.") || !strings.Contains(out, "This reference is loose") {
 		t.Errorf("a list past the bound: %v, %d characters", err, len(out))
 	}
-	// the same crypt and the 90 shortest library texts: only the relatives' details left out
+	// the same crypt and the 85 shortest library texts: only the relatives' details left out (90 sit at the bound,
+	// past it with any line more)
 	var short []string
 	for _, c := range slices.Backward(cards) {
-		if c.Banned == "" && !slices.Contains(c.Types, "Vampire") && !slices.Contains(c.Types, "Imbued") && len(short) < 90 {
+		if c.Banned == "" && !slices.Contains(c.Types, "Vampire") && !slices.Contains(c.Types, "Imbued") && len(short) < 85 {
 			short = append(short, "1x "+c.Name)
 		}
 	}

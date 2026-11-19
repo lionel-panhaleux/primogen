@@ -26,9 +26,11 @@ import (
 const maxDeckInput = 20000
 
 type deckInput struct {
-	Deck   string `json:"deck"`
-	Draft  bool   `json:"draft,omitempty"`
-	Detail bool   `json:"detail,omitempty"`
+	Deck        string       `json:"deck"`
+	Draft       bool         `json:"draft,omitempty"`
+	LibrarySize int          `json:"library_size,omitempty"`
+	Together    [][][]string `json:"together,omitempty"`
+	Detail      bool         `json:"detail,omitempty"`
 }
 
 var deckSchema = &jsonschema.Schema{
@@ -38,6 +40,12 @@ var deckSchema = &jsonschema.Schema{
 			`"Anson x2", crypt lines with their capacity and disciplines accepted), a TWDA deck id ("2k6munduko"), or a deck link from VDB (https://vdb.im/decks/...), VTES Decks (https://vtesdecks.com/deck/...) or Amaranth (https://amaranth.vtes.co.nz/#deck/...)`},
 		"draft": {Type: "boolean", Description: "a deck idea rather than a whole list: its cards, a line without a count read as one copy, " +
 			"the crypt's and library's sizes not checked and no density computed"},
+		"library_size": {Type: "integer", Description: "with draft: the library's size the odds are computed over, 60 to 90; 90 when not given"},
+		"together": {
+			Type: "array", Items: &jsonschema.Schema{Type: "array", Items: &jsonschema.Schema{Type: "array", Items: &jsonschema.Schema{Type: "string"}}},
+			Description: `recipes, each a list of groups of library card names one of each group is needed, e.g. [[["Hunger of Marduk"], ["Blur", "Quickness"]]]: ` +
+				`the exact chance an opening hand holds one of each group, and of having seen them within 14, 21 and 28 cards, and the crypt cards having what a card of each group requires, with their levels; at most 5 recipes of 6 groups of 12 names`,
+		},
 		"detail": {Type: "boolean", Description: "the deck author's whole comment, where the default cuts it, and a larger result, keeping texts a large list's default drops"},
 	},
 	Required: []string{"deck"},
@@ -51,7 +59,8 @@ func addDeck(s *mcp.Server, l *Live) {
 			"of its cards. Takes a decklist as text, a TWDA deck id or a deck link from VDB, VTES Decks or Amaranth, or an idea's cards with draft; validates it (sizes, crypt groups, banned cards, " +
 			"legality today) and returns the computed facts: the crypt table with capacities, disciplines, titles and texts, " +
 			"which crypt cards have what each library card requires and at which level, the library by type with every card's official text, " +
-			"the library by module with each module's density and expected copies per hand, " +
+			"the library by module with each module's density, expected copies per hand and chance of an opening hand holding one, " +
+			"with together, the odds that the cards a plan needs meet in a hand, " +
 			"its answers to the field's combat defenses, the costs, its budgets, concentration and staples beside its reference decks, its track record among winning decks (rarely played cards, cards no winner plays), the nearest archetypes and tournament decks with the cards that differ, and the procedure a deck analysis and advice follow.",
 		InputSchema: deckSchema,
 		Annotations: &mcp.ToolAnnotations{ReadOnlyHint: true, IdempotentHint: true, OpenWorldHint: new(false)},
@@ -65,6 +74,14 @@ func addDeck(s *mcp.Server, l *Live) {
 		if err != nil {
 			return nil, nil, err
 		}
+		recipes, errs := d.readRecipes(in.Together, dk)
+		if len(errs) > 0 {
+			return nil, nil, fmt.Errorf("together: %s", strings.Join(errs, "; "))
+		}
+		if in.LibrarySize != 0 && (in.LibrarySize < 60 || in.LibrarySize > 90) {
+			return nil, nil, fmt.Errorf("library_size is %d: a library holds 60 to 90 cards", in.LibrarySize)
+		}
+		dk.recipes, dk.librarySize = recipes, in.LibrarySize
 		today := time.Now().UTC().Format(time.DateOnly)
 		fixes, short := dk.fixes(today)
 		if dk.twda == nil && !dk.draft && len(fixes) > 0 {
@@ -107,6 +124,24 @@ type deck struct {
 	entries                   []deckEntry
 	notes                     []string // how the list was read
 	draft                     bool     // an idea's cards: no size checked, no density computed
+	recipes                   []recipe // the caller's, for the odds of a hand
+	librarySize               int      // the caller's, for a draft's odds
+}
+
+// oddsSize is the library size the odds are computed over, and a sentence
+// saying how it was taken when it is not the list's.
+func (dk *deck) oddsSize(nLibrary int) (int, string) {
+	switch {
+	case !dk.draft && dk.librarySize != 0:
+		return nLibrary, fmt.Sprintf(" The list's own library, library_size %d left aside: it is for a deck idea.", dk.librarySize)
+	case !dk.draft:
+		return nLibrary, ""
+	case dk.librarySize != 0 && dk.librarySize >= nLibrary:
+		return dk.librarySize, " The library's size given for this deck idea."
+	case dk.librarySize != 0:
+		return nLibrary, fmt.Sprintf(" This deck idea's own copies, more than the library_size %d given.", dk.librarySize)
+	}
+	return max(draftLibrary, nLibrary), fmt.Sprintf(" This deck idea's library taken as %d cards; library_size gives another.", draftLibrary)
 }
 
 var reSchemeless = regexp.MustCompile(`(?i)^(www\.)?(vdb\.im|vtesdecks\.com|amaranth\.vtes\.co\.nz)/`)
@@ -674,7 +709,11 @@ func (dk *deck) write(out *strings.Builder, d *data, today string, fixes []strin
 	}
 	writeCrypt(out, crypt, nCrypt, fit)
 	writeLibrary(out, library, crypt, nLibrary, nCrypt, fit)
-	writeModules(out, b.Modules, library, crypt, nLibrary, dk.draft, fit)
+	size, sizeNote := dk.oddsSize(nLibrary)
+	writeModules(out, b.Modules, library, crypt, nLibrary, size, sizeNote, dk.draft, fit)
+	if len(dk.recipes) > 0 {
+		writeOdds(out, dk.recipes, library, crypt, size, nCrypt, sizeNote)
+	}
 	writePosture(out, b, library, crypt, nCrypt)
 	ref := dk.writeReference(out, d, fit)
 	dk.writeRecord(out, d, ref, today, fit)
@@ -876,7 +915,7 @@ func writeLibrary(out *strings.Builder, library, crypt []deckEntry, n, nCrypt, f
 }
 
 // writeModules groups the library by the catalog's modules.
-func writeModules(out *strings.Builder, modules []bundle.Module, library, crypt []deckEntry, n int, draft bool, fit int) {
+func writeModules(out *strings.Builder, modules []bundle.Module, library, crypt []deckEntry, n, size int, sizeNote string, draft bool, fit int) {
 	out.WriteString("## Library by module\n\n")
 	if len(modules) == 0 {
 		out.WriteString("This data bundle holds no module tags: no modules until it is rebuilt.\n\n")
@@ -888,6 +927,7 @@ func writeModules(out *strings.Builder, modules []bundle.Module, library, crypt 
 		fmt.Fprintf(out, " Density: the module's copies over the library's %d cards, in theory.md's classes "+
 			"(%s); per hand: the copies a hand of 7 holds on average, density × 7.", n, bundle.DensityClasses)
 	}
+	fmt.Fprintf(out, " Opening hands: the exact chance a hand of %d drawn from %d library cards holds a copy.%s", handSize, size, sizeNote)
 	out.WriteString("\n\n")
 	if fit > full {
 		out.WriteString("What each module lacks of its core is left out to fit this result.\n\n")
@@ -948,6 +988,7 @@ func writeModules(out *strings.Builder, modules []bundle.Module, library, crypt 
 			density := float64(copiesHere) / float64(n)
 			fmt.Fprintf(&line, "- **%s** (%s): %d copies, %.1f%%, %s, %.1f per hand", m.Name, section, copiesHere, 100*density, densityClass(density), 7*density)
 		}
+		fmt.Fprintf(&line, ", in %.0f%% of opening hands", 100*anyInHand(copiesHere, size, handSize))
 		for _, p := range []struct {
 			head  string
 			cards []string
@@ -967,7 +1008,7 @@ func writeModules(out *strings.Builder, modules []bundle.Module, library, crypt 
 		out.WriteString(l.line)
 	}
 	if len(single) > 0 {
-		fmt.Fprintf(out, "- With one library copy or none: %s\n", strings.Join(single, "; "))
+		fmt.Fprintf(out, "- With one library copy or none (one copy: in %.0f%% of opening hands): %s\n", 100*anyInHand(1, size, handSize), strings.Join(single, "; "))
 	}
 	var none []string
 	count := 0
@@ -1094,24 +1135,8 @@ func playable(c *bundle.Card, crypt []deckEntry, nCrypt int) string {
 	var able []string
 	n, superior := 0, 0
 	for _, e := range crypt {
-		v := e.card
-		if !clanAndPath(c, v) {
-			continue
-		}
-		var levels []string
-		for _, req := range c.Disciplines {
-			for _, d := range cryptDisciplines(v) {
-				if strings.EqualFold(d, req) {
-					levels = append(levels, d)
-				}
-			}
-		}
-		meetsAnEffect := slices.ContainsFunc(effects, func(eff []string) bool {
-			return len(eff) <= len(levels) && !slices.ContainsFunc(eff, func(d string) bool {
-				return !slices.ContainsFunc(levels, func(l string) bool { return strings.EqualFold(l, d) })
-			})
-		})
-		if len(c.Disciplines) > 0 && len(levels) == 0 || len(effects) > 0 && !meetsAnEffect {
+		levels, ok := meets(c, e.card)
+		if !ok {
 			continue
 		}
 		name := copies(e)
@@ -1139,6 +1164,32 @@ func playable(c *bundle.Card, crypt []deckEntry, nCrypt int) string {
 		line += fmt.Sprintf(" Its text also requires, unchecked here: %q", m)
 	}
 	return line
+}
+
+// meets says whether crypt card v has what library card c requires as the
+// card data holds it, and at which levels it has c's disciplines.
+func meets(c, v *bundle.Card) ([]string, bool) {
+	if !clanAndPath(c, v) {
+		return nil, false
+	}
+	var levels []string
+	for _, req := range c.Disciplines {
+		for _, d := range cryptDisciplines(v) {
+			if strings.EqualFold(d, req) {
+				levels = append(levels, d)
+			}
+		}
+	}
+	effects := comboEffects(c)
+	meetsAnEffect := slices.ContainsFunc(effects, func(eff []string) bool {
+		return len(eff) <= len(levels) && !slices.ContainsFunc(eff, func(d string) bool {
+			return !slices.ContainsFunc(levels, func(l string) bool { return strings.EqualFold(l, d) })
+		})
+	})
+	if len(c.Disciplines) > 0 && len(levels) == 0 || len(effects) > 0 && !meetsAnEffect {
+		return nil, false
+	}
+	return levels, true
 }
 
 // clanAndPath says whether a crypt card has the clan and the path a library

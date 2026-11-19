@@ -8,8 +8,8 @@ is why these cards, in these numbers, in that year. Theory and vocabulary:
 
 1. **Take the facts primogen computes**: the list validated, the crypt
    (groups, capacities, disciplines inferior and superior, titles), the
-   library by type and module, densities and hand expectation, the date,
-   event size and format. Never recompute what was computed, and never
+   library by type and module, densities, hand expectation and the chance
+   of an opening hand holding a module, the date, event size and format. Never recompute what was computed, and never
    assume a card's text or requirements: they are in the evidence. Read the
    requirements as well as the text: an ally's recruit requirement is not in
    its ability text.

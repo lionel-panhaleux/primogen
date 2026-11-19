@@ -11,7 +11,11 @@ steps 1 to 4 and 7 on the draft), then:
    so: the player may have seen a constraint you missed (a recruit
    requirement, a trigger's condition, a single point of failure).
 3. **Enumerate what fires each engine**, conditions read literally, base
-   actions included, before declaring it live or dead.
+   actions included, before declaring it live or dead. When a plan needs
+   cards together, name the recipe from the card texts (Hunger of Marduk,
+   then a card giving an additional strike) and call `vtes_deck` with
+   `together`: the odds, and who has every requirement at which level, are
+   computed; the texts say which level gives the effect.
 4. **Survey the slot, never endorse the named card.** For each slot the
    player asks about, the competitors in the card pool with the evidence and
    the trade-off: `vtes_card_stats` on the card, within the deck's archetype

@@ -4,6 +4,7 @@ package main
 import (
 	"cmp"
 	"context"
+	"encoding/json"
 	"errors"
 	"flag"
 	"fmt"
@@ -104,6 +105,8 @@ func build(ctx context.Context, fs *flag.FlagSet, path *string, args []string, s
 func query(ctx context.Context, fs *flag.FlagSet, path *string, args []string, stdout, stderr io.Writer) error {
 	detail := fs.Bool("detail", false, "the detailed result")
 	draft := fs.Bool("draft", false, "deck: a deck idea's cards, its sizes not checked")
+	librarySize := fs.Int("library-size", 0, "deck: with -draft, the library's size the odds are computed over")
+	together := fs.String("together", "", `deck: recipes as JSON, e.g. '[[["Hunger of Marduk"], ["Blur", "Quickness"]]]'`)
 	directors := fs.Bool("directors", false, "archive: only posts by the rules director sitting when they were written")
 	from := fs.String("from", published, "where to download the bundle when -bundle is not given")
 	archive := fs.String("archive", bundle.KRCG.Archive, "where to download the rulings archive")
@@ -138,6 +141,16 @@ func query(ctx context.Context, fs *flag.FlagSet, path *string, args []string, s
 			list = string(raw)
 		}
 		tool, in["deck"], in["draft"] = "vtes_deck", list, *draft
+		if *librarySize != 0 {
+			in["library_size"] = *librarySize
+		}
+		if *together != "" {
+			var recipes [][][]string
+			if err := json.Unmarshal([]byte(*together), &recipes); err != nil {
+				return fmt.Errorf("-together: %w", err)
+			}
+			in["together"] = recipes
+		}
 	case "stats":
 		tool, in["card"] = "vtes_card_stats", rest[0]
 		if len(rest) > 1 {
