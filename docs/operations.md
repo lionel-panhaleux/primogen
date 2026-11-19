@@ -45,8 +45,8 @@ The server refreshes itself; there is no cron job and no operator.
 - A local install downloads the published bundle on first run and again when
   a newer one exists, checked at most daily, and the archive's bulk file the
   same way, from `usenet.krcg.org`, the first time a tool needs it
-  (`vtes_rulings_archive`, or `vtes_rules_case` given two cards no ruling
-  names together). Loading it takes about 5 seconds (measured on a local
+  (`vtes_rulings_archive`, or `vtes_rules_case` given a single card or two
+  cards no ruling names together). Loading it takes about 5 seconds (measured on a local
   `primogen query`, against a tenth of a second for a call that needs no
   archive); `primogen stdio` loads it once. Offline, it serves what it has
   and says how old it is.
@@ -84,7 +84,8 @@ Go, jq, node and uv come from mise: `mise install` in the checkout reads
 - `primogen query TOOL ARG...` (`-detail` for the detailed mode) calls a
   tool through the MCP server and prints what the model reads: `cards
   NAME...`, `case QUESTION [CARD...]`, `search WORDS...`, `read ID...`,
-  `archive WORDS...`, `deck LIST|ID|LINK` (the list's lines as one or
+  `archive WORDS...` (`-directors` for the sitting rules directors' posts
+  only), `deck LIST|ID|LINK` (the list's lines as one or
   several arguments, or `-` to read it from stdin).
 - `primogen stdio` serves the tools over stdio for a local MCP client.
 - Without `-bundle`, `query` and `stdio` are a local install: they use the
@@ -114,8 +115,8 @@ each, the ids archon.vekn.net gives those documents' headings by archon's
 own renderer at that commit, which every link of theirs and of the
 advanced rules to them is checked against, the archive cut to
 its ids and titles with the text of the posts the rulings and the advanced
-rules cite and of the threads the calibration corpus's `settled-by`
-names), with `knowledge/` as it stands, then query it as a user does,
+rules cite, of the threads the calibration corpus's `settled-by`
+names and of two threads the tests name), with `knowledge/` as it stands, then query it as a user does,
 and run the evidence tests ([product.md](product.md) "Evaluation") on it,
 with zero-vtes's `rules-qa` and rulings ledger pinned beside them. They
 also run the hosted server through its refreshes against that server (the

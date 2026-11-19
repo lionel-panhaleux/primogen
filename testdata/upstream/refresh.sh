@@ -4,7 +4,8 @@
 # name, one VDB deck, vtes-rulings at its head, archon-vibe's rules documents
 # at its head with the ids archon.vekn.net gives them, zero-vtes's rules-qa and rulings ledger, and the archive cut to
 # its ids and titles, with the text of the posts the rulings and the advanced
-# rules cite and of the threads the calibration corpus's settled-by names.
+# rules cite, of the threads the calibration corpus's settled-by names and of
+# the threads the tests name.
 # Needs curl, jq, node and npm (mise install).
 set -eu
 cd "$(dirname "$0")"
@@ -60,8 +61,11 @@ cited=$(
 			sed -E 's|.*/([0-9]+)-[^/#]*#([0-9]+)$|vekn-\1 \2|'
 	} | jq -Rn '[inputs | split(" ")] | group_by(.[0]) | map({key: .[0][0], value: map(.[1])}) | from_entries'
 )
-whole=$(grep -h '^settled-by:' ../../calibration/corpus/*.md | grep -oE 'usenet\.krcg\.org/t/[^/#]+/' |
-	sed -E 's|usenet\.krcg\.org/t/([^/]+)/|\1|' | jq -Rn '[inputs]')
+whole=$({
+	grep -h '^settled-by:' ../../calibration/corpus/*.md | grep -oE 'usenet\.krcg\.org/t/[^/#]+/' |
+		sed -E 's|usenet\.krcg\.org/t/([^/]+)/|\1|'
+	printf '%s\n' z_kvG6T-DTQ w6jOOcMIUbM
+} | jq -Rn '[inputs]')
 curl -fsS https://usenet.krcg.org/archive.json.gz | gunzip |
 	jq -c --argjson cited "$cited" --argjson whole "$whole" '{LastPost, Threads: [.Threads[] | .ThreadId as $t | ($cited[$t] // []) as $c |
 		{ThreadId, Title, Messages: [.Messages | to_entries[] | .key as $i | .value as $m |

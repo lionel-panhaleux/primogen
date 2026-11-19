@@ -22,8 +22,11 @@
    give the ruling and the repair: what stands, and what goes back to hand.
 7. **Be firm where the evidence is.** When a rule or ruling settles the
    point, say so without hedging; a ruling's words reach every case they
-   describe: an effect that lingers applies once its condition is met. When
-   nothing settles it, say that no ruling
+   describe: an effect that lingers applies once its condition is met.
+   Before saying nothing settles it, search the rulings archive
+   (`vtes_rulings_archive`, the card's name, directors only): the sitting
+   rules director's reply settles what no ruling covers, even a "Yes" whose
+   own words name no card. When nothing settles it, say that no ruling
    covers these cards together and what the closest evidence suggests.
    Always separate what is ruled from what is inferred.
 8. **Answer first, then the evidence**, quoted and linked. Keep it short.

@@ -29,6 +29,9 @@ type archiveMsg struct {
 	i      int
 	own    string // folded
 	title  string // folded
+	// question is what a rules director's reply answers, folded, its
+	// decklist out; "" for anyone else's post and a thread's first.
+	question string
 }
 
 func newArchiveSearch(a *bundle.Archive) *archiveSearch {
@@ -40,39 +43,151 @@ func newArchiveSearch(a *bundle.Archive) *archiveSearch {
 			if m.Body == "" {
 				continue
 			}
-			if bundle.Role(m.Author, m.Date).Seat == bundle.Sitting {
+			seat, question := bundle.Role(m.Author, m.Date).Seat, ""
+			if seat == bundle.Sitting || seat == bundle.Possibly {
+				question = bundle.Fold(prose(questionOf(th, i)))
+			}
+			if seat == bundle.Sitting {
 				s.directors = append(s.directors, len(s.msgs))
 			}
-			s.msgs = append(s.msgs, archiveMsg{th, i, bundle.Fold(ownLines(m.Body)), title})
+			s.msgs = append(s.msgs, archiveMsg{th, i, bundle.Fold(ownLines(m.Body)), title, question})
 		}
 	}
 	return s
 }
 
-// naming answers the rules directors' messages whose own words name a card
-// outside a decklist, with those words folded, the decklist out.
-func (s *archiveSearch) naming(names []string) map[int]string {
-	found := map[int]string{}
+// named is where a rules director's message names a card outside a
+// decklist, folded: its own words, the question it answers; "" where not.
+type named struct{ own, question string }
+
+// naming answers the rules directors' messages whose own words, or the
+// question they answer, name a card outside a decklist.
+func (s *archiveSearch) naming(names []string) map[int]named {
+	found := map[int]named{}
 	if len(names) == 0 {
 		return found
 	}
+	names1 := func(text string) bool {
+		return slices.ContainsFunc(names, func(n string) bool { return countWord(text, n) > 0 })
+	}
 	for _, k := range s.directors {
 		m := s.msgs[k]
-		if !slices.ContainsFunc(names, func(n string) bool { return countWord(m.own, n) > 0 }) {
-			continue
-		}
-		var prose strings.Builder
-		for line := range strings.Lines(ownLines(m.thread.Messages[m.i].Body)) {
-			if len(line) >= 80 || !reDeckLine.MatchString(line) {
-				prose.WriteString(line)
+		var n named
+		if names1(m.own) {
+			if own := bundle.Fold(prose(ownLines(m.thread.Messages[m.i].Body))); names1(own) {
+				n.own = own
 			}
 		}
-		own := bundle.Fold(prose.String())
-		if slices.ContainsFunc(names, func(n string) bool { return countWord(own, n) > 0 }) {
-			found[k] = own
+		if names1(m.question) {
+			n.question = m.question
+		}
+		if n != (named{}) {
+			found[k] = n
 		}
 	}
 	return found
+}
+
+// prose drops a text's decklist lines.
+func prose(text string) string {
+	var b strings.Builder
+	for line := range strings.Lines(text) {
+		if len(line) >= 80 || !reDeckLine.MatchString(line) {
+			b.WriteString(line)
+		}
+	}
+	return b.String()
+}
+
+// quotesNone says whether a reply quotes nothing of what it answers.
+func quotesNone(th *bundle.Thread, i int) bool {
+	return i > 0 && strings.TrimSpace(unquote(th.Messages[i].Body)) == ""
+}
+
+// questionOf answers what a reply answers: the lines it quotes, unquoted, else
+// the own words of the post before it in its thread (the archive keeps no
+// parent: the post before may answer another).
+func questionOf(th *bundle.Thread, i int) string {
+	if q := unquote(th.Messages[i].Body); strings.TrimSpace(q) != "" {
+		return q
+	}
+	if i == 0 {
+		return ""
+	}
+	return ownLines(th.Messages[i-1].Body)
+}
+
+func isQuote(line string) bool { return strings.HasPrefix(strings.TrimSpace(line), ">") }
+
+// unquote answers a text's quoted lines, their marks stripped.
+func unquote(text string) string {
+	var b strings.Builder
+	for line := range strings.Lines(text) {
+		if isQuote(line) {
+			b.WriteString(strings.TrimLeft(strings.TrimSpace(line), "> ") + "\n")
+		}
+	}
+	return b.String()
+}
+
+// answering answers a reply as evidence, its question quoted first, up to
+// about qLimit bytes of it, and its own words up to about ownLimit (0: whole).
+// A reply quotes nothing when before is set. A reply quoting is kept as written from
+// its quoted block holding most needles through its own words after it: one
+// reply may answer several questions in turn. A reply quoting nothing follows
+// the post before it, which before says where from.
+func answering(th *bundle.Thread, i int, needles []string, qLimit, ownLimit int) (body, before string) {
+	lines := strings.Split(strings.ReplaceAll(th.Messages[i].Body, "\r\n", "\n"), "\n")
+	best, most := -1, -1
+	for j := range lines {
+		if !isQuote(lines[j]) || (j > 0 && isQuote(lines[j-1])) {
+			continue
+		}
+		end := j
+		for end < len(lines) && isQuote(lines[end]) {
+			end++
+		}
+		block, n := bundle.Fold(unquote(strings.Join(lines[j:end], "\n"))), 0
+		for _, nd := range needles {
+			if countWord(block, nd) > 0 {
+				n++
+			}
+		}
+		if n > most {
+			best, most = j, n
+		}
+	}
+	var q, own string
+	if best >= 0 {
+		end := best
+		for end < len(lines) && isQuote(lines[end]) {
+			end++
+		}
+		q = unquote(strings.Join(lines[best:end], "\n"))
+		var after []string
+		for _, l := range lines[end:] {
+			if isQuote(l) && strings.TrimSpace(strings.Join(after, "")) != "" {
+				break
+			}
+			after = append(after, l)
+		}
+		own = strings.Join(after, "\n")
+	} else if i > 0 {
+		prev := th.Messages[i-1]
+		q, own = ownLines(prev.Body), th.Messages[i].Body
+		before = fmt.Sprintf("the post before it in its thread, by %s, https://usenet.krcg.org/t/%s/#m%d, which it does not quote", prev.Author, th.ID, i-1)
+	}
+	if qLimit > 0 {
+		q = around(q, needles, qLimit)
+	}
+	if ownLimit > 0 && len(own) > ownLimit {
+		own = around(own, needles, ownLimit)
+	}
+	own = strings.TrimSpace(own)
+	if q = strings.TrimSpace(q); q == "" {
+		return own, before
+	}
+	return "> " + strings.ReplaceAll(q, "\n", "\n> ") + "\n\n" + own, before
 }
 
 // reDeckLine is a decklist's line, "3x Conditioning" or "Conditioning x3":
@@ -142,12 +257,13 @@ func addArchive(s *mcp.Server, l *Live) {
 			"Full-text search of the Vampire: The Eternal Struggle (VTES) rulings archive (usenet.krcg.org): the newsgroup " +
 			"from 1994, the V:EKN forum and BoardGameGeek, every thread a rules director took part in. Returns posts with their author, " +
 			"date, whether the author was the sitting rules director then, and the citable link. For a point no ruling settles; " +
-			"a post by a player is not a ruling. vtes_rules_case already quotes the posts the rulings cite, " +
-			"and the rules directors' posts naming two of its cards no ruling names together.",
+			"a post by a player is not a ruling. A rules director's reply is found by its own words, and also by its thread's title " +
+			"and the question it answers, shown with it. vtes_rules_case already quotes the posts the rulings cite, " +
+			"and the rules directors' posts on a card asked about alone or on two cards no ruling names together.",
 		InputSchema: &jsonschema.Schema{
 			Type: "object",
 			Properties: map[string]*jsonschema.Schema{
-				"query":     {Type: "string", Description: `whole words every post must hold in what its author wrote, not what it quotes; "a quoted phrase" as written; card names work`},
+				"query":     {Type: "string", Description: `whole words every post must hold in what its author wrote, not what it quotes (a rules director's reply: or in its thread's title or the question it answers); "a quoted phrase" as written; card names work`},
 				"author":    {Type: "string", Description: "part of the author's name, e.g. LSJ, Ankha"},
 				"directors": {Type: "boolean", Description: "only posts by the rules director sitting when they were written"},
 				"from":      {Type: "string", Description: "the earliest date, YYYY, YYYY-MM or YYYY-MM-DD"},
@@ -183,6 +299,9 @@ func addArchive(s *mcp.Server, l *Live) {
 			msg   *bundle.Message
 			role  bundle.Standing
 			score int
+			// answer: a director's reply found by its thread's title or the
+			// question it answers, not by its own words alone
+			answer bool
 		}
 		var hits []hit
 		for k := range as.msgs {
@@ -194,17 +313,24 @@ func addArchive(s *mcp.Server, l *Live) {
 			if author != "" && !strings.Contains(bundle.Fold(msg.Author), author) {
 				continue
 			}
-			score := 0
+			score, answer := 0, false
 			for _, n := range needles {
-				c := countWord(m.own, n)
-				if c == 0 {
-					score = -1
-					break
-				}
-				score += min(c, 5)
+				c, t := countWord(m.own, n), 0
 				if countWord(m.title, n) > 0 {
-					score += 2
+					t = 2
 				}
+				if c == 0 {
+					if m.question == "" {
+						score = -1
+						break
+					}
+					c, answer = countWord(m.question, n), true
+					if c == 0 && t == 0 {
+						score = -1
+						break
+					}
+				}
+				score += min(c, 5) + t
 			}
 			if score < 0 {
 				continue
@@ -213,7 +339,7 @@ func addArchive(s *mcp.Server, l *Live) {
 			if in.Directors && role.Seat != bundle.Sitting && role.Seat != bundle.Possibly {
 				continue
 			}
-			hits = append(hits, hit{m, msg, role, score})
+			hits = append(hits, hit{m, msg, role, score, answer})
 		}
 		rank := func(s bundle.Seat) int {
 			switch s {
@@ -225,39 +351,71 @@ func addArchive(s *mcp.Server, l *Live) {
 			return 2
 		}
 		slices.SortStableFunc(hits, func(a, b hit) int {
-			return cmp.Or(cmp.Compare(rank(a.role.Seat), rank(b.role.Seat)), cmp.Compare(b.score, a.score), strings.Compare(b.msg.Date, a.msg.Date))
+			return cmp.Or(cmp.Compare(rank(a.role.Seat), rank(b.role.Seat)), compareBool(a.answer, b.answer),
+				cmp.Compare(b.score, a.score), strings.Compare(b.msg.Date, a.msg.Date))
 		})
-		n, limit, total := 8, 600, budget
+		n, answers, limit, total := 8, 3, 600, budget
 		if in.Detail {
-			n, limit, total = 25, 0, detailBudget
+			n, answers, limit, total = 25, 8, 0, detailBudget
+		}
+		var picked []hit
+		own, replies := 0, 0
+		for _, h := range hits {
+			if h.answer {
+				replies++
+				if replies <= answers {
+					picked = append(picked, h)
+				}
+			} else if own++; own <= n {
+				picked = append(picked, h)
+			}
 		}
 		var out strings.Builder
-		if len(hits) == 0 {
-			fmt.Fprintf(&out, "No post of the archive holds all of %q as words of its own. Try fewer words, or other spellings.\n\n", needles)
-		} else {
+		switch {
+		case len(hits) == 0:
+			fmt.Fprintf(&out, "No post of the archive holds all of %q as words of its own, and no rules director's reply answers a question that does. Try fewer words, or other spellings.\n\n", needles)
+		case replies == 0:
 			fmt.Fprintf(&out, "%d posts hold %q as words of their own; %d below, by the sitting rules director first, then possibly sitting, then everyone else, each by how often it holds them.\n\n",
-				len(hits), needles, min(n, len(hits)))
+				own, needles, len(picked))
+		default:
+			fmt.Fprintf(&out, "%d posts hold %q as words of their own, and %d rules directors' replies hold them only with their thread's title or the question they answer, quoted before the reply; "+
+				"%d below, by the sitting rules director first, then possibly sitting, then everyone else, a post holding them before a reply found by its question, each by how often it holds them.\n\n",
+				own, needles, replies, len(picked))
 		}
 		shown := 0
-		for _, h := range hits[:min(n, len(hits))] {
+		for _, h := range picked {
 			p := bundle.Post{
 				Link:   fmt.Sprintf("https://usenet.krcg.org/t/%s/#m%d", h.m.thread.ID, h.m.i),
 				Thread: h.m.thread.Title, Author: h.msg.Author, Date: h.msg.Date, Body: h.msg.Body,
 			}
+			// a reply's question is its evidence: twice the room, a third of it quoted
+			heading, room := "Post", limit
+			body := func(limit int) string { return around(h.msg.Body, needles, limit) }
+			if h.answer || h.m.question != "" && quotesNone(h.m.thread, h.m.i) {
+				heading, room = "Reply, after the question it quotes", 2*limit
+				if _, before := answering(h.m.thread, h.m.i, needles, 0, 0); before != "" {
+					heading = "Reply, after " + before
+				}
+				body = func(limit int) string {
+					b, _ := answering(h.m.thread, h.m.i, needles, limit*2/3, limit)
+					return b
+				}
+				p.Body = body(0)
+			}
 			if !in.Detail {
-				p.Body = around(h.msg.Body, needles, limit)
+				p.Body = body(limit)
 			}
 			left := total - out.Len() - 1200 // and the closing lines
 			if left < 1000 {
 				break
 			}
 			var post strings.Builder
-			writePost(&post, p, "Post", "", limit)
+			writePost(&post, p, heading, "", room)
 			text := post.String()
 			if len(text) > left {
 				post.Reset()
-				p.Body = around(h.msg.Body, needles, left)
-				writePost(&post, p, "Post", "", 0)
+				p.Body = body(left)
+				writePost(&post, p, heading, "", 0)
 				// cut as written: each line's prefix counts too
 				text = post.String()
 				text = text[:strings.LastIndex(text[:min(len(text), left)], "\n")+1] + "(cut here: the post is whole at its link)\n"
@@ -273,6 +431,17 @@ func addArchive(s *mcp.Server, l *Live) {
 		fmt.Fprintf(&out, "Archive: posts to %s.\n", as.a.LastPost)
 		return text(out.String()), nil, nil
 	})
+}
+
+// compareBool orders false before true.
+func compareBool(a, b bool) int {
+	switch {
+	case a == b:
+		return 0
+	case a:
+		return 1
+	}
+	return -1
 }
 
 // countWord counts a folded needle in a folded text as whole words.

@@ -539,13 +539,33 @@ func TestQueryRules(t *testing.T) {
 			"# Procedure: a rules answer",
 			"rules of archon-vibe 4bb83ba",
 		}},
-		// a rules director's post naming two cards no ruling names together, the archive fetched at the first call
+		// a rules director's post naming two cards no ruling names together, the archive fetched at the first call;
+		// a reply naming them in the question it answers, which it quotes; four of a thread at most
 		{args: []string{"case", "If you use Foreshadowing Destruction and your prey is over ten, can you add a Conditioning ?"}, want: []string{
-			"# The rules directors' posts on cards no ruling names together",
+			"# The rules directors' posts on these cards",
 			"Post naming Foreshadowing Destruction and Conditioning: Vincent Ripoll (Ankha), the sitting rules director, 2019-10-24, \"About bleed modifiers\", https://usenet.krcg.org/t/vekn-78044/#m3\n",
-			"https://usenet.krcg.org/t/vekn-78044/#m13\n",
-			"- No ruling names Foreshadowing Destruction and Conditioning together. 4 posts by the rules director then sitting name them within a few sentences: all above.\n",
+			"Reply to a question it quotes naming Foreshadowing Destruction and Conditioning: Vincent Ripoll (Ankha), the sitting rules director, 2019-10-25, \"About bleed modifiers\", https://usenet.krcg.org/t/vekn-78044/#m12\n| > ",
+			"- No ruling names Foreshadowing Destruction and Conditioning together. 6 posts by the rules director then sitting name them within a few sentences or answer a question that does, 5 of them above.\n",
+		}, not: []string{"https://usenet.krcg.org/t/vekn-78044/#m13\n"}},
+		// a card asked about alone, no ruling filed under it: the rules director's replies whose own words name nothing,
+		// found by the question they answer, the post before it or the lines it quotes
+		{args: []string{"case", "Political Flux is in play and a vote ousts two Methuselahs at once: who gains the pool?"}, want: []string{
+			"Reply, after the post before it in its thread, by Damnans, https://usenet.krcg.org/t/z_kvG6T-DTQ/#m0, which it does not quote, naming Political Flux: " +
+				"L. Scott Johnson, the sitting rules director, 2001-06-12, \"[LSJ] Political Flux\", https://usenet.krcg.org/t/z_kvG6T-DTQ/#m1\n" +
+				"| > What happens in a 5 player game (A, B, C, D, E) when there is a\n| > Political Flux in play",
+			"| Both, yes.\n",
+			"Reply to a question it quotes naming Political Flux: L. Scott Johnson, the sitting rules director, 2010-01-16, \"(LSJ) Political Flux vs Simultaneous Ousting\", https://usenet.krcg.org/t/w6jOOcMIUbM/#m1\n",
+			"| A. B would get 1 as well, had xe not been ousted.\n",
+			"- No ruling of the rulings database is filed under Political Flux.\n",
+			"- 2 posts by the rules director then sitting name Political Flux or answer a question naming it: all above.\n",
 		}},
+		{args: []string{"-directors", "archive", `"Political Flux"`}, want: []string{
+			"0 posts hold [\"political flux\"] as words of their own, and 3 rules directors' replies hold them only with their thread's title or the question they answer",
+			"Reply, after the post before it in its thread, by Damnans, https://usenet.krcg.org/t/z_kvG6T-DTQ/#m0, which it does not quote: " +
+				"L. Scott Johnson, the sitting rules director, 2001-06-12, \"[LSJ] Political Flux\", https://usenet.krcg.org/t/z_kvG6T-DTQ/#m1\n",
+			"| Both, yes.\n",
+			"https://usenet.krcg.org/t/w6jOOcMIUbM/#m1\n",
+		}, not: []string{"a player, not a rules director"}},
 		{args: []string{"case", "Can a minion block twice?"}, want: []string{"No card given or found in the question", "### [rulebook:who-may-attempt-to-block]"}},
 		// a discipline is no card, and cards given are the cards
 		{args: []string{"case", "Can a vampire with superior Fortitude play Freak Drive after an action blocked by a vampire with Presence and The Kiss of Ra?", "Freak Drive"},

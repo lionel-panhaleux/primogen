@@ -45,9 +45,9 @@ type casePack struct {
 	detail   bool
 	// posts holds the rulings whose original posts the pack may quote, best first.
 	posts []*bundle.Ruling
-	// directorPosts are the rules directors' posts naming two cards no ruling
-	// names together, best first, within their caps; pairPosts counts them
-	// all by pair; archiveErr says why the archive was not searched.
+	// directorPosts are the rules directors' posts on the pairs searched(),
+	// best first, within their caps; pairPosts counts them all by pair;
+	// archiveErr says why the archive was not searched.
 	directorPosts []directorPost
 	pairPosts     map[[2]*bundle.Card]int
 	archiveErr    error
@@ -56,6 +56,9 @@ type casePack struct {
 type directorPost struct {
 	post  bundle.Post
 	pairs [][2]*bundle.Card // the pairs it names
+	asked bool              // named only by the question it answers, quoted first
+	// before says where the question comes from when the reply quotes none
+	before string
 }
 
 // cards answers the question's cards a post names, in the question's order.
@@ -81,7 +84,7 @@ func addCase(s *mcp.Server, l *Live) {
 			return nil, nil, fmt.Errorf(`give the question and at most %d non-empty card names, e.g. {"question": "Can I play Freak Drive after The Kiss of Ra?", "cards": ["Freak Drive", "The Kiss of Ra"]}`, maxNames)
 		}
 		p := newCasePack(l.p.Load(), in)
-		if len(p.apart()) > 0 {
+		if len(p.searched()) > 0 {
 			if as, err := l.archiveFor(ctx); err != nil {
 				p.archiveErr = err
 			} else {
@@ -350,38 +353,80 @@ func (p *casePack) apart() [][2]*bundle.Card {
 	return pairs
 }
 
+// searched answers what the archive is searched for: the pairs of the
+// question's cards no ruling names together, or a card asked about alone,
+// paired with itself.
+func (p *casePack) searched() [][2]*bundle.Card {
+	if len(p.cards) == 1 {
+		return [][2]*bundle.Card{{p.cards[0], p.cards[0]}}
+	}
+	return p.apart()
+}
+
 // chooseDirectorPosts picks the posts by the rules director then sitting whose
-// own words name two cards no ruling names together within a few sentences (a
-// compilation names them apart). Closeness is to the whole post: the question
-// it quotes counts.
+// own words, or else the question they answer, name both cards of a pair
+// searched within a few sentences (a compilation names them apart). Closeness
+// is to the question it answers and its own words around the names: a long
+// post would otherwise hold every word.
 func (p *casePack) chooseDirectorPosts(as *archiveSearch) {
 	perThread, most := 4, 8
 	if p.detail {
 		perThread, most = 10, 25
 	}
 	spelled := map[*bundle.Card][]string{}
-	naming := map[*bundle.Card]map[int]string{}
+	naming := map[*bundle.Card]map[int]named{}
 	pairsOf := map[int][][2]*bundle.Card{}
+	byOwn := map[int]bool{}
 	p.pairPosts = map[[2]*bundle.Card]int{}
-	for _, pair := range p.apart() {
+	// a post a card's ruling cites is quoted there already
+	cited := map[string]bool{}
+	for _, c := range p.cards {
+		for _, r := range c.Rulings {
+			for _, ref := range r.References {
+				cited[ref.Archive] = true
+			}
+		}
+	}
+	isCited := func(k int) bool {
+		m := as.msgs[k]
+		at := fmt.Sprintf("https://usenet.krcg.org/t/%s/#", m.thread.ID)
+		id := m.thread.Messages[m.i].ID
+		return cited[fmt.Sprintf("%sm%d", at, m.i)] || id != "" && cited[at+id]
+	}
+	for _, pair := range p.searched() {
 		for _, c := range pair {
 			if naming[c] == nil {
 				spelled[c] = spellings(c)
 				naming[c] = as.naming(spelled[c])
 			}
 		}
-		for k, own := range naming[pair[0]] {
-			if _, ok := naming[pair[1]][k]; ok && closeTogether(own, spelled[pair[0]], spelled[pair[1]]) {
+		together := func(x, y string) bool {
+			return x != "" && y != "" && closeTogether(x, spelled[pair[0]], spelled[pair[1]])
+		}
+		for k, a := range naming[pair[0]] {
+			b, ok := naming[pair[1]][k]
+			if !ok || isCited(k) {
+				continue
+			}
+			own := together(a.own, b.own)
+			if own || together(a.question, b.question) && (pair[0] == pair[1] || p.shownNames(as, k, pair, spelled)) {
 				pairsOf[k] = append(pairsOf[k], pair)
 				p.pairPosts[pair]++
+				byOwn[k] = byOwn[k] || own
 			}
 		}
 	}
 	msg := func(k int) *bundle.Message { return &as.msgs[k].thread.Messages[as.msgs[k].i] }
 	score := map[int]float64{}
-	for k := range pairsOf {
+	for k, pairs := range pairsOf {
+		var needles []string
+		for _, pair := range pairs {
+			needles = append(needles, spelled[pair[0]]...)
+			needles = append(needles, spelled[pair[1]]...)
+		}
+		q := questionOf(as.msgs[k].thread, as.msgs[k].i)
 		seen := map[string]bool{}
-		for _, t := range terms(msg(k).Body) {
+		for _, t := range terms(around(q, needles, 1000) + "\n" + around(ownLines(msg(k).Body), needles, 1000)) {
 			if !seen[t] {
 				seen[t] = true
 				score[k] += p.q[t]
@@ -402,11 +447,36 @@ func (p *casePack) chooseDirectorPosts(as *archiveSearch) {
 			continue
 		}
 		inThread[m.thread]++
-		p.directorPosts = append(p.directorPosts, directorPost{post: bundle.Post{
+		dp := directorPost{post: bundle.Post{
 			Link:   fmt.Sprintf("https://usenet.krcg.org/t/%s/#m%d", m.thread.ID, m.i),
 			Thread: m.thread.Title, Author: msg(k).Author, Date: msg(k).Date, Body: msg(k).Body,
-		}, pairs: pairsOf[k]})
+		}, pairs: pairsOf[k], asked: !byOwn[k]}
+		if dp.asked || quotesNone(m.thread, m.i) {
+			var needles []string
+			for _, c := range dp.cards(p.cards) {
+				needles = append(needles, spelled[c]...)
+			}
+			qLimit, ownLimit := 450, 700
+			if p.detail {
+				qLimit, ownLimit = 0, 0
+			}
+			dp.post.Body, dp.before = answering(m.thread, m.i, needles, qLimit, ownLimit)
+		}
+		p.directorPosts = append(p.directorPosts, dp)
 	}
+}
+
+// shownNames says whether the question a reply is shown after names both cards
+// of a pair within a few sentences: a reply may answer several questions, each
+// naming one.
+func (p *casePack) shownNames(as *archiveSearch, k int, pair [2]*bundle.Card, spelled map[*bundle.Card][]string) bool {
+	m := as.msgs[k]
+	body, before := answering(m.thread, m.i, append(slices.Clone(spelled[pair[0]]), spelled[pair[1]]...), 0, 0)
+	q := unquote(body)
+	if before != "" {
+		q = questionOf(m.thread, m.i)
+	}
+	return closeTogether(bundle.Fold(prose(q)), spelled[pair[0]], spelled[pair[1]])
 }
 
 // spellings answers how a post may name a card, folded: its printed name or
@@ -483,9 +553,10 @@ func (p *casePack) write() string {
 			posts[r.Link] = b.String()
 		}
 	}
-	const directorsHead = "# The rules directors' posts on cards no ruling names together\n\n" +
-		"For two of these cards that no ruling names together, the posts by the rules director then sitting naming both within a few sentences, " +
-		"the closest to the question first. Such a post settles what it covers as the cards and rules stood at its date " +
+	const directorsHead = "# The rules directors' posts on these cards\n\n" +
+		"For a card asked about alone, the posts by the rules director then sitting naming it; for two cards that no ruling names together, " +
+		"those naming both within a few sentences. A reply that names them only in the question it answers comes after that question, quoted: " +
+		"the lines it quotes, kept in the order written, or else the post before it in its thread, named in its heading, which it may not be answering. The closest to the question first. Such a post settles what it covers as the cards and rules stood at its date " +
 		"(each card's history of changes says what changed since). Quote it with its link and its author's standing.\n\n"
 	var directors []string
 	keptDirectors := map[int]bool{}
@@ -496,10 +567,16 @@ func (p *casePack) write() string {
 			names = append(names, c.Name)
 			needles = append(needles, spellings(c)...)
 		}
-		if !p.detail && len(ownLines(post.Body)) > postLimit {
+		heading, room := "Post naming "+strings.Join(names, " and "), postLimit
+		switch {
+		case dp.before != "":
+			heading, room = "Reply, after "+dp.before+", naming "+strings.Join(names, " and "), 2*postLimit
+		case dp.asked:
+			heading, room = "Reply to a question it quotes naming "+strings.Join(names, " and "), 2*postLimit
+		case !p.detail && len(ownLines(post.Body)) > postLimit:
 			post.Body = around(post.Body, needles, postLimit)
 		}
-		writePost(&b, post, "Post naming "+strings.Join(names, " and "), "", postLimit)
+		writePost(&b, post, heading, "", room)
 		directors = append(directors, b.String()+"\n")
 	}
 	head, sections, tail := p.sections()
@@ -553,7 +630,8 @@ func (p *casePack) write() string {
 		p.writeAbsent(&out, keptDirectors)
 		out.WriteString(strings.TrimSpace(d.b.RulesAnswer))
 		out.WriteString("\n\nAnswer from this evidence, quoting it and citing its links, never from memory. " +
-			"Where nothing here settles a point, say it is unsettled rather than filling the gap.\n\n")
+			"Where nothing here settles a point, search vtes_rulings_archive (the cards' names, directors only) for what this pack left out or did not search, " +
+			"before calling it unsettled. Only when nothing does, say it is unsettled rather than filling the gap.\n\n")
 		return out.String()
 	}
 	const trailer = 800 // what is left out, and the data line
@@ -816,6 +894,9 @@ func (p *casePack) writeAbsent(out *strings.Builder, shown map[int]bool) {
 			lines = append(lines, fmt.Sprintf("No section of the advanced rules names %s.", c.Name))
 		}
 	}
+	if len(p.cards) == 1 {
+		lines = append(lines, p.aloneLine(shown))
+	}
 	apart, none, others := p.apart(), 0, false
 	for _, pair := range apart {
 		line := fmt.Sprintf("No ruling names %s and %s together.", pair[0].Name, pair[1].Name)
@@ -830,17 +911,17 @@ func (p *casePack) writeAbsent(out *strings.Builder, shown map[int]bool) {
 		case found == 0:
 			none++
 		case found == 1 && in == 1:
-			line += " A post by the rules director then sitting names them within a few sentences: above."
+			line += " A post by the rules director then sitting names them within a few sentences, or answers a question that does: above."
 		case found == 1:
-			line += " A post by the rules director then sitting names them within a few sentences, left out here."
+			line += " A post by the rules director then sitting names them within a few sentences, or answers a question that does, left out here."
 			others = true
 		case found == in:
-			line += fmt.Sprintf(" %d posts by the rules director then sitting name them within a few sentences: all above.", found)
+			line += fmt.Sprintf(" %d posts by the rules director then sitting name them within a few sentences or answer a question that does: all above.", found)
 		case in == 0:
-			line += fmt.Sprintf(" %d posts by the rules director then sitting name them within a few sentences, left out here.", found)
+			line += fmt.Sprintf(" %d posts by the rules director then sitting name them within a few sentences or answer a question that does, left out here.", found)
 			others = true
 		default:
-			line += fmt.Sprintf(" %d posts by the rules director then sitting name them within a few sentences, %d of them above.", found, in)
+			line += fmt.Sprintf(" %d posts by the rules director then sitting name them within a few sentences or answer a question that does, %d of them above.", found, in)
 			others = true
 		}
 		lines = append(lines, line)
@@ -854,7 +935,7 @@ func (p *casePack) writeAbsent(out *strings.Builder, shown map[int]bool) {
 	if others {
 		lines = append(lines, "vtes_rulings_archive, with both names and directors only, gives the rules directors' posts left out here.")
 	}
-	if p.archiveErr != nil {
+	if p.archiveErr != nil && len(apart) > 0 {
 		lines = append(lines, fmt.Sprintf("The rulings archive was not searched for a rules director's post naming two of these cards (%s): "+
 			"vtes_rulings_archive, with both names and directors only, searches it.", strings.Join(strings.Fields(p.archiveErr.Error()), " ")))
 	}
@@ -866,6 +947,30 @@ func (p *casePack) writeAbsent(out *strings.Builder, shown map[int]bool) {
 		fmt.Fprintf(out, "- %s\n", l)
 	}
 	out.WriteString("\n")
+}
+
+// aloneLine says what the archive holds on a card asked about alone, with the
+// rules directors' posts shown, by their index.
+func (p *casePack) aloneLine(shown map[int]bool) string {
+	c := p.cards[0]
+	if p.archiveErr != nil {
+		return fmt.Sprintf("The rulings archive was not searched for a rules director's post on %s (%s): "+
+			"vtes_rulings_archive, with its name and directors only, searches it.", c.Name, strings.Join(strings.Fields(p.archiveErr.Error()), " "))
+	}
+	found, in := p.pairPosts[[2]*bundle.Card{c, c}], 0
+	for i := range p.directorPosts {
+		if shown[i] {
+			in++
+		}
+	}
+	switch {
+	case found == 0:
+		return fmt.Sprintf("No post by the rules director then sitting names %s, or answers a question naming it (vtes_rulings_archive searches wider).", c.Name)
+	case found == in:
+		return fmt.Sprintf("%d posts by the rules director then sitting name %s or answer a question naming it: all above.", found, c.Name)
+	}
+	return fmt.Sprintf("%d posts by the rules director then sitting name %s or answer a question naming it, %d of them above: "+
+		"vtes_rulings_archive, with its name and directors only, gives the others.", found, c.Name, in)
 }
 
 func (p *casePack) namedTogether(a, b *bundle.Card) bool {

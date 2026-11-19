@@ -92,7 +92,9 @@ reference id and its URL).
 every push and every sweep that finds something. Unzipped, it is one JSON
 object: `LastPost`, the date of the newest post the archive holds (ISO, no
 time zone), and `Threads`, every thread file as the repository holds it, in
-the format its README describes.
+the format its README describes. A message carries its author, date and body
+(and a forum or BoardGameGeek post its number), never the post it replies
+to.
 
 GitHub Pages stamps its `ETag` and `Last-Modified` at each deploy, not from
 the content, so a `200` does not mean a thread changed: a pass that must know

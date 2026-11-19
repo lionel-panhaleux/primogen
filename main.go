@@ -24,12 +24,12 @@ import (
 
 const usage = `usage:
   primogen build [-bundle PATH] [-knowledge DIR]   build the data bundle (default: data/bundle.json.gz)
-  primogen query [-bundle PATH] [-detail] TOOL ARG...   call a tool and print what the model reads:
+  primogen query [-bundle PATH] [-detail] [-directors] TOOL ARG...   call a tool and print what the model reads:
       cards NAME...              vtes_cards
       case QUESTION [CARD...]    vtes_rules_case
       search WORDS...            vtes_rules_search
       read ID...                 vtes_rules_read
-      archive WORDS...           vtes_rulings_archive
+      archive WORDS...           vtes_rulings_archive (-directors: the sitting rules directors' posts only)
       deck LIST|ID|LINK|-        vtes_deck: a decklist (its lines as one or several arguments, or - for stdin), a TWDA id or a VDB link
   primogen stdio [-bundle PATH]                    serve the tools over stdio, for a local MCP client
   primogen serve -bundle PATH [-addr ADDR] [-knowledge DIR]   serve the tools over HTTP at /mcp, refreshing the bundle
@@ -38,7 +38,7 @@ Without -bundle, query and stdio use the published bundle in the user cache
 directory: downloaded on first run (from -from, for the tests), and again when
 a newer one exists, checked at most daily. The rulings archive is downloaded
 the same way (from -archive) when a tool first needs it: vtes_rulings_archive,
-or vtes_rules_case given two cards no ruling names together.`
+or vtes_rules_case given a single card or two cards no ruling names together.`
 
 // published is the bundle the hosted server builds, which local installs download.
 const published = "https://mcp.krcg.org/bundle.json.gz"
@@ -102,6 +102,7 @@ func build(ctx context.Context, fs *flag.FlagSet, path *string, args []string, s
 
 func query(ctx context.Context, fs *flag.FlagSet, path *string, args []string, stdout, stderr io.Writer) error {
 	detail := fs.Bool("detail", false, "the detailed result")
+	directors := fs.Bool("directors", false, "archive: only posts by the rules director sitting when they were written")
 	from := fs.String("from", published, "where to download the bundle when -bundle is not given")
 	archive := fs.String("archive", bundle.KRCG.Archive, "where to download the rulings archive")
 	vdb := fs.String("vdb", tools.VDB, "the VDB API's deck route")
@@ -124,7 +125,7 @@ func query(ctx context.Context, fs *flag.FlagSet, path *string, args []string, s
 	case "read":
 		tool, in = "vtes_rules_read", map[string]any{"ids": rest}
 	case "archive":
-		tool, in["query"] = "vtes_rulings_archive", strings.Join(rest, " ")
+		tool, in["query"], in["directors"] = "vtes_rulings_archive", strings.Join(rest, " "), *directors
 	case "deck":
 		list := strings.Join(rest, "\n")
 		if list == "-" {

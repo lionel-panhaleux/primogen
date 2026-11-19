@@ -68,7 +68,8 @@ func addCards(s *mcp.Server, l *Live) {
 		}
 		if found {
 			out.WriteString("Answer from these texts and rulings, quoting them and citing their links, never from memory. " +
-				"Where neither a card's text nor a ruling here settles a point, say it is unsettled rather than filling the gap.\n\n")
+				"Where neither a card's text nor a ruling here settles a point, search vtes_rulings_archive (the card's name, directors only) before calling it unsettled: " +
+				"a sitting rules director's reply settles it. Only when nothing does, say it is unsettled rather than filling the gap.\n\n")
 		}
 		out.WriteString(DataLine(d.b))
 		return &mcp.CallToolResult{Content: []mcp.Content{&mcp.TextContent{Text: out.String()}}}, nil, nil
