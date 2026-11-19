@@ -53,6 +53,76 @@ answer. `primogen query` calls
 the same tools from a shell. A tool that ships adds its one line to the README's
 "Tools".
 
+### Grading a deck
+
+Decided with the owner, 2026-11-19, from a prototype over the TWDA window
+(1494 decks) and the preconstructed decks the card data's set information
+lists (45 from 2000 to 2010, "old"; 22 from 2019 to 2025, "recent"); each
+figure below is that prototype's, to be computed again by the code that
+ships it. `vtes_deck` grades no deck: it prints numbers beside a reference
+and the model interprets them (principles 7 and 10). Every number comes
+with the reference decks' own quartiles, each deck left out of its own,
+and with how often the reference's own decks fall outside its full range
+on it: about one labelled winner in five does on the action cards, the
+masters, the blood or the pool cost, so a single outlier is a question and
+several pointing the same way a finding.
+
+- **The reference.** The nearest archetype with its variants, when the
+  deck is at or above the similarity 95 in 100 labelled decks, each left
+  out, reach to their own archetype (0.49 today) and the archetype holds
+  10 decks or more; else the deck's
+  nearest decks, when 10 or more are within that similarity; else all the
+  window's decks, said to be loose. Without the similarity condition an
+  old precon's 20 nearest decks reach down to 0.13 and mix archetypes.
+- **Budgets** (count and share of the library, with the reference's library
+  sizes): the cards needing a minion's action, by type (action, political action,
+  equipment, ally, retainer); the master cards
+  with trifles as one total; the blood and the pool the library costs; the
+  copies of its blood and pool sources by kind, from a curated `economy`
+  block of `module-tags.json` (copies, not yield, said). They read a list
+  against its relatives: the Banu list holds 26 action cards, above all 41
+  Haqim Royalty winners (24 at most), and only one of them costs more
+  blood. They do not grade a level: old precons sit inside the winners'
+  central range on the action cards and the blood and pool costs; only
+  the masters set them apart (12 against 18 at the median).
+- **Card choice and concentration**, what separates weak lists: the share
+  of the library in cards under 1% of the window's decks play (fewer than
+  15 of 1494; old precons 44%, recent ones 13%, winners 4% at the median), cards legal under 18
+  months listed apart and not counted; the distinct library cards and the
+  share the list's ten largest playsets hold (the Banu list above its
+  archetype's 90th percentile in distinct cards, the "unfocused" of the
+  thread); the share in no module (old precons 55%, winners 25%); the
+  reference's staples (cards in three quarters of its decks) absent or
+  below its lower quartile of copies, and the list's cards a tenth or
+  fewer of it plays, each a count beside the reference's own (the Banu
+  list holds 13 such cards against a median of 4, Blood Fury among them,
+  which the owner's review cuts; Blur, in 38 of the 41, and Priority
+  Contract, a second copy of which the owner advised in the thread, are
+  staples the list lacks or under-plays).
+- **Odds**: for each module, the chance an opening hand holds a copy; for
+  each recipe the caller names (groups of cards, one of each needed), the
+  exact chance of an opening hand holding it and of having seen it within
+  14, 21 and 28 cards, and the crypt cards able to play every piece; a
+  draft's library taken as 90 cards unless the caller gives its size. Only
+  the opening hand is random, said. On the Banu list, Hunger of Marduk
+  with an additional strike opens 22% of games, 37% in a winner of its
+  archetype.
+- **Track record**: each card no TWDA deck of the window plays, with the
+  decks ever playing it, the last one's date and the date it became legal.
+  The Sword of Nuln idea's engine, legal since 2003, is in none of 4709.
+  Its real need, an answer to Strike: combat ends, is the combat posture's.
+
+Rejected: bloat per turn and net pool (most gains are conditional, so a
+per-turn yield is a judgement the server would assert), actions per
+minion-turn (no turn count a list fixes), module co-occurrence as synergy
+(it measures habit, and missed the shared blood budget the owner named),
+and any level score (no measure correlates with event size beyond about
+0.1). Synergy is read through its constraints: who can play every piece,
+the odds the pieces meet, the shared budgets and the concentration. No
+measure sees a card's quality against its competitors (`vtes_card_stats`'
+slot survey does), nor whether a plan's refills or politics hold at a
+table.
+
 ## Connecting
 
 - **One endpoint**, `mcp.krcg.org/mcp`. It offers the Archon login when the

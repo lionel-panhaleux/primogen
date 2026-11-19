@@ -13,6 +13,14 @@ The rules facts below are the rulebook's; the rest is strategy, owner-graded.
   (Villein, Minion Tap) turns minions' blood into pool, then refills them.
   Minion Tap moves any amount, Villein 2 to 5: Tap is the leech for big
   capacities.
+- **Read a budget beside the archetype's.** Blood and pool spent, their
+  sources, the cards needing an action, the master cards: none has a right
+  value across decks, and winners of one archetype sit closer together than
+  winners at large. A
+  single budget far from the archetype's is common among its own winners;
+  the finding is several pointing the same way, and why.
+- **A source's copies are not its yield**: most blood and pool gains are
+  conditional (a strike that lands, a vote that passes, the Edge held).
 
 ## The four pillars
 
@@ -40,6 +48,24 @@ which single copies are cut.
   tactical below 7%. Deck size is about the peak rotation × 12 turns.
 - Situational modules jam; look for the release valves (Dreams of the Sphinx,
   The Barrens, cards with two modes). Recursion beats rotation.
+- **Cards needing an action compete for the minions.** Taking an action
+  locks the acting minion, and only unlocked minions act: cards needing an
+  action compete with each other and with every bleed, hunt and rush, and
+  past what the minions can perform they jam like any situational card.
+- **By default, one master phase action a turn**, and one more from a
+  trifle; cards granting master phase actions raise it. Master cards
+  beyond what the master phases play wait in hand.
+- **Odds, not averages, for what must be drawn together.** An expectation
+  per hand hides the hands that miss: when a plan needs two or three cards
+  at once, the chance a hand holds them all says how often it opens.
+- **Concentration is reliability.** A module draws by its density,
+  whatever its distinct cards; but copies spread over many cards in no
+  module leave no plan a hand draws reliably. Winners hold most of their
+  library in their largest playsets.
+- **Cards winners barely play mark distance, not weakness.** How much of a
+  list is in cards winners rarely choose says how far it stands from what
+  wins; an original idea or a new card stands there too, a card printed
+  last year having had no time to be played.
 
 ## Copy counts encode intent
 
