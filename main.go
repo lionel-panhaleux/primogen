@@ -31,6 +31,7 @@ const usage = `usage:
       read ID...                 vtes_rules_read
       archive WORDS...           vtes_rulings_archive (-directors: the sitting rules directors' posts only)
       deck LIST|ID|LINK|-        vtes_deck: a decklist (its lines as one or several arguments, or - for stdin), a TWDA id or a VDB link
+      stats CARD [ARCHETYPE]     vtes_card_stats: a card's play rates, companions and competitors, overall or within an archetype
   primogen stdio [-bundle PATH]                    serve the tools over stdio, for a local MCP client
   primogen serve -bundle PATH [-addr ADDR] [-knowledge DIR]   serve the tools over HTTP at /mcp, refreshing the bundle
 
@@ -136,6 +137,11 @@ func query(ctx context.Context, fs *flag.FlagSet, path *string, args []string, s
 			list = string(raw)
 		}
 		tool, in["deck"] = "vtes_deck", list
+	case "stats":
+		tool, in["card"] = "vtes_card_stats", rest[0]
+		if len(rest) > 1 {
+			in["archetype"] = strings.Join(rest[1:], " ")
+		}
 	default:
 		return errors.New(usage)
 	}

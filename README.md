@@ -17,6 +17,7 @@ sign-in.
 - `vtes_rules_search`, `vtes_rules_read`: the rulebook, the advanced rules, the tournament rules and the judges' guide, searched by keyword or read by section.
 - `vtes_rulings_archive`: full-text search of the rulings archive, each post's author marked when they were the sitting rules director.
 - `vtes_deck`: a decklist (as text, a TWDA id or a VDB link) validated and read: the crypt, which crypt cards have what each card requires and at which level, the library by type with every card's text and by module with each module's density and copies per hand, the costs, the nearest archetypes and tournament decks.
+- `vtes_card_stats`: a card among the tournament-winning decks, overall or within an archetype: how many play it and with how many copies, what is played with it, and its competitors for the slot with their texts.
 
 ## Sources
 

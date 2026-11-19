@@ -111,9 +111,9 @@ type vector struct {
 	vals []float64
 }
 
-// feature is a card's column key: a vampire's printed name across its groups
+// Feature is a card's column key: a vampire's printed name across its groups
 // (re-printed in another group, it plays the same deck), advanced apart.
-func feature(c *Card) string {
+func Feature(c *Card) string {
 	if c.IsCrypt() {
 		if c.Advanced {
 			return "c:" + c.PrintedName + " (ADV)"
@@ -191,7 +191,7 @@ func (r *Relatives) counts(cards []DeckCard) map[string]int {
 	out := map[string]int{}
 	for _, dc := range cards {
 		if c := r.byID[dc.ID]; c != nil && dc.Count > 0 {
-			out[feature(c)] += dc.Count
+			out[Feature(c)] += dc.Count
 		}
 	}
 	return out
@@ -298,6 +298,28 @@ func (r *Relatives) Nearest(v vector, id string, n int) []Match {
 		}
 	}
 	return top(sims, n)
+}
+
+// Around are the n decks of the window nearest the sum of the given decks'
+// vectors.
+func (r *Relatives) Around(ids map[string]bool, n int) []*Deck {
+	sum := make([]float64, len(r.idf))
+	for i, d := range r.Decks {
+		if ids[d.ID] {
+			for j, col := range r.vecs[i].cols {
+				sum[col] += r.vecs[i].vals[j]
+			}
+		}
+	}
+	sims := make([]float64, len(r.vecs))
+	for i, v := range r.vecs {
+		sims[i] = v.dotDense(sum)
+	}
+	var out []*Deck
+	for _, m := range top(sims, n) {
+		out = append(out, r.Decks[m.Index])
+	}
+	return out
 }
 
 func top(sims []float64, n int) []Match {

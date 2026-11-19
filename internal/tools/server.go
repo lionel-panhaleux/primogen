@@ -85,6 +85,7 @@ func NewServer(l *Live) *mcp.Server {
 	addRules(s, l)
 	addArchive(s, l)
 	addDeck(s, l)
+	addStats(s, l)
 	return s
 }
 

@@ -514,6 +514,50 @@ func vampires(b *bundle.Bundle) []string {
 	return out
 }
 
+// TestQueryStats surveys a slot: the owner's grade of the Toreador vote entry
+// (calibration/corpus/2026-08-26-toreador-vote-push.md) named Awe's
+// competitors Scalpel Tongue and Closed Session.
+func TestQueryStats(t *testing.T) {
+	query := func(args ...string) (string, error) {
+		var stdout, stderr strings.Builder
+		err := run(t.Context(), append([]string{"query", "-bundle", testBundle, "stats"}, args...), &stdout, &stderr)
+		return stdout.String(), err
+	}
+	for _, args := range [][]string{{"Awe", "Endless Dance"}, {"Awe"}} {
+		out, err := query(args...)
+		if err != nil {
+			t.Fatal(err)
+		}
+		i := strings.Index(out, "## Competitors for its slot")
+		if i < 0 {
+			t.Fatalf("%v: no competitors in:\n%s", args, out)
+		}
+		for _, w := range []string{"**Scalpel Tongue**", "**Closed Session**", "**Perfect Paragon**", "**Bewitching Oration**"} {
+			if !strings.Contains(out[i:], w) {
+				t.Errorf("%v: missing %s among the competitors:\n%s", args, w, out[i:])
+			}
+		}
+		if strings.Contains(out[i:], "**Voter Captivation**") {
+			t.Errorf("%v: Voter Captivation, played with Awe at another timing, is no competitor:\n%s", args, out[i:])
+		}
+	}
+	for _, tc := range []struct {
+		args []string
+		err  string
+	}{
+		{[]string{"Awe", "Toreador vote"}, `no archetype is named "Toreador vote". The archetypes playing Awe most: **Endless Dance** (C4);`},
+		{[]string{"Awe", "Lutz vote"}, "Those whose name holds a word of it: **Lutz Politics** (C15)."},
+		{[]string{"Awe", "Gangrel vote"}, "Those whose name holds a word of it: **Gangrel Resistance** (C11)"},
+		{[]string{"Awe", "Nothing"}, "None has a name holding a word of it."},
+		{[]string{"Villein", "Girls"}, `several archetypes are named "Girls": **Girls** (C25); **Girls** (G23), a variant of **Nananimalism**. Call`},
+		{[]string{"Awwwwe of Nothing"}, `No card is named "Awwwwe of Nothing"`},
+	} {
+		if _, err := query(tc.args...); err == nil || !strings.Contains(err.Error(), tc.err) {
+			t.Errorf("error %v, want %q", err, tc.err)
+		}
+	}
+}
+
 // TestQueryRules calls the rules tools as a model does.
 func TestQueryRules(t *testing.T) {
 	// the ten cards with the most rulings

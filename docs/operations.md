@@ -93,7 +93,8 @@ Go, jq, node and uv come from mise: `mise install` in the checkout reads
   NAME...`, `case QUESTION [CARD...]`, `search WORDS...`, `read ID...`,
   `archive WORDS...` (`-directors` for the sitting rules directors' posts
   only), `deck LIST|ID|LINK` (the list's lines as one or
-  several arguments, or `-` to read it from stdin).
+  several arguments, or `-` to read it from stdin), `stats CARD
+  [ARCHETYPE]`.
 - `primogen stdio` serves the tools over stdio for a local MCP client.
 - Without `-bundle`, `query` and `stdio` are a local install: they use the
   published bundle in the user cache directory, which only the download

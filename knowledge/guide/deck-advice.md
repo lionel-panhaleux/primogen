@@ -14,7 +14,9 @@ steps 1 to 4 and 7 on the draft), then:
    actions included, before declaring it live or dead.
 4. **Survey the slot, never endorse the named card.** For each slot the
    player asks about, the competitors in the card pool with the evidence and
-   the trade-off. Against opposing vote blocks, denial (cancel, lock out)
+   the trade-off: `vtes_card_stats` on the card, within the deck's archetype
+   when `vtes_deck` names one, gives the cards winning decks play in its
+   place. Against opposing vote blocks, denial (cancel, lock out)
    usually beats adding votes.
 5. **A unique card cannot carry a deck alone**: a build-around starts with
    its fetch engine and its density, and with what that engine implies (a

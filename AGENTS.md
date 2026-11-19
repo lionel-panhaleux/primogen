@@ -74,11 +74,12 @@ trailer; upkeep reads them.
 ## Right now
 
 `vtes_cards`, the four rules tools (`vtes_rules_case`,
-`vtes_rules_search`, `vtes_rules_read`, `vtes_rulings_archive`) and
-`vtes_deck` (a list validated, its crypt, library, modules, costs and relatives computed) hosted at
+`vtes_rules_search`, `vtes_rules_read`, `vtes_rulings_archive`),
+`vtes_deck` (a list validated, its crypt, library, modules, costs and relatives computed) and
+`vtes_card_stats` (a card's play rates, companions and competitors for its slot) hosted at
 `https://mcp.krcg.org/mcp` and refreshing themselves (not announced yet), and
 from a local install (`primogen stdio`) downloading the published bundle.
-Cards and rules are done; the deck is the open milestone: the slot survey
-and its graded session remain. From a checkout:
+Cards and rules are done; the deck is the open milestone: its graded
+session remains. From a checkout:
 `primogen build`, then `primogen query` or `primogen stdio` with
 `-bundle data/bundle.json.gz`. The board holds the next lines.
