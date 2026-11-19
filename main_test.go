@@ -448,6 +448,40 @@ func TestQueryDeck(t *testing.T) {
 			t.Errorf("%s: the modules shown or the cards in none:\n%s", tc.deck, out)
 		}
 	}
+	// a deck idea: its cards, a count optional, no size checked and no density computed
+	idea, err := query("-draft", "deck", "Sword of Nuln", "Eulogio Sánchez de los Reyes", "- Morbidity", "Hunter's Mark", "2x Villein")
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, w := range []string{
+		"A deck idea: 1 crypt and 5 library cards, a line without a count read as one copy",
+		"Tournament legal today (", "), its sizes aside: yes.",
+		"Crypt cards with the [obl] or [tha] and path Death and the Soul it requires (each effect's symbols in the text say which): 1 of 1: Eulogio Sánchez de los Reyes (G6) [OBL THA].",
+		"- 2× **Villein**", "- **Zillah + Villein ramp-bloat** (Bloat & pool economy): 2 copies; core: Villein ×2",
+		"In no module shown (3 copies): Hunter's Mark, Morbidity, Sword of Nuln",
+		"This deck is near no archetype", "This is a deck idea: the advice procedure applies to it", "# Procedure: advice on a deck or an idea",
+	} {
+		if !strings.Contains(idea, w) {
+			t.Errorf("the deck idea: missing %q in:\n%s", w, idea)
+		}
+	}
+	if strings.Contains(idea[strings.Index(idea, "## Library by module"):strings.Index(idea, "## Relatives")], "per hand") {
+		t.Errorf("a density computed for a deck idea:\n%s", idea)
+	}
+	if _, err := query("deck", "Sword of Nuln", "Morbidity"); err == nil || !strings.Contains(err.Error(), "for a deck idea, draft reads a line without a count as one copy") {
+		t.Errorf("an idea's cards without draft: %v", err)
+	}
+	if _, err := query("deck", "1x Sword of Nuln", "2x Villein"); err == nil || !strings.Contains(err.Error(), "For a deck idea rather than a whole list, call vtes_deck with draft") {
+		t.Errorf("a short list without draft: %v", err)
+	}
+	// an idea without a vampire; a TWDA deck stays whole
+	if out, err := query("-draft", "deck", "Sword of Nuln", "Morbidity"); err != nil ||
+		!strings.Contains(out, "No crypt card given: the library's requirements are not checked against a crypt.") || strings.Contains(out, "Crypt cards with") {
+		t.Errorf("an idea without a vampire: %v\n%s", err, out)
+	}
+	if out, err := query("-draft", "deck", "12947"); err != nil || !strings.Contains(out, "draft left aside: a TWDA deck is read whole") || !strings.Contains(out, " per hand") {
+		t.Errorf("a TWDA deck with draft: %v\n%s", err, out)
+	}
 	// a list past the bound: 30 vampires and 90 library cards, the longest texts
 	b, err := bundle.Load(testBundle)
 	if err != nil {

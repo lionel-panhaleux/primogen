@@ -24,13 +24,13 @@ import (
 
 const usage = `usage:
   primogen build [-bundle PATH] [-knowledge DIR]   build the data bundle (default: data/bundle.json.gz)
-  primogen query [-bundle PATH] [-detail] [-directors] TOOL ARG...   call a tool and print what the model reads:
+  primogen query [-bundle PATH] [-detail] [-directors] [-draft] TOOL ARG...   call a tool and print what the model reads:
       cards NAME...              vtes_cards
       case QUESTION [CARD...]    vtes_rules_case
       search WORDS...            vtes_rules_search
       read ID...                 vtes_rules_read
       archive WORDS...           vtes_rulings_archive (-directors: the sitting rules directors' posts only)
-      deck LIST|ID|LINK|-        vtes_deck: a decklist (its lines as one or several arguments, or - for stdin), a TWDA id or a deck link (VDB, VTES Decks, Amaranth)
+      deck LIST|ID|LINK|-        vtes_deck: a decklist (its lines as one or several arguments, or - for stdin), a TWDA id or a deck link (VDB, VTES Decks, Amaranth); -draft: a deck idea's cards
       stats CARD [ARCHETYPE]     vtes_card_stats: a card's play rates, companions and competitors, overall or within an archetype
   primogen stdio [-bundle PATH]                    serve the tools over stdio, for a local MCP client
   primogen serve -bundle PATH [-addr ADDR] [-knowledge DIR]   serve the tools over HTTP at /mcp, refreshing the bundle
@@ -103,6 +103,7 @@ func build(ctx context.Context, fs *flag.FlagSet, path *string, args []string, s
 
 func query(ctx context.Context, fs *flag.FlagSet, path *string, args []string, stdout, stderr io.Writer) error {
 	detail := fs.Bool("detail", false, "the detailed result")
+	draft := fs.Bool("draft", false, "deck: a deck idea's cards, its sizes not checked")
 	directors := fs.Bool("directors", false, "archive: only posts by the rules director sitting when they were written")
 	from := fs.String("from", published, "where to download the bundle when -bundle is not given")
 	archive := fs.String("archive", bundle.KRCG.Archive, "where to download the rulings archive")
@@ -136,7 +137,7 @@ func query(ctx context.Context, fs *flag.FlagSet, path *string, args []string, s
 			}
 			list = string(raw)
 		}
-		tool, in["deck"] = "vtes_deck", list
+		tool, in["deck"], in["draft"] = "vtes_deck", list, *draft
 	case "stats":
 		tool, in["card"] = "vtes_card_stats", rest[0]
 		if len(rest) > 1 {

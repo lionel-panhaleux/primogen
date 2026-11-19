@@ -94,7 +94,7 @@ Go, jq, node and uv come from mise: `mise install` in the checkout reads
   `archive WORDS...` (`-directors` for the sitting rules directors' posts
   only), `deck LIST|ID|LINK` (the list's lines as one or
   several arguments, or `-` to read it from stdin; a link of VDB, VTES Decks
-  or Amaranth), `stats CARD
+  or Amaranth; `-draft` for a deck idea's cards), `stats CARD
   [ARCHETYPE]`.
 - `primogen stdio` serves the tools over stdio for a local MCP client.
 - Without `-bundle`, `query` and `stdio` are a local install: they use the

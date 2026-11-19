@@ -27,6 +27,7 @@ const maxDeckInput = 20000
 
 type deckInput struct {
 	Deck   string `json:"deck"`
+	Draft  bool   `json:"draft,omitempty"`
 	Detail bool   `json:"detail,omitempty"`
 }
 
@@ -35,6 +36,8 @@ var deckSchema = &jsonschema.Schema{
 	Properties: map[string]*jsonschema.Schema{
 		"deck": {Type: "string", Description: `the deck: a decklist as text, one card per line with its count ("3x Conditioning", ` +
 			`"Anson x2", crypt lines with their capacity and disciplines accepted), a TWDA deck id ("2k6munduko"), or a deck link from VDB (https://vdb.im/decks/...), VTES Decks (https://vtesdecks.com/deck/...) or Amaranth (https://amaranth.vtes.co.nz/#deck/...)`},
+		"draft": {Type: "boolean", Description: "a deck idea rather than a whole list: its cards, a line without a count read as one copy, " +
+			"the crypt's and library's sizes not checked and no density computed"},
 		"detail": {Type: "boolean", Description: "the deck author's whole comment, where the default cuts it, and a larger result, keeping texts a large list's default drops"},
 	},
 	Required: []string{"deck"},
@@ -44,8 +47,8 @@ func addDeck(s *mcp.Server, l *Live) {
 	mcp.AddTool(s, &mcp.Tool{
 		Name:  "vtes_deck",
 		Title: "VTES deck",
-		Description: "Call first to analyze or improve a Vampire: The Eternal Struggle (VTES) deck: never read a decklist from memory " +
-			"of its cards. Takes a decklist as text, a TWDA deck id or a deck link from VDB, VTES Decks or Amaranth; validates it (sizes, crypt groups, banned cards, " +
+		Description: "Call first to analyze or improve a Vampire: The Eternal Struggle (VTES) deck or a deck idea: never read a decklist from memory " +
+			"of its cards. Takes a decklist as text, a TWDA deck id or a deck link from VDB, VTES Decks or Amaranth, or an idea's cards with draft; validates it (sizes, crypt groups, banned cards, " +
 			"legality today) and returns the computed facts: the crypt table with capacities, disciplines, titles and texts, " +
 			"which crypt cards have what each library card requires and at which level, the library by type with every card's official text, " +
 			"the library by module with each module's density and expected copies per hand, the costs, the nearest archetypes and tournament decks with the cards that differ, and the procedure a deck analysis and advice follow.",
@@ -57,15 +60,19 @@ func addDeck(s *mcp.Server, l *Live) {
 			return nil, nil, fmt.Errorf(`give one deck of at most %d characters: a decklist as text, a TWDA id or a deck link, e.g. {"deck": "2k6munduko"}`, maxDeckInput)
 		}
 		d := l.p.Load()
-		dk, err := d.readDeck(ctx, l, text)
+		dk, err := d.readDeck(ctx, l, text, in.Draft)
 		if err != nil {
 			return nil, nil, err
 		}
 		today := time.Now().UTC().Format(time.DateOnly)
-		fixes := dk.fixes(today)
-		if dk.twda == nil && len(fixes) > 0 {
-			return nil, nil, fmt.Errorf("this list is not tournament legal today (%s); fix it and call vtes_deck again:\n- %s",
-				today, strings.Join(fixes, "\n- "))
+		fixes, short := dk.fixes(today)
+		if dk.twda == nil && !dk.draft && len(fixes) > 0 {
+			hint := ""
+			if short {
+				hint = "\nFor a deck idea rather than a whole list, call vtes_deck with draft: its sizes are not checked."
+			}
+			return nil, nil, fmt.Errorf("this list is not tournament legal today (%s); fix it and call vtes_deck again:\n- %s%s",
+				today, strings.Join(fixes, "\n- "), hint)
 		}
 		limit := budget
 		if in.Detail {
@@ -98,11 +105,22 @@ type deck struct {
 	twda                      *bundle.Deck
 	entries                   []deckEntry
 	notes                     []string // how the list was read
+	draft                     bool     // an idea's cards: no size checked, no density computed
 }
 
 var reSchemeless = regexp.MustCompile(`(?i)^(www\.)?(vdb\.im|vtesdecks\.com|amaranth\.vtes\.co\.nz)/`)
 
-func (d *data) readDeck(ctx context.Context, l *Live, text string) (*deck, error) {
+func (d *data) readDeck(ctx context.Context, l *Live, text string, draft bool) (*deck, error) {
+	dk, err := d.readAny(ctx, l, text, draft)
+	if dk != nil && draft {
+		if dk.draft = dk.twda == nil; !dk.draft {
+			dk.notes = append(dk.notes, "draft left aside: a TWDA deck is read whole, as archived")
+		}
+	}
+	return dk, err
+}
+
+func (d *data) readAny(ctx context.Context, l *Live, text string, draft bool) (*deck, error) {
 	if reSchemeless.MatchString(text) {
 		text = "https://" + text
 	}
@@ -123,7 +141,7 @@ func (d *data) readDeck(ctx context.Context, l *Live, text string) (*deck, error
 		}
 		return nil, fmt.Errorf("no deck of the TWDA has the id %q: give a TWDA id (e.g. 2k6munduko), a deck link, or the list as text, one card per line with its count", text)
 	}
-	return d.readText(text)
+	return d.readText(text, draft)
 }
 
 func (d *data) fromTWDA(t *bundle.Deck) *deck {
@@ -366,7 +384,7 @@ var (
 )
 
 // readText reads a decklist line by line.
-func (d *data) readText(text string) (*deck, error) {
+func (d *data) readText(text string, draft bool) (*deck, error) {
 	dk := &deck{}
 	var lines []nameLine
 	for raw := range strings.Lines(text) {
@@ -394,6 +412,8 @@ func (d *data) readText(text string) (*deck, error) {
 			count, rest = atoi(m[1]), m[2]
 		} else if m := reCountLast.FindStringSubmatch(raw); m != nil {
 			count, rest = atoi(m[2]), m[1]
+		} else if draft && !reHeader.MatchString(raw) {
+			count, rest = 1, strings.TrimLeft(raw, "-*• \t")
 		} else {
 			switch {
 			case d.ix.lookup(bundle.Fold(raw)) != nil:
@@ -407,10 +427,14 @@ func (d *data) readText(text string) (*deck, error) {
 		lines = append(lines, nameLine{name: name, group: group, count: count, comment: comment})
 	}
 	if errs := d.resolveLines(dk, lines, false); len(errs) > 0 {
+		if draft {
+			errs = append(errs, "draft reads every line as a card's name: drop a line that names no card")
+		}
 		return nil, errors.New("some lines name no card; correct them and call vtes_deck again:\n- " + strings.Join(errs, "\n- "))
 	}
 	if len(dk.entries) == 0 {
-		return nil, errors.New(`no line of the list reads as a card with its count: give one card per line, e.g. "3x Conditioning" or "2 Anson"`)
+		return nil, errors.New(`no line of the list reads as a card with its count: give one card per line, e.g. "3x Conditioning" or "2 Anson"; ` +
+			`for a deck idea, draft reads a line without a count as one copy`)
 	}
 	return dk, nil
 }
@@ -532,18 +556,21 @@ func (dk *deck) split() (crypt, library []deckEntry, nCrypt, nLibrary int) {
 }
 
 // fixes names what keeps the list from tournament play today, per the
-// rulebook's deck construction rules and the card data's dates.
-func (dk *deck) fixes(today string) []string {
+// rulebook's deck construction rules and the card data's dates; and if it is short.
+func (dk *deck) fixes(today string) ([]string, bool) {
 	crypt, _, nCrypt, nLibrary := dk.split()
 	var out []string
-	if nCrypt < 12 {
-		out = append(out, fmt.Sprintf("the crypt has %d cards: at least 12 (add %d)", nCrypt, 12-nCrypt))
+	if !dk.draft {
+		if nCrypt < 12 {
+			out = append(out, fmt.Sprintf("the crypt has %d cards: at least 12 (add %d)", nCrypt, 12-nCrypt))
+		}
+		if nLibrary < 60 {
+			out = append(out, fmt.Sprintf("the library has %d cards: 60 to 90 (add %d)", nLibrary, 60-nLibrary))
+		} else if nLibrary > 90 {
+			out = append(out, fmt.Sprintf("the library has %d cards: 60 to 90 (cut %d)", nLibrary, nLibrary-90))
+		}
 	}
-	if nLibrary < 60 {
-		out = append(out, fmt.Sprintf("the library has %d cards: 60 to 90 (add %d)", nLibrary, 60-nLibrary))
-	} else if nLibrary > 90 {
-		out = append(out, fmt.Sprintf("the library has %d cards: 60 to 90 (cut %d)", nLibrary, nLibrary-90))
-	}
+	short := len(out) > 0 && (nCrypt < 12 || nLibrary < 60)
 	var groups []int
 	for _, e := range crypt {
 		if g, err := strconv.Atoi(strings.TrimPrefix(e.card.Group, "G")); err == nil && !slices.Contains(groups, g) {
@@ -561,7 +588,7 @@ func (dk *deck) fixes(today string) []string {
 			out = append(out, fmt.Sprintf("%s is tournament legal only from %s", e.card.Name, e.card.Legal))
 		}
 	}
-	return out
+	return out, short
 }
 
 func joinInts(ns []int) string {
@@ -619,9 +646,21 @@ func (dk *deck) write(out *strings.Builder, d *data, today string, fixes []strin
 			fmt.Fprintf(out, "- %s\n", n)
 		}
 	}
-	if len(fixes) == 0 {
+	switch {
+	case dk.draft:
+		fmt.Fprintf(out, "\nA deck idea: %d crypt and %d library cards, a line without a count read as one copy; its sizes are not checked "+
+			"and no module's density is computed.\n", nCrypt, nLibrary)
+		if len(fixes) == 0 {
+			fmt.Fprintf(out, "Tournament legal today (%s), its sizes aside: yes.\n", today)
+		} else {
+			fmt.Fprintf(out, "Tournament legal today (%s), its sizes aside: no:\n", today)
+			for _, f := range fixes {
+				fmt.Fprintf(out, "- %s\n", f)
+			}
+		}
+	case len(fixes) == 0:
 		fmt.Fprintf(out, "\nTournament legal today (%s): yes.\n", today)
-	} else {
+	default:
 		fmt.Fprintf(out, "\nTournament legal today (%s): no, as archived:\n", today)
 		for _, f := range fixes {
 			fmt.Fprintf(out, "- %s\n", f)
@@ -634,7 +673,7 @@ func (dk *deck) write(out *strings.Builder, d *data, today string, fixes []strin
 	}
 	writeCrypt(out, crypt, nCrypt, fit)
 	writeLibrary(out, library, crypt, nLibrary, nCrypt, fit)
-	writeModules(out, b.Modules, library, crypt, nLibrary, fit)
+	writeModules(out, b.Modules, library, crypt, nLibrary, dk.draft, fit)
 	dk.writeRelatives(out, d, detail, fit)
 
 	out.WriteString("## How to answer\n\nThese facts are computed from the card data; the texts above are official. " +
@@ -642,6 +681,9 @@ func (dk *deck) write(out *strings.Builder, d *data, today string, fixes []strin
 		"The modules say which cards belong together, not how this deck plays them. " +
 		"Primogen does not serve theory.md and modules.md, which the procedures name: what you say of them beyond these facts is your own reading, " +
 		"to be said so.\n\n")
+	if dk.draft {
+		out.WriteString("This is a deck idea: the advice procedure applies to it, the analysis' steps it names on these cards.\n\n")
+	}
 	out.WriteString(strings.TrimSpace(b.DeckAnalysis))
 	out.WriteString("\n\n")
 	out.WriteString(strings.TrimSpace(b.DeckAdvice))
@@ -650,6 +692,10 @@ func (dk *deck) write(out *strings.Builder, d *data, today string, fixes []strin
 }
 
 func writeCrypt(out *strings.Builder, crypt []deckEntry, n, fit int) {
+	if n == 0 {
+		out.WriteString("\n## Crypt\n\nNo crypt card given: the library's requirements are not checked against a crypt.\n\n")
+		return
+	}
 	capacity, lo, hi := 0, 0, 0
 	var groups []string
 	for i, e := range crypt {
@@ -742,6 +788,10 @@ var typeOrder = []string{"Master", "Conviction", "Action", "Political Action", "
 	"Action Modifier", "Reaction", "Combat", "Event"}
 
 func writeLibrary(out *strings.Builder, library, crypt []deckEntry, n, nCrypt, fit int) {
+	if n == 0 {
+		out.WriteString("## Library\n\nNo library card given.\n\n")
+		return
+	}
 	fmt.Fprintf(out, "## Library (%d cards, %d distinct)\n\n", n, len(library))
 	costs := map[string][2]int{} // kind → amount, cards
 	var variable []string
@@ -801,7 +851,10 @@ func writeLibrary(out *strings.Builder, library, crypt []deckEntry, n, nCrypt, f
 				fmt.Fprintf(out, ". %s", strings.Join(reqs, " "))
 			}
 			out.WriteString("\n")
-			who := playable(e.card, crypt, nCrypt)
+			who := ""
+			if nCrypt > 0 {
+				who = playable(e.card, crypt, nCrypt)
+			}
 			if who != "" {
 				fmt.Fprintf(out, "  %s\n", who)
 			}
@@ -819,15 +872,19 @@ func writeLibrary(out *strings.Builder, library, crypt []deckEntry, n, nCrypt, f
 }
 
 // writeModules groups the library by the catalog's modules.
-func writeModules(out *strings.Builder, modules []bundle.Module, library, crypt []deckEntry, n, fit int) {
+func writeModules(out *strings.Builder, modules []bundle.Module, library, crypt []deckEntry, n int, draft bool, fit int) {
 	out.WriteString("## Library by module\n\n")
 	if len(modules) == 0 {
 		out.WriteString("This data bundle holds no module tags: no modules until it is rebuilt.\n\n")
 		return
 	}
-	fmt.Fprintf(out, "The modules of primogen's catalog (knowledge/guide/modules.md, curated by the owner) of which this deck holds at least one core card "+
-		"(a star engine naming several: two of its cards), a card counted in each module it belongs to. Density: the module's copies over the library's %d cards, in theory.md's classes "+
-		"(%s); per hand: the copies a hand of 7 holds on average, density × 7.\n\n", n, bundle.DensityClasses)
+	out.WriteString("The modules of primogen's catalog (knowledge/guide/modules.md, curated by the owner) of which this deck holds at least one core card " +
+		"(a star engine naming several: two of its cards), a card counted in each module it belongs to.")
+	if !draft {
+		fmt.Fprintf(out, " Density: the module's copies over the library's %d cards, in theory.md's classes "+
+			"(%s); per hand: the copies a hand of 7 holds on average, density × 7.", n, bundle.DensityClasses)
+	}
+	out.WriteString("\n\n")
 	if fit > full {
 		out.WriteString("What each module lacks of its core is left out to fit this result.\n\n")
 	}
@@ -882,13 +939,17 @@ func writeModules(out *strings.Builder, modules []bundle.Module, library, crypt 
 			tagged[id] = true
 		}
 		section, _, _ := strings.Cut(m.Section, " (")
-		if copiesHere <= 1 {
+		if copiesHere <= 1 && !draft {
 			single = append(single, fmt.Sprintf("**%s** (%s)", m.Name, strings.Join(slices.Concat(parts[0], parts[1], inCrypt), ", ")))
 			continue
 		}
-		density := float64(copiesHere) / float64(n)
 		var line strings.Builder
-		fmt.Fprintf(&line, "- **%s** (%s): %d copies, %.1f%%, %s, %.1f per hand", m.Name, section, copiesHere, 100*density, densityClass(density), 7*density)
+		if draft {
+			fmt.Fprintf(&line, "- **%s** (%s): %d copies", m.Name, section, copiesHere)
+		} else {
+			density := float64(copiesHere) / float64(n)
+			fmt.Fprintf(&line, "- **%s** (%s): %d copies, %.1f%%, %s, %.1f per hand", m.Name, section, copiesHere, 100*density, densityClass(density), 7*density)
+		}
 		for _, p := range []struct {
 			head  string
 			cards []string
@@ -920,7 +981,10 @@ func writeModules(out *strings.Builder, modules []bundle.Module, library, crypt 
 			count += e.count
 		}
 	}
-	if len(none) > 0 {
+	switch {
+	case len(none) > 0 && draft:
+		fmt.Fprintf(out, "\nIn no module shown (%d copies): %s\n", count, strings.Join(none, ", "))
+	case len(none) > 0:
 		fmt.Fprintf(out, "\nIn no module shown (%d copies, %.1f%% of the library): %s\n", count, 100*float64(count)/float64(n), strings.Join(none, ", "))
 	}
 	out.WriteString("\n")
