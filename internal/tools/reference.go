@@ -32,7 +32,8 @@ var reTrifle = regexp.MustCompile(`(?i)\btrifle\b`)
 type measures struct {
 	lib, action, masters, trifles, blood, pool, distinct, top10, noModule int
 	byType                                                                map[string]int
-	copies                                                                map[int]int // library card id → copies
+	copies                                                                map[int]int    // library card id → copies
+	gains                                                                 map[string]int // economy kind → copies
 }
 
 // figure is a measure as the section shows it, with what the list's own
@@ -65,8 +66,15 @@ var concentration = []figure{
 	{"Copies in no module shown", func(m *measures) int { return m.noModule }, nil},
 }
 
-func measure(cards map[int]int, byID map[int]*bundle.Card, modules []bundle.Module) *measures {
-	m := &measures{byType: map[string]int{}, copies: map[int]int{}}
+func measure(cards map[int]int, byID map[int]*bundle.Card, modules []bundle.Module, economy []bundle.Gain) *measures {
+	m := &measures{byType: map[string]int{}, copies: map[int]int{}, gains: map[string]int{}}
+	for _, g := range economy {
+		for _, t := range g.Cards {
+			for _, id := range t.IDs {
+				m.gains[g.Kind] += cards[id]
+			}
+		}
+	}
 	tagged := map[int]bool{}
 	for _, mod := range modules {
 		if !moduleHeld(mod, func(id int) bool { return cards[id] > 0 }) {
@@ -121,7 +129,7 @@ func (d *data) windowMeasures() map[string]*measures {
 			for _, c := range t.Cards {
 				cards[c.ID] += c.Count
 			}
-			d.measures[t.ID] = measure(cards, d.byID, d.b.Modules)
+			d.measures[t.ID] = measure(cards, d.byID, d.b.Modules, d.b.Economy)
 		}
 	})
 	return d.measures
@@ -213,7 +221,7 @@ func (dk *deck) writeReference(out *strings.Builder, d *data, fit int) *referenc
 	for _, t := range ref.decks {
 		ms = append(ms, all[t.ID])
 	}
-	here := measure(cards, d.byID, d.b.Modules)
+	here := measure(cards, d.byID, d.b.Modules, d.b.Economy)
 	n := len(ms)
 
 	fmt.Fprintf(out, "The reference: %s. These decks won a tournament: their figures say what winners play, not what is strong. "+
@@ -248,6 +256,8 @@ func (dk *deck) writeReference(out *strings.Builder, d *data, fit int) *referenc
 		"(at most two a budget can, so the larger the reference, the rarer). Where that is common, a single figure far from the reference is a question and several pointing the same way are a finding.\n",
 		n, outside, num(math.Round(10*pct(outside, n))/10), len(budgets))
 
+	writeGains(out, d, lines)
+
 	out.WriteString("\n### Concentration\n\n")
 	lines(concentration)
 
@@ -264,6 +274,39 @@ func (dk *deck) writeReference(out *strings.Builder, d *data, fit int) *referenc
 	writeFew(out, d, here, ms, plays, fit == full)
 	out.WriteString("\n")
 	return &ref
+}
+
+// writeGains counts the list's blood and pool sources by kind, naming its cards.
+func writeGains(out *strings.Builder, d *data, lines func([]figure)) {
+	out.WriteString("\n### Blood and pool sources\n\n")
+	if len(d.b.Economy) == 0 {
+		out.WriteString("This data bundle holds no blood and pool sources: none until it is rebuilt.\n")
+		return
+	}
+	out.WriteString("The copies of the library cards giving each kind of source, a card counted in each of its kinds, by the curated and revisable tags of `module-tags.json`. " +
+		"Copies, not yield: most gains are conditional (a strike that lands, a vote that passes, the Edge held), and how much each gives is in its text.\n\n")
+	var figures []figure
+	for _, g := range d.b.Economy {
+		figures = append(figures, figure{fmt.Sprintf("%s%s (%s)", strings.ToUpper(g.Kind[:1]), g.Kind[1:], g.What),
+			func(m *measures) int { return m.gains[g.Kind] },
+			func(m *measures) string {
+				var names []string
+				for _, t := range g.Cards {
+					k := 0
+					for _, id := range t.IDs {
+						k += m.copies[id]
+					}
+					if k > 0 {
+						names = append(names, fmt.Sprintf("%s ×%d", t.Name, k))
+					}
+				}
+				if len(names) == 0 {
+					return ""
+				}
+				return "; " + strings.Join(names, ", ")
+			}})
+	}
+	lines(figures)
 }
 
 // writeStaples names the reference's staples this list lacks or plays below

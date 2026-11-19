@@ -40,6 +40,8 @@ type Bundle struct {
 	Modules []Module
 	// Defenses are the combat defenses of the module catalog, from the same files.
 	Defenses []Defense
+	// Economy is the tags' blood and pool sources, by kind in the tags' order.
+	Economy []Gain
 	// GameTerms are the game's terms in English, from knowledge/game-terms.json.
 	GameTerms []string
 	// Shorthand is the players' shorthand of knowledge/shorthand.json.

@@ -41,6 +41,25 @@ type Answers struct {
 	Cards []Answer
 }
 
+// Gain is a kind of blood or pool source of the tags' economy, what it is, and its cards.
+type Gain struct {
+	Kind, What string
+	Cards      []Tag
+}
+
+// reGains finds a card text gaining its controller pool or a minion blood,
+// which the economy must tag or exclude.
+var reGains = regexp.MustCompile(`(?i)\bgains? (\d+|x|an?|one|two|three|that much|that many|additional|the) (additional )?(pool|blood)\b|\bgains? [^.]{0,30}\b(pool|blood) equal\b|\b(gains?|add) enough blood\b|\bgains? the (same )?amount of (blood|pool)\b|\bfrom the (blood )?bank\b|\bsteals? [^.]{0,30}\b(blood|pool)\b|\bto (your|their|its controller.s) pool\b|\bfrom (your|their) pool to\b|\badd(s|ing)? (up to )?(\d+|x|an?|one|two|three|that much|that many|additional|the) (additional )?blood\b|\bmove [^.]{0,20}blood from this card to\b|\ballocate [^.]{0,20}\bpool\b|\bmove [^.]{0,20}\bpool from\b|\bblood (or life )?from [^.]{0,30}\bto this\b|\bwith (\d+|x) blood\b`)
+
+// moduleTags are knowledge/guide/module-tags.json's, resolved.
+type moduleTags struct {
+	modules  []Module
+	defenses []Defense
+	economy  []Gain
+	// notGains are the cards the economy excludes, by id.
+	notGains map[int]bool
+}
+
 // Answer is a card answering a defense, at the level it needs:
 // alternatives, each a set of disciplines all needed (capitals: superior).
 type Answer struct {
@@ -64,7 +83,7 @@ const DensityClasses = "spam above 25%, strong 14 to 25%, standard 7 to 14%, tac
 
 // readModules resolves the tags' card names, a vampire's name without its
 // group standing for each of its groups; a name no card has is left out.
-func readModules(raw, catalog, theory []byte, cards []Card, warn func(string, ...any)) ([]Module, []Defense, error) {
+func readModules(raw, catalog, theory []byte, cards []Card, warn func(string, ...any)) (*moduleTags, error) {
 	var f struct {
 		Modules []struct {
 			Section, Module string
@@ -80,9 +99,14 @@ func readModules(raw, catalog, theory []byte, cards []Card, warn func(string, ..
 				Cards []string
 			}
 		}
+		Economy struct {
+			Kinds    []struct{ Kind, What string }
+			Sources  map[string][]string
+			Excluded map[string]string // a card the economy's pattern finds and why it is no source
+		}
 	}
 	if err := json.Unmarshal(raw, &f); err != nil {
-		return nil, nil, fmt.Errorf("guide/module-tags.json: %w", err)
+		return nil, fmt.Errorf("guide/module-tags.json: %w", err)
 	}
 	if !strings.Contains(strings.Join(strings.Fields(string(theory)), " "), DensityClasses) {
 		warn("guide/theory.md no longer reads %q, the density classes vtes_deck applies: change them in the code too", DensityClasses)
@@ -180,7 +204,38 @@ func readModules(raw, catalog, theory []byte, cards []Card, warn func(string, ..
 	for _, n := range slices.Sorted(maps.Keys(defenses)) {
 		warn("guide/modules.md: the defense %q has no tags in guide/module-tags.json", n)
 	}
-	return out, defs, nil
+	t := &moduleTags{modules: out, defenses: defs, notGains: map[int]bool{}}
+	for _, k := range f.Economy.Kinds {
+		t.economy = append(t.economy, Gain{k.Kind, k.What, resolve(f.Economy.Sources[k.Kind], "economy, "+k.Kind)})
+	}
+	for kind := range f.Economy.Sources {
+		if !slices.ContainsFunc(f.Economy.Kinds, func(k struct{ Kind, What string }) bool { return k.Kind == kind }) {
+			warn("guide/module-tags.json: the economy's %q is none of its kinds, left out", kind)
+		}
+	}
+	for _, n := range slices.Sorted(maps.Keys(f.Economy.Excluded)) {
+		for _, tag := range resolve([]string{n}, "economy, excluded") {
+			for _, id := range tag.IDs {
+				t.notGains[id] = true
+			}
+		}
+	}
+	return t, nil
+}
+
+// ungained names the library cards that the TWDA decks of the archetype
+// labels' window play whose text gains pool or blood and that the economy
+// neither tags nor excludes, the most played first.
+func (b *Bundle) ungained(excluded map[int]bool) []string {
+	tagged := maps.Clone(excluded)
+	for _, g := range b.Economy {
+		for _, t := range g.Cards {
+			for _, id := range t.IDs {
+				tagged[id] = true
+			}
+		}
+	}
+	return b.windowCards(func(c *Card) bool { return !tagged[c.ID] && reGains.MatchString(c.Text) })
 }
 
 // untagged names the library cards that the TWDA decks of the archetype
@@ -194,6 +249,13 @@ func (b *Bundle) untagged() []string {
 			}
 		}
 	}
+	return b.windowCards(func(c *Card) bool { return !tagged[c.ID] })
+}
+
+// windowCards names the library cards the TWDA decks of the archetype
+// labels' window play that keep holds for, with how many decks play them,
+// the most played first.
+func (b *Bundle) windowCards(keep func(*Card) bool) []string {
 	byID := map[int]*Card{}
 	for i := range b.Cards {
 		byID[b.Cards[i].ID] = &b.Cards[i]
@@ -204,7 +266,7 @@ func (b *Bundle) untagged() []string {
 			continue
 		}
 		for _, c := range d.Cards {
-			if t := byID[c.ID].Types; !tagged[c.ID] && !slices.Contains(t, "Vampire") && !slices.Contains(t, "Imbued") {
+			if card := byID[c.ID]; !card.IsCrypt() && keep(card) {
 				decks[c.ID]++
 			}
 		}

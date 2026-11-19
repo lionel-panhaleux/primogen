@@ -8,6 +8,4 @@ date or an outside event is not a line.
 
 ---
 
-- **The blood and pool sources of a deck** (M:deck): `module-tags.json` gains an `economy` block, each card gaining its controller pool or blood with its kind, every entry checked against the card's text and the doubtful ones settled by the owner in the session; the build warns of a card the window plays whose text gains its controller pool or a minion blood ("gain N pool", "move N blood from the blood bank", "steal N blood" and their kin) and is neither tagged nor excluded with a reason; `vtes_deck` prints each kind's copies beside the reference, copies not yield. Done when: the build passes with no such warning, and the Banu list prints its sources by kind beside Haqim Royalty's quartiles, its 7 Hunger of Marduk counted as a steal. Docs: product.md (the `vtes_deck` row, "Grading a deck"), operations.md (the build's warning), provenance.md (what `module-tags.json` holds).
-
-<!-- completed-since-upkeep: 13 -->
+<!-- completed-since-upkeep: 14 -->

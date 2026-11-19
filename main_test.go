@@ -490,10 +490,11 @@ func TestQueryDeck(t *testing.T) {
 			t.Errorf("the Banu list: missing %q in:\n%s", w, banu)
 		}
 	}
-	// beside its reference decks (product.md, the vtes_deck row): the budgets, the concentration, the staples, the cards few play
+	// beside its reference decks (product.md, the vtes_deck row): the budgets, the sources, the concentration, the staples, the cards few play
 	for _, w := range []string{
 		"The reference: its nearest archetype, **Haqim Royalty** (C1), its decks and its variants' among the 1494 TWDA decks since 2021-07-01: 41 decks.",
 		"- Cards needing a minion's action (action, political action, equipment, ally, retainer): 26, 31 per 100 library cards; action 14; political action 4; equipment 8. Reference: 6, 8, 11, 15, 18, 20, 24;",
+		"- Steal (blood, life or pool taken from another Methuselah's minion or pool): 7, 8 per 100 library cards; Hunger of Marduk ×7. Reference: 0, 10, 10, 12, 14, 16, 20;",
 		"- Distinct library cards: 35, 41 per 100 library cards. Reference: 18, 20, 22, 25, 29, 32, 38;",
 		"How common an outlier is: of the 41 reference decks, each set against the others, 7 (17.1%)",
 		"- Priority Contract: in 40 of 41 reference decks, median 3 copies, lower quartile 2; here 1.\n",
@@ -627,7 +628,7 @@ func TestQueryDeck(t *testing.T) {
 	if out, err := query("-draft", "deck", "12947"); err != nil || !strings.Contains(out, "draft left aside: a TWDA deck is read whole") || !strings.Contains(out, " per hand") {
 		t.Errorf("a TWDA deck with draft: %v\n%s", err, out)
 	}
-	// a list past the bound: 20 vampires and 90 library cards, the longest texts
+	// a list past the bound: 20 vampires and 65 library cards, the longest texts
 	b, err := bundle.Load(testBundle)
 	if err != nil {
 		t.Fatal(err)
@@ -638,7 +639,7 @@ func TestQueryDeck(t *testing.T) {
 	crypt := 0
 	for _, c := range cards {
 		vampire := slices.Contains(c.Types, "Vampire")
-		if c.Banned != "" || vampire && (c.Group != "G5" || crypt == 20) || !vampire && len(long)-crypt == 90 {
+		if c.Banned != "" || vampire && (c.Group != "G5" || crypt == 20) || !vampire && len(long)-crypt == 65 {
 			continue
 		}
 		if vampire {
@@ -650,11 +651,10 @@ func TestQueryDeck(t *testing.T) {
 	if out, err := query("deck", strings.Join(long, "\n")); err != nil || len(out) > 40000 || !strings.Contains(out, "Left out to fit this result: the texts of the library's cards.") || !strings.Contains(out, "This reference is loose") {
 		t.Errorf("a list past the bound: %v, %d characters", err, len(out))
 	}
-	// the same crypt and the 85 shortest library texts: only the relatives' details left out (90 sit at the bound,
-	// past it with any line more)
+	// the same crypt and the 70 shortest library texts: only the relatives' details left out
 	var short []string
 	for _, c := range slices.Backward(cards) {
-		if c.Banned == "" && !slices.Contains(c.Types, "Vampire") && !slices.Contains(c.Types, "Imbued") && len(short) < 85 {
+		if c.Banned == "" && !slices.Contains(c.Types, "Vampire") && !slices.Contains(c.Types, "Imbued") && len(short) < 70 {
 			short = append(short, "1x "+c.Name)
 		}
 	}

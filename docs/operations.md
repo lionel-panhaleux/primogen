@@ -81,7 +81,11 @@ Go, jq, node and uv come from mise: `mise install` in the checkout reads
   for no such module, a module needing more pieces than it tags, a defense there that `modules.md`'s "Combat defenses" does not name or one it names without tags, an answer's level naming a discipline its card does not require, or
   `theory.md` no longer reading the density classes `vtes_deck` applies; how many library cards the TWDA
   decks of that window play and no module tags, the 50 most played named
-  with how many decks play them (a pass over the tags); a post the
+  with how many decks play them (a pass over the tags); the library cards
+  of that window whose text gains pool or blood (a pattern in the code:
+  "gain N pool", "from the blood bank", "steal N blood" and their kin) and
+  that the tags' `economy` neither lists nor excludes with a reason, a
+  key of its `sources` that is none of its `kinds`; a post the
   advanced rules cite that the archive does not hold, or a ruling's rulebook
   reference no section of the rulebook opens: the fix is upstream, unless
   archon gives that id to a paragraph `archon.go` opens no section at; and

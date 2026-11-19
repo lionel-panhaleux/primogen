@@ -163,9 +163,11 @@ func Build(ctx context.Context, up Upstream, archive *Archive) (*Bundle, []strin
 			return nil, nil, fmt.Errorf("%s: %w", up.Cards, err)
 		}
 	}
-	if b.Modules, b.Defenses, err = readModules(tags, modules, theory, b.Cards, warn); err != nil {
+	t, err := readModules(tags, modules, theory, b.Cards, warn)
+	if err != nil {
 		return nil, nil, err
 	}
+	b.Modules, b.Defenses, b.Economy = t.modules, t.defenses, t.economy
 	decks, twdaVersion, err := fetchDecks(ctx, up.TWDA, b.Cards, warn)
 	if err != nil {
 		return nil, nil, err
@@ -179,6 +181,10 @@ func Build(ctx context.Context, up Upstream, archive *Archive) (*Bundle, []strin
 		shown := untagged[:min(len(untagged), untaggedShown)]
 		warn("%d library cards the TWDA decks since %s play have no module tag (knowledge/guide/module-tags.json); the %d most played, with their decks: %s",
 			len(untagged), labels.Since, len(shown), strings.Join(shown, "; "))
+	}
+	if ungained := b.ungained(t.notGains); len(ungained) > 0 {
+		warn("guide/module-tags.json: %d library cards the TWDA decks since %s play gain pool or blood by their text and the economy neither tags nor excludes: %s",
+			len(ungained), labels.Since, strings.Join(ungained, "; "))
 	}
 	b.attachRulings(db, archive, warn)
 	b.attachChanges(history, warn)

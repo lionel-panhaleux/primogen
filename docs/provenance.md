@@ -33,9 +33,15 @@ compares them with upstream and records the commit below.
   adds (refills, enablers, fetch targets), each checked against its text in
   the card data, and gives the reason a module has no card of its own; and
   each combat defense its cards and its answers, grouped by how they answer
-  it, each with the level it needs. `vtes_deck` reads a library by module
-  with it, serving the modules' names, not the catalog's prose, and its
-  combat posture, serving the defenses' names and their answers' `how`.
+  it, each with the level it needs; and its `economy`, the blood and pool
+  sources by kind (pool, blood, steal, blood to pool, pool to blood, each
+  defined there, the served wording), each
+  card read from its text, the cards a text finds gaining pool or blood
+  that are no source excluded with the reason, the doubtful ones settled
+  by the owner on 2026-11-20. `vtes_deck` reads a library by module
+  with it, serving the modules' names, not the catalog's prose; its
+  combat posture, serving the defenses' names and their answers' `how`;
+  and its sources by kind beside its reference.
 - `classification.json`: the owner's archetype labels for the
   tournament-winning decks since 2021-07 (the 2026-07 pass), forked from
   codex-of-the-damned @ `18be59e`. `vtes_deck` places a deck among its
