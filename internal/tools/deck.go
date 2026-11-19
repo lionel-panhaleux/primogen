@@ -51,7 +51,7 @@ func addDeck(s *mcp.Server, l *Live) {
 			"of its cards. Takes a decklist as text, a TWDA deck id or a VDB link; validates it (sizes, crypt groups, banned cards, " +
 			"legality today) and returns the computed facts: the crypt table with capacities, disciplines, titles and texts, " +
 			"which crypt cards have what each library card requires and at which level, the library by type with every card's official text, " +
-			"the costs, the nearest archetypes and tournament decks with the cards that differ, and the procedure a deck analysis and advice follow.",
+			"the library by module with each module's density and expected copies per hand, the costs, the nearest archetypes and tournament decks with the cards that differ, and the procedure a deck analysis and advice follow.",
 		InputSchema: deckSchema,
 		Annotations: &mcp.ToolAnnotations{ReadOnlyHint: true, IdempotentHint: true, OpenWorldHint: new(false)},
 	}, func(ctx context.Context, _ *mcp.CallToolRequest, in deckInput) (*mcp.CallToolResult, any, error) {
@@ -460,12 +460,13 @@ func (dk *deck) write(out *strings.Builder, d *data, today string, fixes []strin
 	}
 	writeCrypt(out, crypt, nCrypt, fit)
 	writeLibrary(out, library, crypt, nLibrary, nCrypt, fit)
+	writeModules(out, b.Modules, library, crypt, nLibrary, fit)
 	dk.writeRelatives(out, d, detail, fit)
 
 	out.WriteString("## How to answer\n\nThese facts are computed from the card data; the texts above are official. " +
 		"Rulings are not in this dossier: call vtes_cards for a card's rulings and history, vtes_rules_case for a rules point. " +
-		"This dossier computes no modules and no hand expectation, " +
-		"and primogen does not serve theory.md and modules.md, which the procedures name: what you say of them is your own reading, " +
+		"The modules say which cards belong together, not how this deck plays them. " +
+		"Primogen does not serve theory.md and modules.md, which the procedures name: what you say of them beyond these facts is your own reading, " +
 		"to be said so.\n\n")
 	out.WriteString(strings.TrimSpace(b.DeckAnalysis))
 	out.WriteString("\n\n")
@@ -641,6 +642,127 @@ func writeLibrary(out *strings.Builder, library, crypt []deckEntry, n, nCrypt, f
 		}
 		out.WriteString("\n")
 	}
+}
+
+// writeModules groups the library by the catalog's modules.
+func writeModules(out *strings.Builder, modules []bundle.Module, library, crypt []deckEntry, n, fit int) {
+	out.WriteString("## Library by module\n\n")
+	if len(modules) == 0 {
+		out.WriteString("This data bundle holds no module tags: no modules until it is rebuilt.\n\n")
+		return
+	}
+	fmt.Fprintf(out, "The modules of primogen's catalog (knowledge/guide/modules.md, curated by the owner) of which this deck holds at least one core card "+
+		"(a star engine naming several: two of its cards), a card counted in each module it belongs to. Density: the module's copies over the library's %d cards, in theory.md's classes "+
+		"(%s); per hand: the copies a hand of 7 holds on average, density × 7.\n\n", n, bundle.DensityClasses)
+	if fit > full {
+		out.WriteString("What each module lacks of its core is left out to fit this result.\n\n")
+	}
+	held := map[int]deckEntry{}
+	for _, e := range slices.Concat(library, crypt) {
+		held[e.card.ID] = e
+	}
+	type shown struct {
+		line   string
+		copies int
+	}
+	var lines []shown
+	var single []string // the modules with one library card or none
+	tagged := map[int]bool{}
+	for _, m := range modules {
+		var parts [2][]string // core, support
+		var inCrypt, absent []string
+		var ids []int
+		copiesHere, coreHeld, pieces := 0, 0, 0
+		for i, tags := range [][]bundle.Tag{m.Core, m.Support} {
+			for _, t := range tags {
+				found := false
+				for _, id := range t.IDs {
+					e, ok := held[id]
+					if !ok {
+						continue
+					}
+					found = true
+					if slices.Contains(e.card.Types, "Vampire") || slices.Contains(e.card.Types, "Imbued") {
+						inCrypt = append(inCrypt, copies(e))
+						continue
+					}
+					ids = append(ids, id)
+					copiesHere += e.count
+					parts[i] = append(parts[i], copies(e))
+				}
+				switch {
+				case found:
+					pieces++
+					if i == 0 {
+						coreHeld++
+					}
+				case i == 0 && fit == full:
+					absent = append(absent, t.Name)
+				}
+			}
+		}
+		if coreHeld == 0 || pieces < m.Pieces {
+			continue
+		}
+		for _, id := range ids {
+			tagged[id] = true
+		}
+		section, _, _ := strings.Cut(m.Section, " (")
+		if copiesHere <= 1 {
+			single = append(single, fmt.Sprintf("**%s** (%s)", m.Name, strings.Join(slices.Concat(parts[0], parts[1], inCrypt), ", ")))
+			continue
+		}
+		density := float64(copiesHere) / float64(n)
+		var line strings.Builder
+		fmt.Fprintf(&line, "- **%s** (%s): %d copies, %.1f%%, %s, %.1f per hand", m.Name, section, copiesHere, 100*density, densityClass(density), 7*density)
+		for _, p := range []struct {
+			head  string
+			cards []string
+		}{{"core", parts[0]}, {"support", parts[1]}, {"in the crypt", inCrypt}, {"not here, of its core", absent}} {
+			if len(p.cards) > 0 {
+				fmt.Fprintf(&line, "; %s: %s", p.head, strings.Join(p.cards, ", "))
+			}
+		}
+		line.WriteString("\n")
+		lines = append(lines, shown{line.String(), copiesHere})
+	}
+	slices.SortStableFunc(lines, func(a, b shown) int { return cmp.Compare(b.copies, a.copies) })
+	if len(lines)+len(single) == 0 {
+		out.WriteString("No module of the catalog has a core card in this deck.\n")
+	}
+	for _, l := range lines {
+		out.WriteString(l.line)
+	}
+	if len(single) > 0 {
+		fmt.Fprintf(out, "- With one library copy or none: %s\n", strings.Join(single, "; "))
+	}
+	var none []string
+	count := 0
+	for _, e := range slices.SortedStableFunc(slices.Values(library), func(a, b deckEntry) int {
+		return cmp.Or(cmp.Compare(b.count, a.count), strings.Compare(a.card.Name, b.card.Name))
+	}) {
+		if !tagged[e.card.ID] {
+			none = append(none, copies(e))
+			count += e.count
+		}
+	}
+	if len(none) > 0 {
+		fmt.Fprintf(out, "\nIn no module shown (%d copies, %.1f%% of the library): %s\n", count, 100*float64(count)/float64(n), strings.Join(none, ", "))
+	}
+	out.WriteString("\n")
+}
+
+// densityClass is theory.md's class of a module's density.
+func densityClass(d float64) string {
+	switch {
+	case d > 0.25:
+		return "spam"
+	case d >= 0.14:
+		return "strong"
+	case d >= 0.07:
+		return "standard"
+	}
+	return "tactical"
 }
 
 var reTextRequires = regexp.MustCompile(`Requires [^.]*\.`)

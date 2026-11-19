@@ -331,7 +331,14 @@ func TestQueryDeck(t *testing.T) {
 		`Its text also requires, unchecked here: "Requires an Anarch."`,
 		"- 11× **Thing** (card 101972). Clans its requirement names: Gangrel.\n  Crypt cards with the clan Gangrel it requires: all 12.",
 		"  > [pro] Strike: combat ends.\n  > [PRO] As above, and unlock this vampire before combat ends.\n",
-		"This dossier computes no modules and no hand expectation,",
+		// the library by module: a Gangrel wall, as the catalog describes it
+		"- **PRO stealth** (Stealth & block denial): 20 copies, 22.2%, strong, 1.6 per hand; core: Earth Control ×3, Form of Mist ×4, Form of the Bat ×4, Earth Meld ×9\n" +
+			"- **Baron defense** (Bleed defense): 17 copies, 18.9%, strong, 1.3 per hand; core: Bait and Switch ×7, Organized Resistance ×9, Powerbase: Los Angeles; not here, of its core: The Anarch Free Press\n",
+		"- **Leech package** (Bloat & pool economy): 9 copies, 10.0%, standard, 0.7 per hand; core: Villein ×3, Vessel ×3; support: Zoo Hunting Ground, Carfax Abbey, Papillon;",
+		"- **ANI intercept** (Wakes, intercept & wall kits): 5 copies, 5.6%, tactical, 0.4 per hand; core: Raven Spy ×5;",
+		"- **Protected-permanent payload** (Wakes, intercept & wall kits): 3 copies, 3.3%, tactical, 0.2 per hand; core: The Rack, Powerbase: Montreal; support: Monkey Wrench;",
+		"- With one library copy or none: **Big-cap ramp** (Information Highway); **Permanent intercept** (Mr. Winthrop)\n",
+		"In no module shown (23 copies, 25.6% of the library): Thing ×11, Deep Ecology ×5, Powerbase: Savannah ×2, Anarch Railroad, Backways, Ecoterrorists, Ennoia's Theater, Revolutionary Council\n",
 		// its relatives, the deck left out of them, and how well the labels classify back
 		"pass of 2026-07-05, curated and revisable; each of their decks left out in turn, 97% are placed back in their archetype, 99% in its family (variants merged).",
 		"Nearest archetypes (95 in 100 of an archetype's own decks are at 0.49 or more from it):\n- **Gangrel Resistance** (C11): 0.92; 44 decks, its representative decks 12101.\n- **Gangrel Grinder** (C64), a variant of **Gangrel Resistance**: ",
@@ -391,7 +398,7 @@ func TestQueryDeck(t *testing.T) {
 				"Only in this deck: 3× Elemental Stoicism; 1× Theo Bell (G6).\nOnly in 12947: 3× Earth Control; 1× Indira (G6).\n",
 		}},
 		// a deck near no archetype, its twin the nearest deck
-		{"13019", []string{"- **Matawall** (C53): 0.15;", "This deck is near no archetype: even the closest is under 0.49.",
+		{"13019", []string{"- **Zillah + Villein ramp-bloat** (Bloat & pool economy): 6 copies, 6.7%, tactical, 0.5 per hand; core: Villein ×6;", "- **Matawall** (C53): 0.15;", "This deck is near no archetype: even the closest is under 0.49.",
 			"### 13163, Agnieszka: 1.00\n\nWon by Martin Weinmayer at The Vozhd of JOL, Online, 2026-03-17, 45 players. Event report: https://www.vekn.net/event-calendar/event/13163\nThe same list as this deck.\n"}},
 		{"12434", []string{"(cut at 1500 of 6967 characters: detail gives it whole)"}},
 		// a deck the TWDA archives, illegal today
@@ -411,8 +418,13 @@ func TestQueryDeck(t *testing.T) {
 		if len(out) > 40000 {
 			t.Errorf("%d characters, past the bound of 40,000", len(out))
 		}
+		// a support card of a module not shown is in no module shown; a star engine needs two of its pieces
+		if i := strings.Index(out, "\nIn no module shown"); tc.deck == "2k6munduko" && (i < 0 || !strings.Contains(out[i:strings.Index(out, "## Relatives")], "Ivory Bow")) ||
+			tc.deck == "13019" && strings.Contains(out, "- **Enkil Cog + Instantaneous Transformation + Homunculus**") {
+			t.Errorf("%s: the modules shown or the cards in none:\n%s", tc.deck, out)
+		}
 	}
-	// a list past the bound: 40 vampires and 90 library cards, the longest texts
+	// a list past the bound: 30 vampires and 90 library cards, the longest texts
 	b, err := bundle.Load(testBundle)
 	if err != nil {
 		t.Fatal(err)
@@ -423,7 +435,7 @@ func TestQueryDeck(t *testing.T) {
 	crypt := 0
 	for _, c := range cards {
 		vampire := slices.Contains(c.Types, "Vampire")
-		if c.Banned != "" || vampire && (c.Group != "G5" || crypt == 40) || !vampire && len(long)-crypt == 90 {
+		if c.Banned != "" || vampire && (c.Group != "G5" || crypt == 30) || !vampire && len(long)-crypt == 90 {
 			continue
 		}
 		if vampire {
@@ -449,16 +461,17 @@ func TestQueryDeck(t *testing.T) {
 	if out, err := query("-detail", "deck", "12434"); err != nil || strings.Contains(out, "detail gives it whole") {
 		t.Errorf("the detailed dossier cuts the comment: %v", err)
 	}
-	// a bundle built before it carried the archetype labels
-	b.Classification = bundle.Classification{}
+	// a bundle built before it carried the archetype labels and the module tags
+	b.Classification, b.Modules = bundle.Classification{}, nil
 	old := filepath.Join(t.TempDir(), "old.json.gz")
 	if err := b.Save(old); err != nil {
 		t.Fatal(err)
 	}
 	var stdout, stderr strings.Builder
 	if err := run(t.Context(), []string{"query", "-bundle", old, "deck", "12511"}, &stdout, &stderr); err != nil ||
-		!strings.Contains(stdout.String(), "## Relatives\n\nThis data bundle holds no archetype labels: no relatives until it is rebuilt.") {
-		t.Errorf("a bundle without archetype labels: %v\n%s", err, stdout.String())
+		!strings.Contains(stdout.String(), "## Relatives\n\nThis data bundle holds no archetype labels: no relatives until it is rebuilt.") ||
+		!strings.Contains(stdout.String(), "## Library by module\n\nThis data bundle holds no module tags: no modules until it is rebuilt.") {
+		t.Errorf("a bundle without archetype labels and module tags: %v\n%s", err, stdout.String())
 	}
 
 	for _, tc := range []struct{ deck, err string }{
@@ -483,7 +496,7 @@ func TestQueryDeck(t *testing.T) {
 		}
 	}
 	for _, w := range testWarnings {
-		if strings.Contains(w, "decks of the TWDA name a card") {
+		if strings.Contains(w, "decks of the TWDA name a card") || strings.Contains(w, "guide/module-tags.json:") || strings.Contains(w, "guide/modules.md:") {
 			t.Error(w)
 		}
 	}
@@ -873,7 +886,8 @@ func TestServe(t *testing.T) {
 		}
 	}
 	expect("status page", get("/status"), "Data: cards of static.krcg.org 2026-11-01 00:00 UTC", "Last refresh",
-		"TWDA decks since 2021-07-01, not in the archetype labels of 2026-07-05, match no archetype", `13019 "Agnieszka, The Unbreakable" (2026-06-16, closest Matawall at 0.15)`)
+		"TWDA decks since 2021-07-01, not in the archetype labels of 2026-07-05, match no archetype", `13019 "Agnieszka, The Unbreakable" (2026-06-16, closest Matawall at 0.15)`,
+		"library cards the TWDA decks since 2021-07-01 play have no module tag (knowledge/guide/module-tags.json); the 50 most played, with their decks: ")
 	for _, path := range []string{"/", "/llms.txt"} {
 		expect("catalog", get(path), "# KRCG\n", "(https://mcp.krcg.org/mcp)", "(https://static.krcg.org/data/vtes.json)")
 	}

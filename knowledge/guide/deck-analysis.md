@@ -14,7 +14,7 @@ is why these cards, in these numbers, in that year. Theory and vocabulary:
    requirements as well as the text: an ally's recruit requirement is not in
    its ability text.
 2. **Crypt first.** What does it cohere around? Star (3 or 4×), core (2×),
-   support (1×). Titles count twice: as votes and as the titled reactions
+   support (1×). Titles count twice: as votes and as the titled wakes
    they unlock.
 3. **The library as modules.** For each: density, expectation per hand,
    pillar. Find the engine (the card that grants the effect, not its

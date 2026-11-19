@@ -24,7 +24,13 @@ compares them with upstream and records the commit below.
   contract, `deck-analysis.md` and `deck-advice.md` every `vtes_deck`
   dossier; `theory.md`, `modules.md`, `card-comparison.md` and
   `meta-reading.md` are served by no tool yet.
-  `modules.md` is the module catalog the owner canonized on 2026-08-25.
+  `modules.md` is the module catalog the owner canonized on 2026-08-25,
+  checked against the card texts on 2026-11-19. `module-tags.json` gives
+  each of its modules, by its name and section there, its cards: the core
+  its entry names first, the support it adds (refills, enablers, fetch
+  targets), each checked against its text in the card data, and gives the
+  reason a module has no card of its own. `vtes_deck` reads a library
+  by module with it, serving the modules' names, not the catalog's prose.
 - `classification.json`: the owner's archetype labels for the
   tournament-winning decks since 2021-07 (the 2026-07 pass), forked from
   codex-of-the-damned @ `18be59e`. `vtes_deck` places a deck among its

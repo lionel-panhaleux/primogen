@@ -82,8 +82,9 @@ defense and economy come first (except when analyzing an actual combat deck).
   2024 errata: check dates on older lists.
 - **Giovanni recursion** — Sudario Refraction (2× fetches each other back), Spiritual Guidance.
   Constant access to the two cards the lunge needs.
-- **Fetch locations** — Garibaldi-Meucci Museum (Anarch; also contested to deny its S:CE to
-  others), The Sargon Fragment (open to all, action-hungry), Maabara, Unity.
+- **Fetch permanents** — Garibaldi-Meucci Museum (location, Anarch; also contested to deny its
+  S:CE to others), The Sargon Fragment (equipment, open to all, action-hungry), Maabara
+  (location), Unity (hunter-list master).
 - **Magic of the Smith toolbox** — Magic of the Smith fetching Heart of Nizchetus first, then the
   situational answer (Bowl of Convergence vs stealth, Sniper Rifle vs Potence, Ivory Bow, Kevlar
   Vest, Soul Gem for star engines). Equipment as a searchable answer suite. [24 decks: Magic of
@@ -101,8 +102,8 @@ defense and economy come first (except when analyzing an actual combat deck).
   and Daring the Dawn are lunge cards, kept not cycled. [107 decks]
 - **DEM bleed kit** — Kindred Spirits, Eyes of Chaos, Confusion (+ Deny, Touch of Clarity).
   Bleed with built-in bloat and stealth support; the weenie DEM signature. [29 decks]
-- **Permanent bleed enhancers** — Camera Phone, Club Illusion, Enkil Cog, New Carthage (titled
-  Brujah), Legendary Vampire, Reg Driscoll, Tasha Morgan + J.S. Simmons. Board-based bleed growth:
+- **Permanent bleed enhancers** — Camera Phone, Club Illusion, Enkil Cog, Heart of the City, New
+  Carthage (titled Brujah), Legendary Vampire, Reg Driscoll, Tasha Morgan + J.S. Simmons. Board-based bleed growth:
   survives hand jam, compounds with swarms; the reason "weak bodies remain" doesn't stop a lunge.
 - **Unlimited-modifier stacking** — Leverage, Command of the Beast, Quicksilver Contemplation,
   Power of One [pot]. Bleed bonuses that don't count against the one-limited-modifier rule: stack
@@ -134,7 +135,7 @@ defense and economy come first (except when analyzing an actual combat deck).
   Stealth that doubles as S:CE — the module that lets Gangrel walls and Stanislava run tight.
   [91 decks Gangrel package]
 - **Permanent stealth** — Creepshow Casino, Monastery of Shadows, Elysian Fields, Opium Den,
-  Heart of the City, Club Illusion, Toreador Grand Ball. Board stealth that never jams; vote decks
+  Toreador Grand Ball. Board stealth that never jams; vote decks
   and repeat-bleeders lean on these + dual-mode cards instead of fat modifier stacks.
 - **Block-denial masters** — Pentex™ Subversion, Misdirection, Anarch Troublemaker (+ Mind Numb).
   Paralyze the designated blocker before the lunge; works on votes too.
@@ -151,12 +152,14 @@ defense and economy come first (except when analyzing an actual combat deck).
 - **Baron defense** — Bait and Switch, Organized Resistance (works from a *locked* Baron),
   The Anarch Free Press, Powerbase: Los Angeles. The Anarch answer to DOM/AUS-less crypts; the
   core of what makes Baron toolboxes viable. [30 decks Illegal Brawl kit]
-- **Bleed reduction** — Visions of Zapathasura, Party Out of Bounds, Lost in Translation.
-  For crypts without bounce disciplines; weaker but stealth-proof.
+- **Bleed reduction** — Visions of Zapathasura, Party Out of Bounds (+ Lost in Translation, a
+  bounce needing no discipline, of allies and younger vampires only). For crypts without bounce
+  disciplines; weaker but stealth-proof.
 - **No-bounce substitutes** — Narrow Minds, Archon Investigation (deterrent), Spying Mission
-  (avoid feeding the grand-prey on a bounced bleed), Telepathic Counter ⚠. What S&B decks run
+  (avoid feeding the grand-prey on a bounced bleed), Telepathic Counter ⚠, Two Wrongs (a master
+  bounce: a bleed from anyone but the predator goes to the bleeder's prey). What S&B decks run
   instead of reactions.
-- **Bounce counters** — Hide the Mind, Revelations, Approximation of Loyalty, Two Wrongs,
+- **Bounce counters** — Hide the Mind, Revelations, Approximation of Loyalty,
   Contingency Planning, Monocle of Clarity (scout first). Lunge insurance for powerbleed.
 
 ## Wakes, intercept & wall kits
@@ -173,9 +176,9 @@ defense and economy come first (except when analyzing an actual combat deck).
 - **Permanent intercept** — KRCG News Radio, Channel 10, WMRH Talk Radio, Wall Street Night, Mr.
   Winthrop, Bowl of Convergence. One intercept is enough vs hunts, equips, recruits and votes;
   these lock that baseline in. [41 decks radio stack]
-- **Titled reactions** — Second Tradition: Domain (Camarilla), Organized Resistance (Baron),
-  Eternal Vigilance / Under Siege (Sabbat), No Secrets From the Magaji (Laibon). Wake+intercept
-  (and for 2nd Trad, +2 intercept) tied to the crypt's titles — the reason "titled crypt" is a
+- **Titled wakes** — Second Tradition: Domain (Camarilla), Organized Resistance (Baron): reactions;
+  Eternal Vigilance / Under Siege (Sabbat), No Secrets From the Magaji (Laibon): actions put in
+  play. Wakes, most with intercept (+2 for 2nd Trad, none for Eternal Vigilance), tied to the crypt's titles — the reason "titled crypt" is a
   defensive statement, not just votes. [50 decks 2nd Trad + Parity Shift + Forced March]
 - **Protected-permanent payload** — Smiling Jack, The Rack, Powerbase: Montreal / Barranquilla,
   Anarch Revolt, Constant Revolution, Army of Rats, Creeping Sabotage (+ Monkey Wrench lunge, +
@@ -205,8 +208,7 @@ defense and economy come first (except when analyzing an actual combat deck).
 - **Titled-crypt toolbox** — all-titled crypts (Princes/Justicars, archbishops, Barons) + Parity
   Shift + Second Tradition / Organized Resistance. Votes, defense and bloat from the crypt itself;
   the political toolbox chassis (Juliet's Dream, Lasombra Pop, Nosferatu Royalty).
-- **Vote suppression** — Condemnation: Mute, Arishat, Fabrizia-style minus-votes ⚠, Banishment on
-  the key voter. Break the opposing lock before forcing your own.
+- **Vote suppression** — Condemnation: Mute, Arishat, Banishment on the key voter. Break the opposing lock before forcing your own.
 
 ## Multi-action & A&B engines
 
@@ -231,12 +233,12 @@ defense and economy come first (except when analyzing an actual combat deck).
   Self-sufficient blockers with combat ability; Nephandus adds torpor-burning. A table-wide
   deterrent one card at a time. [34 decks Carlton + Nephandus]
 - **War Ghoul rush kit** — War Ghoul, Piper, Jake Washington (sacrifice fodder), Fake Out, Trap,
-  Ossian, Vozhd. Turn-one rush pressure from the ally side; sacrifice economics beat influence
+  Ossian, the Vozhd (Sofia, Gravesend, Juiz de Fora, Szczecin). Turn-one rush pressure from the ally side; sacrifice economics beat influence
   economics. J.S. Simmons + Tasha Morgan fit because they are zero-cost: good bleed retainers in
   their own right that *can* be fed to a War Ghoul — useful either way. [22 decks; 28 with
   Simmons + Tasha in Piper lists]
 - **Recursive swarms** — Emerald Legionnaire (returns from the ash heap), Spectral Servitor,
-  Shambling Hordes + Liquidation/Trochomancy to stock the heap, Charisma for free recruits,
+  Shambling Hordes + Liquidation to stock the heap, Charisma for free recruits,
   Khazar's Diary as the payoff variant. Swarm payload that regrows through combat losses —
   pre-nerf Emerald Legion defined the 2022-23 meta (check dates). [20 decks Legionnaire kit]
 - **Ally-armed combat swarm** — Underbridge Stray (recruited with Tainted Spring → 3 life / 2
@@ -266,8 +268,9 @@ defense and economy come first (except when analyzing an actual combat deck).
   (+ Disguised Weapon, Dragonbound/Fame payload). Long-range strikes plus additional strikes;
   Psyche! doubles as anti-S:CE. [27-31 decks variants]
 - **Marduk theft-at-range** (CEL+THA, Banu Haqim) — Hunger of Marduk (played before range: this
-  round, strikes become ranged blood steal) + maneuvers to long (Blur, Pursuit, Sideslip) +
-  additional strikes (Quickness, Blur) so one round = several steals; Rego Motum as cover. Steal
+  round, strikes become ranged blood steal) + Pursuit (maneuver to long, or at superior an
+  additional strike) + additional strikes (Quickness, Blur) so one round = several steals;
+  Sideslip (dodge, or prevent 1) and Rego Motum as cover. Steal
   is not damage — prevention doesn't apply — and the blood loops back to the striker: grinding
   from a range where most modules can't answer. The modern Haqim Royalty combat identity.
   [28 decks Haqim kit; 17 Blur + Fast Hands]
@@ -288,8 +291,8 @@ defense and economy come first (except when analyzing an actual combat deck).
   posture: pure avoidance, cycles on actions in forward decks.
 - **Anti-S:CE** — Immortal Grapple, Psyche!, Telepathic Tracking, NSA Trio (blockers only),
   Relentless Reaper. What separates a real rush threat from a nuisance.
-- **Range control** — maneuvers everywhere (Dust Up, Bollix, Blur…) + set-range (Sniper Rifle,
-  Shadow Step, High Ground). Whoever fixes the range chooses which module functions; the answer to
+- **Range control** — maneuvers everywhere (Pursuit, Bollix, Fake Out…) + set-range (Sniper
+  Rifle, Shadow Step, High Ground). Whoever fixes the range chooses which module functions; the answer to
   both gun decks and Marduk-style blood theft.
 - **Combat → pool conversion** — Fame, Tension in the Ranks, Dragonbound (+ Anarch Revolt).
   The cards that make combat a payload at all; without them rushing is pure table control.
@@ -312,7 +315,7 @@ defense and economy come first (except when analyzing an actual combat deck).
   bleed defense.
 - **Contest as a weapon** — Secure Haven (protect the star / contest the opponent's), Garibaldi
   contested to deny its S:CE, Aranthebes contest tech. Uniques are a battlefield.
-- **Timing gifts** ⚠ — Millicent Smith passed to the predator (any blocked minion burns): cards
+- **Timing gifts** ⚠ — Millicent Smith passed to the predator (any of its controller's blocked vampires burns): cards
   donated cross-table as deterrence.
 
 ## Star engines (signature combos, one-liners)
@@ -321,17 +324,19 @@ defense and economy come first (except when analyzing an actual combat deck).
   turn. [103 decks contain the pair-core]
 - **Madness Network + Reversal of Fortunes** — Madness Reversal: play twice as much as the table.
 - **Montano + Baltimore Purge + Graverobbing + Heidelberg Castle** — steal via torpor, strip blood.
-- **Mind Rape + Heidelberg / + Madness Network** — steal, strip, act with it immediately.
+- **Puppet Master + Heidelberg / + Madness Network** — (once Mind Rape) steal, strip, act with it
+  immediately.
 - **Cybele + Call the Great Beast + Soul Gem of Etrius (+ Magic of the Smith, Truth of a Thousand
   Lies)** — the Cybelotron resurrection loop.
 - **Nergal + Call the Great Beast + Soul Gem** — summon a loaded Beast, refresh Nergal.
 - **Shalmath + Summon History (+ Ankara Citadel first)** — a fetch engine as a crypt.
 - **Rachel Brandywine + Homunculus + Madness Network** — bleed across consecutive turns.
 - **Week of Nightmares + Dabbler + Break the Bonds kit** — the Ravnos Bonds explosion. [29 decks]
-- **Khazar's Diary + expendable allies (Jake, Cry Wolf, Shambling Hordes)** — every dead ally is a
+- **Khazar's Diary + expendable unique allies (Jake, Cry Wolf)** — every burned unique minion is a
   Diary counter.
-- **Hesha Ruhadze + equipment fetchers (Angel Chavarria, Hag's Wrinkles, Learjet) + Nod** — the
-  20+ bleed Emporium.
+- **Hesha Ruhadze + Nod (+ Hag's Wrinkles, Angel Chavarria's THN for it, Learjet)** — the 20+
+  bleed Emporium: Hesha (G6) gets +1 bleed per unique equipment, Nod moves the equipment onto him,
+  Hag's Wrinkles unlocks after an equip, Learjet draws an extra card.
 - **Lutz von Hohenzollern + vote diversity** — every passed referendum pings the prey: utility
   votes become payload.
-- **Powerbase: Savannah + Salt of Thoth** — S:CE denial as a board state; jams wall hands.
+- **Powerbase: Savannah + Salt of Thoth** — combat ends from the board, for an acting vampire; jams wall hands.

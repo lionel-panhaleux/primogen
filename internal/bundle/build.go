@@ -63,6 +63,8 @@ const (
 	SourceArchon    = "rules of archon-vibe"
 )
 
+const untaggedShown = 50
+
 // Build reads every upstream but the archive, fetched apart by FetchArchive.
 // The warnings name what needs a person.
 func Build(ctx context.Context, up Upstream, archive *Archive) (*Bundle, []string, error) {
@@ -90,11 +92,12 @@ func Build(ctx context.Context, up Upstream, archive *Archive) (*Bundle, []strin
 	if err != nil {
 		return nil, nil, err
 	}
-	var history, advanced, procedure, analysis, advice, terms, shorthand, catalog, classification []byte
+	var history, advanced, procedure, analysis, advice, terms, shorthand, catalog, classification, tags, modules, theory []byte
 	for name, body := range map[string]*[]byte{
 		"card-changes.md": &history, "rules/advanced-rules.md": &advanced,
 		"guide/rules-answer.md": &procedure, "guide/deck-analysis.md": &analysis, "guide/deck-advice.md": &advice,
 		"game-terms.json": &terms, "shorthand.json": &shorthand, "llms.txt": &catalog, "classification.json": &classification,
+		"guide/module-tags.json": &tags, "guide/modules.md": &modules, "guide/theory.md": &theory,
 	} {
 		if *body, err = read(name); err != nil {
 			return nil, nil, err
@@ -160,6 +163,9 @@ func Build(ctx context.Context, up Upstream, archive *Archive) (*Bundle, []strin
 			return nil, nil, fmt.Errorf("%s: %w", up.Cards, err)
 		}
 	}
+	if b.Modules, err = readModules(tags, modules, theory, b.Cards, warn); err != nil {
+		return nil, nil, err
+	}
 	decks, twdaVersion, err := fetchDecks(ctx, up.TWDA, b.Cards, warn)
 	if err != nil {
 		return nil, nil, err
@@ -168,6 +174,11 @@ func Build(ctx context.Context, up Upstream, archive *Archive) (*Bundle, []strin
 	if unmatched := NewRelatives(b).Unmatched(); len(unmatched) > 0 {
 		warn("%d TWDA decks since %s, not in the archetype labels of %s, match no archetype (a new one, or a pass over the labels): %s",
 			len(unmatched), labels.Since, labels.Generated, strings.Join(unmatched, "; "))
+	}
+	if untagged := b.untagged(); len(untagged) > 0 {
+		shown := untagged[:min(len(untagged), untaggedShown)]
+		warn("%d library cards the TWDA decks since %s play have no module tag (knowledge/guide/module-tags.json); the %d most played, with their decks: %s",
+			len(untagged), labels.Since, len(shown), strings.Join(shown, "; "))
 	}
 	b.attachRulings(db, archive, warn)
 	b.attachChanges(history, warn)

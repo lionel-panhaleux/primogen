@@ -36,6 +36,8 @@ type Bundle struct {
 	Decks []Deck
 	// Classification is the owner's archetype labels, knowledge/classification.json.
 	Classification Classification
+	// Modules are the module catalog's cards, knowledge/guide/module-tags.json.
+	Modules []Module
 	// GameTerms are the game's terms in English, from knowledge/game-terms.json.
 	GameTerms []string
 	// Shorthand is the players' shorthand of knowledge/shorthand.json.

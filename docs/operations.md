@@ -54,9 +54,9 @@ The server refreshes itself; there is no cron job and no operator.
   journal: the build's warnings (below), and every link of the catalog
   (`knowledge/llms.txt`) that does not answer a GET: no answer within 30
   seconds, a 404, a 410 or a server error (an endpoint that refuses a GET or
-  wants a token answers). Cards with no module tag, an upstream
-  rules diff waiting for sync and an archive whose newest post is old join
-  them once primogen can compute them.
+  wants a token answers). An upstream rules diff waiting for sync and an
+  archive whose newest post is old join them once primogen can compute
+  them.
 
 ## Commands
 
@@ -74,7 +74,14 @@ Go, jq, node and uv come from mise: `mise install` in the checkout reads
   left out of the bundle: the fix is in the gist, then `/sync`; a TWDA deck
   naming a card the card data lacks, left out until the card data has it;
   the TWDA decks of the archetype labels' window the owner has not labelled
-  that match no archetype (a new one, or a pass over the labels); a post the
+  that match no archetype (a new one, or a pass over the labels); a name of
+  `knowledge/guide/module-tags.json` no card has, left out, a module there
+  that `modules.md` does not name under its section, or a module of
+  `modules.md` with no tags and no reason under `untagged`, a reason there
+  for no such module, a module needing more pieces than it tags, or
+  `theory.md` no longer reading the density classes `vtes_deck` applies; how many library cards the TWDA
+  decks of that window play and no module tags, the 50 most played named
+  with how many decks play them (a pass over the tags); a post the
   advanced rules cite that the archive does not hold, or a ruling's rulebook
   reference no section of the rulebook opens: the fix is upstream, unless
   archon gives that id to a paragraph `archon.go` opens no section at; and
@@ -135,7 +142,7 @@ travel inside the data bundle, and the hosted server reads them from `main`
 on GitHub: a pushed knowledge change reaches users within the hour, without
 a deploy. Pushing `knowledge/` is publishing it, and the deployed binary
 reads it: a change to a knowledge file's format is deployed before it is
-pushed.
+pushed, and a binary reading a new knowledge file after it is pushed.
 
 ## Looking things up
 
