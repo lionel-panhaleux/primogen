@@ -28,6 +28,8 @@ const nightly = 6
 func serve(ctx context.Context, fs *flag.FlagSet, path *string, args []string) error {
 	addr := fs.String("addr", "127.0.0.1:8050", "the address to listen on")
 	knowledge := fs.String("knowledge", "", "a local knowledge directory (default: knowledge/ at primogen's main branch on GitHub)")
+	appID := fs.String("github-app", "", "the client ID of the GitHub App filing vtes_feedback's reports (none: the tool refuses)")
+	appKey := fs.String("github-key", "", "the GitHub App's private key, a PEM file")
 	if err := fs.Parse(args); err != nil {
 		return err
 	}
@@ -40,6 +42,16 @@ func serve(ctx context.Context, fs *flag.FlagSet, path *string, args []string) e
 	r, err := newRefresher(ctx, up, p, slog.Default())
 	if err != nil {
 		return err
+	}
+	if (*appID == "") != (*appKey == "") {
+		return errors.New("-github-app and -github-key go together")
+	}
+	if *appID != "" {
+		g, err := newGitHubApp("https://api.github.com", "lionel-panhaleux/primogen", *appID, *appKey)
+		if err != nil {
+			return err
+		}
+		r.fileWith(g)
 	}
 	go func() {
 		t := time.NewTicker(time.Hour)
@@ -237,6 +249,12 @@ func current(live *bundle.Bundle, probed []bundle.Source) bool {
 		}
 	}
 	return true
+}
+
+func (r *refresher) fileWith(g *githubApp) {
+	r.live.File = func(ctx context.Context, rep tools.Report, from string) (string, error) {
+		return g.file(ctx, rep, from, tools.DataLine(r.live.Bundle()))
+	}
 }
 
 func (r *refresher) handler() http.Handler {

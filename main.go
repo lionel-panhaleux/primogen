@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"os"
 	"os/signal"
 	"path/filepath"
@@ -34,8 +35,9 @@ const usage = `usage:
       deck LIST|ID|LINK|-        vtes_deck: a decklist (its lines as one or several arguments, or - for stdin), a TWDA id or a deck link (VDB, VTES Decks, Amaranth); -draft: a deck idea's cards
       stats CARD [ARCHETYPE]     vtes_card_stats: a card's play rates, companions and competitors, overall or within an archetype
       meta [ARCHETYPE]           vtes_meta: the archetypes' shares of the latest window, or one archetype's (-months: the window's length)
+      feedback QUESTION WRONG EXPECTED   vtes_feedback: file a report on an answer as a public GitHub issue, through the hosted server
   primogen stdio [-bundle PATH]                    serve the tools over stdio, for a local MCP client
-  primogen serve -bundle PATH [-addr ADDR] [-knowledge DIR]   serve the tools over HTTP at /mcp, refreshing the bundle
+  primogen serve -bundle PATH [-addr ADDR] [-knowledge DIR] [-github-app ID -github-key PEM]   serve the tools over HTTP at /mcp, refreshing the bundle
 
 Without -bundle, query and stdio use the published bundle in the user cache
 directory: downloaded on first run (from -from, for the tests), and again when
@@ -161,6 +163,11 @@ func query(ctx context.Context, fs *flag.FlagSet, path *string, args []string, s
 		if len(rest) > 0 {
 			in["archetype"] = strings.Join(rest, " ")
 		}
+	case "feedback":
+		if len(rest) != 3 {
+			return errors.New(usage)
+		}
+		tool, in = "vtes_feedback", map[string]any{"question": rest[0], "wrong": rest[1], "expected": rest[2], "public": true}
 	case "stats":
 		tool, in["card"] = "vtes_card_stats", rest[0]
 		if len(rest) > 1 {
@@ -203,6 +210,7 @@ func localLive(ctx context.Context, flagged, from, archive string, stderr io.Wri
 		return nil, err
 	}
 	live := tools.NewLive(b)
+	live.File = forward(from)
 	live.LoadArchive = func(ctx context.Context) (*bundle.Archive, error) {
 		p, err := installed("archive.json.gz")
 		if err != nil {
@@ -211,6 +219,51 @@ func localLive(ctx context.Context, flagged, from, archive string, stderr io.Wri
 		return cached(ctx, archive, p, readArchive, stderr)
 	}
 	return live, nil
+}
+
+// forward files a report through the hosted server publishing the bundle,
+// which holds the GitHub App and the limits.
+func forward(published string) tools.Filer {
+	return func(ctx context.Context, r tools.Report, _ string) (string, error) {
+		link, err := forwarded(ctx, published, r)
+		if err != nil && !strings.HasPrefix(err.Error(), "not filed: ") {
+			err = fmt.Errorf("not filed: %w", err)
+		}
+		return link, err
+	}
+}
+
+func forwarded(ctx context.Context, published string, r tools.Report) (string, error) {
+	u, err := url.Parse(published)
+	if err != nil {
+		return "", err
+	}
+	u.Path, u.RawQuery = "/mcp", ""
+	// a retried call could file the report twice
+	cs, err := mcp.NewClient(&mcp.Implementation{Name: "primogen", Version: tools.Version()}, nil).Connect(ctx, &mcp.StreamableClientTransport{Endpoint: u.String(), MaxRetries: -1}, nil)
+	if err != nil {
+		return "", fmt.Errorf("%s does not answer: %w", u, err)
+	}
+	defer cs.Close()
+	res, err := cs.CallTool(ctx, &mcp.CallToolParams{Name: "vtes_feedback", Arguments: r})
+	if err != nil {
+		return "", err
+	}
+	if res.IsError {
+		var text strings.Builder
+		for _, c := range res.Content {
+			if t, ok := c.(*mcp.TextContent); ok {
+				text.WriteString(t.Text)
+			}
+		}
+		return "", errors.New(text.String())
+	}
+	var filed tools.Filed
+	raw, _ := json.Marshal(res.StructuredContent)
+	if err := json.Unmarshal(raw, &filed); err != nil || filed.Issue == "" {
+		return "", fmt.Errorf("%s answered no issue's link: %s", u, raw)
+	}
+	return filed.Issue, nil
 }
 
 func readArchive(path string) (*bundle.Archive, error) {

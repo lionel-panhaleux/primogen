@@ -19,7 +19,8 @@ import (
 
 const instructions = `Primogen grounds answers about Vampire: The Eternal Struggle (VTES).
 Never state a card's text, a ruling or a rule from memory: call vtes_cards for every card the answer relies on, vtes_rules_case first for any rules question, vtes_deck first for a decklist, or with draft for a deck idea's cards, and vtes_meta for any claim about the meta; quote what they return.
-Each item carries its authority and its link; cite the link. When the result says no ruling covers a point, search vtes_rulings_archive (the card's name, directors only) before calling it unsettled: a sitting rules director's reply settles it, even one whose own words name no card. Only when nothing does, say the point is unsettled rather than filling the gap.`
+Each item carries its authority and its link; cite the link. When the result says no ruling covers a point, search vtes_rulings_archive (the card's name, directors only) before calling it unsettled: a sitting rules director's reply settles it, even one whose own words name no card. Only when nothing does, say the point is unsettled rather than filling the gap.
+When the user says an answer was wrong, offer to report it with vtes_feedback.`
 
 // The bounds of a result, in characters: under the 50,000 past which Claude
 // Code saves a result to a file and, detailed, about 20,000 tokens.
@@ -36,7 +37,9 @@ type Live struct {
 	// LoadArchive fetches the archive on first use, for a server not handed one.
 	LoadArchive func(context.Context) (*bundle.Archive, error)
 	// Sites replaces "https:/" before a deckbuilder's host, for the tests.
-	Sites    string
+	Sites string
+	// File files a user's report; nil, the tool refuses.
+	File     Filer
 	loading  sync.Mutex
 	amaranth struct {
 		sync.Mutex
@@ -103,6 +106,7 @@ func NewServer(l *Live) *mcp.Server {
 	addDeck(s, l)
 	addStats(s, l)
 	addMeta(s, l)
+	addFeedback(s, l)
 	return s
 }
 

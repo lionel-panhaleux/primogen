@@ -1,0 +1,3 @@
+creation_rules:
+  - age:
+      - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIE+Fa+dmnpPBYM0G7xPupl+GkVdF6YFmZ/NkpyqOzWoI  # the owner

@@ -10,8 +10,23 @@ commands are added here by the lines that create them.
   `https://mcp.krcg.org`. `primogen serve` listens on `127.0.0.1:8050` as
   the `primogen` systemd unit (a dynamic user, its bundle in
   `/var/lib/primogen`, logs under `journalctl -t primogen`), behind
-  `server-setup`'s `nginx_site` and certbot. No secrets yet; the first one
-  goes in sops, as in `server-setup`.
+  `server-setup`'s `nginx_site` and certbot, which passes the client's
+  address as `X-Real-IP`, the address `vtes_feedback`'s limit counts. The
+  limit's counts are held in memory: a restart or a deploy resets them.
+
+## Secrets
+
+`secrets.sops.yaml`, encrypted with sops to the SSH key `.sops.yaml` lists
+(the owner's: deploys run from this machine, so no other key decrypts it),
+holds one secret: `github_app_key`, the private key of the
+GitHub App `app-feedback-issues` (Issues read and write, no webhook),
+installed on several of the owner's repositories: each token the server
+asks for is scoped to this repository's issues. `mise run deploy` decrypts it and puts it
+on frankfurt as `/etc/primogen/github-app.pem` (root, 600, never diffed),
+handed to the dynamic user through systemd's `LoadCredential`; the App's
+client ID, not a secret, is in `deploy/deploy.py`. `sops edit
+secrets.sops.yaml` edits it; a new key is generated on the App's settings
+page, the old one deleted there after the deploy.
 
 ## Data refresh
 
@@ -101,8 +116,12 @@ Go, jq, node and uv come from mise: `mise install` in the checkout reads
   only), `deck LIST|ID|LINK` (the list's lines as one or
   several arguments, or `-` to read it from stdin; a link of VDB, VTES Decks
   or Amaranth; `-draft` for a deck idea's cards), `stats CARD
-  [ARCHETYPE]`, `meta [ARCHETYPE]` (`-months` for the window's length).
+  [ARCHETYPE]`, `meta [ARCHETYPE]` (`-months` for the window's length),
+  `feedback QUESTION WRONG EXPECTED` (files a public issue, through the
+  hosted server, or the one `-from` names).
 - `primogen stdio` serves the tools over stdio for a local MCP client.
+  Like `query`, it files `vtes_feedback`'s reports through the hosted
+  server's `/mcp`, at the host `-from` names.
 - Without `-bundle`, `query` and `stdio` are a local install: they use the
   published bundle in the user cache directory, which only the download
   writes, as "Data refresh" says (`-from` and `-archive` change where the
@@ -112,7 +131,9 @@ Go, jq, node and uv come from mise: `mise install` in the checkout reads
   `/mcp` (stateless, JSON responses), the published bundle, the catalog of
   the KRCG stack at `/` and `/llms.txt`, and the status page at `/status`,
   refreshed as "Data refresh" says, keeping current the file given
-  with `-bundle`. It builds one first if there is none, and reads
+  with `-bundle`. With `-github-app` (the App's client ID) and `-github-key`
+  (its PEM file), it files `vtes_feedback`'s reports; without, the tool
+  refuses, pointing to the repository's issues. It builds one first if there is none, and reads
   `knowledge/` from GitHub unless given `-knowledge`.
 - `mise run release` releases: on a clean `main` not behind `origin`, it
   runs the checks, tags the next `v0.N.0` (none if HEAD has a tag already),

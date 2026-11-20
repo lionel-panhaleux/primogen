@@ -11,6 +11,7 @@ from pyinfra.facts.server import Arch
 from pyinfra.operations import files, server, systemd
 from pyinfra.operations.util import any_changed
 from server_setup import nginx_site
+from server_setup.secrets import load, put_secret
 
 REPO = Path(__file__).resolve().parent.parent
 DOMAIN = "mcp.krcg.org"
@@ -18,6 +19,8 @@ NAME = "primogen"
 # frankfurt has no port registry: 8040 is the engine's (zero-vtes), 8030 the forum's, 7007-9008 archon's
 PORT = 8050
 OPT = f"/opt/{NAME}"
+# the GitHub App filing vtes_feedback's reports; its key is in secrets.sops.yaml
+APP_CLIENT_ID = "Iv23liWtGTsLHMrGaGvD"
 
 # A certificate request for a name that does not resolve here fails, and Let's Encrypt counts
 # every failed validation against its hourly limit.
@@ -40,6 +43,8 @@ digest = hashlib.sha256((dist / NAME).read_bytes()).hexdigest()[:16]
 # pyinfra diffs any file it replaces, and a binary does not diff: each build lands in a new directory.
 binary = f"{OPT}/{digest}/{NAME}"
 files.put(name="Upload primogen", src=str(dist / NAME), dest=binary, mode="755")
+secrets = load(str(REPO / "secrets.sops.yaml"))
+key = put_secret(name="GitHub App key", content=secrets["github_app_key"], dest=f"/etc/{NAME}/github-app.pem")
 
 unit = files.put(
     name="Install primogen.service",
@@ -49,7 +54,8 @@ After=network-online.target
 Wants=network-online.target
 
 [Service]
-ExecStart={binary} serve -addr 127.0.0.1:{PORT} -bundle /var/lib/{NAME}/bundle.json.gz
+ExecStart={binary} serve -addr 127.0.0.1:{PORT} -bundle /var/lib/{NAME}/bundle.json.gz -github-app {APP_CLIENT_ID} -github-key ${{CREDENTIALS_DIRECTORY}}/github-app.pem
+LoadCredential=github-app.pem:/etc/{NAME}/github-app.pem
 DynamicUser=yes
 StateDirectory={NAME}
 Restart=always
@@ -69,7 +75,7 @@ systemd.service(
     name="Restart primogen",
     service=f"{NAME}.service",
     restarted=True,
-    _if=lambda: unit.did_change() and not started.did_change(),
+    _if=lambda: (unit.did_change() or key.did_change()) and not started.did_change(),
 )
 server.shell(
     name="Drop older builds",
