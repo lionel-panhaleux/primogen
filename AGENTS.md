@@ -75,15 +75,17 @@ trailer; upkeep reads them.
 
 `vtes_cards`, the four rules tools (`vtes_rules_case`,
 `vtes_rules_search`, `vtes_rules_read`, `vtes_rulings_archive`),
-`vtes_deck` (a list validated, its crypt, library, modules and their odds in a hand, combat posture, costs, budgets and blood and pool sources beside its reference decks, track record and relatives computed) and
-`vtes_card_stats` (a card's play rates, companions and competitors for its slot) hosted at
-`https://mcp.krcg.org/mcp` and refreshing themselves (not announced yet), and
-from a local install (`primogen stdio`) downloading the published bundle;
+`vtes_deck` (a list validated, its crypt, library, modules and their odds in a hand, combat posture, costs, budgets and blood and pool sources beside its reference decks, track record and relatives computed),
+`vtes_card_stats` (a card's play rates, companions and competitors for its slot),
 `vtes_meta` (the archetypes' shares of the latest window, the decks since
-the labels placed by similarity, the unplaced share stated) in `main`, live
-from the next release, the build proposing new archetypes from the unplaced
-decks for the owner to name. Cards, rules and the deck are done; the meta is
+the labels placed by similarity, the unplaced share stated) and
+`vtes_feedback` (a user's report on an answer filed as a public `feedback`
+issue, which `/intake` reads) hosted at
+`https://mcp.krcg.org/mcp` and refreshing themselves (not announced yet), and
+from a local install (`primogen stdio`) downloading the published bundle,
+the build proposing new archetypes from the unplaced decks for the owner to
+name. Cards, rules and the deck are done; the meta is
 the open milestone, its graded session next, and the announcement waits for
-it and for a feedback tool. From a checkout:
+it. From a checkout:
 `primogen build`, then `primogen query` or `primogen stdio` with
 `-bundle data/bundle.json.gz`. The board holds the next lines.

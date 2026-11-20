@@ -14,8 +14,8 @@ of real questions ([product.md](product.md) "Evaluation").
 Served at `mcp.krcg.org`, not announced. Ends when the owner announces it
 to the community; real users change the ranking and may change the harness.
 The announcement waits for M:meta, so it covers the three questions of
-[product.md](product.md), and for a feedback tool that turns what users
-report into issues intake reads (owner, 2026-11-20).
+[product.md](product.md) (owner, 2026-11-20); `vtes_feedback` turns what
+users report into the issues `/intake` reads.
 
 ## Ranking
 
