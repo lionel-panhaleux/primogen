@@ -166,8 +166,11 @@ func TestArchonLoginAndExport(t *testing.T) {
 		`{"type":"user","data":{"uid":"019f6a5e-d1e6-7347-965e-4dac09bf03a4","vekn_id":"3200340","country":"FR","city":"Paris","roles":["IC","Prince"],"wins":["019fea18-1364-7549-8f9a-70dcc09a03d9"],"constructed_offline":{"total":180,"tournaments":[{"tournament_uid":"019fea18-1364-7549-8f9a-70dcc09a03d9","tournament_name":"Malmö Unbound","date":"2026-06-13","player_count":13,"rank":"","vp":6.5,"gw":2,"finalist_position":1,"points":180,"position":1}]},"community_links":[{"url":"https://codex-of-the-damned.org","type":"website","label":"Codex of the Damned","languages":["en","fr"],"moderation":"global"},{"url":"https://secret.example.com","type":"other","label":"Hidden Link","moderation":"hidden"}]}}`,
 		`{"type":"user","data":{"uid":"019f6a5e-d5dd-74b9-9aab-00919d4de7dc","vekn_id":"1002345","country":"SE","city":"Malmö","roles":["Prince"],"wins":[],"constructed_offline":{"total":120,"tournaments":[]},"community_links":[{"url":"https://vekn.se","type":"website","label":"VEKN Sweden","country":"SE","moderation":"national"}]}}`,
 		`{"type":"tournament","data":{"uid":"019fea18-1364-7549-8f9a-70dcc09a03d9","name":"Malmö Unbound","format":"Standard","rank":"","start":"2026-06-13T10:00:00","finish":"2026-06-13T18:00:00","timezone":"Europe/Stockholm","country":"SE","city":"Malmö","league_uid":"019fe07a-b107-7465-9968-122ceb6d67d1","state":"Finished","event_code":"MU-2606","external_ids":{"vekn":"13370"},"organizers_uids":["019f6a5e-d5dd-74b9-9aab-00919d4de7dc"],"winner":"019f6a5e-d1e6-7347-965e-4dac09bf03a4","standings":[{"user_uid":"019f6a5e-d1e6-7347-965e-4dac09bf03a4","gw":2,"vp":6.5,"tp":114,"finalist":true},{"user_uid":"019f6a5e-d5dd-74b9-9aab-00919d4de7dc","gw":1,"vp":5.0,"tp":108,"finalist":true}],"players":[{"user_uid":"019f6a5e-d1e6-7347-965e-4dac09bf03a4","state":"Finished","result":{"gw":2,"vp":6.5,"tp":114},"finalist":true},{"user_uid":"019f6a5e-d5dd-74b9-9aab-00919d4de7dc","state":"Finished","result":{"gw":1,"vp":5.0,"tp":108},"finalist":true}],"reported_player_count":13}}`,
+		`{"type":"tournament","data":{"uid":"019fe500-2222-7549-8f9a-70dcc09a03d9","name":"Paris Spring Open","format":"Standard","rank":"","start":"2026-05-10T10:00:00","finish":"2026-05-10T18:00:00","timezone":"Europe/Paris","country":"FR","city":"Paris","state":"Finished","event_code":"PS-2605","winner":"019f6a5e-d5dd-74b9-9aab-00919d4de7dc","reported_player_count":16}}`,
 		`{"type":"tournament","data":{"uid":"019ff0c2-51e8-7a6d-b58c-4e9a2f7d1c03","name":"French National Championship","format":"Standard","rank":"National Championship","start":"2026-09-20T10:00:00","timezone":"Europe/Paris","country":"FR","city":"Paris","state":"Planned","event_code":"FR-NC-26","players":[]}}`,
 		fmt.Sprintf(`{"type":"deck","data":{"uid":"019f6a65-01d4-7214-bcc9-4e46534b9d62","tournament_uid":"019fea18-1364-7549-8f9a-70dcc09a03d9","user_uid":"019f6a5e-d1e6-7347-965e-4dac09bf03a4","name":"Malmö Haqim","comments":"Archon winner comment.","cards":%s,"attribution":{"kind":"Owner"},"winner":true}}`, cardsJSON),
+		`{"type":"deck","data":{"uid":"019f6a65-1111-7214-bcc9-4e46534b9d62","tournament_uid":"019fea18-1364-7549-8f9a-70dcc09a03d9","user_uid":"019f6a5e-d5dd-74b9-9aab-00919d4de7dc","name":"Malmö Finalist Brew","comments":"Finalist deck.","cards":{"100001":1,"200001":1},"attribution":{"kind":"Owner"},"winner":false}}`,
+		fmt.Sprintf(`{"type":"deck","data":{"uid":"019f6a65-2222-7214-bcc9-4e46534b9d62","tournament_uid":"019fe500-2222-7549-8f9a-70dcc09a03d9","user_uid":"019f6a5e-d5dd-74b9-9aab-00919d4de7dc","name":"Paris Haqim","comments":"Winner-only event deck.","cards":%s,"attribution":{"kind":"Owner"},"winner":true}}`, cardsJSON),
 		`{"type":"league","data":{"uid":"019fe07a-b107-7465-9968-122ceb6d67d1","name":"Nordic Chapter 2026","kind":"League","standings_mode":"GP","format":"Standard","country":"SE","start":"2026-01-01","finish":"2026-12-31","organizers_uids":["019f6a5e-d5dd-74b9-9aab-00919d4de7dc"]}}`,
 	}
 	up.setExport(2, "2026-11-20T09:15:00.000000", lines, len(lines))
@@ -195,7 +198,7 @@ func TestArchonLoginAndExport(t *testing.T) {
 	}
 	statusBody, _ := io.ReadAll(resp.Body)
 	resp.Body.Close()
-	if !strings.Contains(string(statusBody), "Archon export: 2026-11-20 09:15 UTC (2 tournaments, 1 decks, 2 members, 1 leagues); last refresh 2026-11-20 09:20 UTC: ok.") {
+	if !strings.Contains(string(statusBody), "Archon export: 2026-11-20 09:15 UTC (3 tournaments, 3 decks, 2 members, 1 leagues); last refresh 2026-11-20 09:20 UTC: ok.") {
 		t.Fatalf("unexpected /status:\n%s", statusBody)
 	}
 	pubResp, err := http.Get(hosted.URL + "/bundle.json.gz")
@@ -246,6 +249,12 @@ func TestArchonLoginAndExport(t *testing.T) {
 	}
 	if text, isErr := callTool(anonCS, "vtes_deck", map[string]any{"deck": "https://archon.vekn.net/tournaments/MU-2606"}); !isErr || !strings.Contains(text, "logged-in VEKN members only") {
 		t.Fatalf("expected unauthenticated vtes_deck Archon link refusal, got isErr=%v:\n%s", isErr, text)
+	}
+	if text, isErr := callTool(anonCS, "vtes_meta", map[string]any{}); isErr ||
+		!strings.Contains(text, "full-field play share against win share requires Archon login at https://mcp.krcg.org/mcp") ||
+		strings.Contains(text, "## Full-field play against win share (Archon)") ||
+		strings.Contains(text, "archon.vekn.net export") {
+		t.Fatalf("unauthenticated vtes_meta: isErr=%v\n%s", isErr, text)
 	}
 	var stdout, stderr strings.Builder
 	if err := run(ctx, []string{"query", "-bundle", testBundle, "-rankings", "events"}, &stdout, &stderr); err == nil || !strings.Contains(err.Error(), "logged-in VEKN members only") {
@@ -389,6 +398,22 @@ func TestArchonLoginAndExport(t *testing.T) {
 			!strings.Contains(text, "Haqim Royalty") {
 			t.Fatalf("vtes_deck(%q): isErr=%v\n%s", target, isErr, text)
 		}
+	}
+
+	if text, isErr := callTool(memberCS, "vtes_meta", map[string]any{}); isErr ||
+		!strings.Contains(text, "## Full-field play against win share (Archon)") ||
+		!strings.Contains(text, "1 of 2 finished Archon tournaments (13 players in all) published decklists beyond the winner: 2 published decks (1 winners, 1 other decks)") ||
+		!strings.Contains(text, "| 1 | **Haqim Royalty** (C1) | 50.0% | 1 | 100.0% | 1 | 100.0% |") ||
+		!strings.Contains(text, "| | near no archetype | 50.0% | 1 | 0.0% | 0 | 0.0% |") ||
+		!strings.Contains(text, "archon.vekn.net export 2026-11-20 09:15 UTC") {
+		t.Fatalf("member vtes_meta: isErr=%v\n%s", isErr, text)
+	}
+	if text, isErr := callTool(memberCS, "vtes_meta", map[string]any{"archetype": "Haqim Royalty"}); isErr ||
+		!strings.Contains(text, "Full-field (Archon, 1 events with decklists beyond the winner, 2 published decks, 1 wins): play share 50.0% (1 decks), win share 100.0% (1 wins), conversion 100.0%.") ||
+		!strings.Contains(text, "Its published Archon decks in the window, of 2:") ||
+		!strings.Contains(text, "019f6a65-01d4-7214-bcc9-4e46534b9d62, Malmö Haqim: won by VEKN 3200340 at Malmö Unbound (MU-2606)") ||
+		!strings.Contains(text, "019f6a65-2222-7214-bcc9-4e46534b9d62, Paris Haqim: won by VEKN 1002345 at Paris Spring Open (PS-2605)") {
+		t.Fatalf("member vtes_meta(Haqim Royalty): isErr=%v\n%s", isErr, text)
 	}
 
 	ts, err := oauthHandler.TokenSource(ctx)

@@ -82,7 +82,9 @@ failing check) says so in a `Friction:` trailer; upkeep reads them.
 `vtes_deck` (a list validated, its crypt, library, modules and their odds in a hand, combat posture, costs, budgets and blood and pool sources beside its reference decks, track record and relatives computed),
 `vtes_card_stats` (a card's play rates, companions and competitors for its slot),
 `vtes_meta` (the archetypes' shares of the latest window, the decks since
-the labels placed by similarity, the unplaced share stated),
+the labels placed by similarity, the unplaced share stated, and with Archon
+login, full-field play share against win share and conversion across the
+events that published decklists beyond the winner),
 `vtes_events` (community links for everyone; with Archon OAuth login,
 tournaments, standings, published decklists, rating rankings, a member's
 ratings, known wins, tournament history and decks by VEKN ID, and leagues,

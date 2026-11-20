@@ -53,10 +53,11 @@ func addMeta(s *mcp.Server, l *Live) {
 		Description: "Call before any claim about the Vampire: The Eternal Struggle (VTES) meta: never say an archetype is popular, rising or dominant from memory. " +
 			"Returns the archetypes' shares of the tournament-winning decks (TWDA) of the latest window, weighted by event size, " +
 			"with the share in no archetype stated; what rises and falls against the previous window and the cards behind the move; " +
-			"each leading archetype's core cards. With an archetype: its share over time, its core cards and its representative and newest decks.",
+			"each leading archetype's core cards; and for a logged-in VEKN member, full-field play share against win share and conversion across the window's Archon events that published decklists beyond the winner. " +
+			"With an archetype: its share over time, its core cards and its representative and newest decks.",
 		InputSchema: metaSchema,
 		Annotations: &mcp.ToolAnnotations{ReadOnlyHint: true, IdempotentHint: true, OpenWorldHint: new(false)},
-	}, func(ctx context.Context, _ *mcp.CallToolRequest, in metaInput) (*mcp.CallToolResult, any, error) {
+	}, func(ctx context.Context, req *mcp.CallToolRequest, in metaInput) (*mcp.CallToolResult, any, error) {
 		d := l.p.Load()
 		if d.rel == nil {
 			return nil, nil, fmt.Errorf("this data bundle holds no archetype labels, built before it carried them: no meta until it is rebuilt")
@@ -74,15 +75,23 @@ func addMeta(s *mcp.Server, l *Live) {
 				return nil, nil, err
 			}
 		}
+		member := MemberFrom(req) != ""
+		var archon *Archon
+		if member {
+			archon = l.Archon()
+		}
 		var out strings.Builder
 		if arch == nil {
-			writeMeta(&out, d, m, months, in.Detail)
+			writeMeta(&out, d, m, archon, member, months, in.Detail)
 		} else {
-			writeArchetype(&out, d, m, arch, months, in.Detail)
+			writeArchetype(&out, d, m, archon, member, arch, months, in.Detail)
 		}
 		out.WriteString("## How to answer\n\n" +
-			"Read the meta from these figures: name the window, say the decks won their events (what wins, not what is played) and give the share in no archetype. " +
-			"Call vtes_meta with an archetype for its core and its decks, vtes_deck with a deck's id for its list, vtes_card_stats for a card's play rates, " +
+			"Read the meta from these figures: name the window, say the TWDA decks won their events (what wins, not what is played) and give the share in no archetype. ")
+		if archon != nil {
+			out.WriteString("Where the full-field Archon section is present, distinguish play share and conversion across the events that published decklists beyond the winner from TWDA win share across all reported winners. ")
+		}
+		out.WriteString("Call vtes_meta with an archetype for its core and its decks, vtes_deck with a deck's id for its list, vtes_card_stats for a card's play rates, " +
 			"vtes_cards for any card the answer relies on.\n\n")
 		if p := strings.TrimSpace(d.b.MetaReading); p != "" {
 			out.WriteString(p)
@@ -91,7 +100,11 @@ func addMeta(s *mcp.Server, l *Live) {
 		}
 		out.WriteString("\n\n")
 		out.WriteString("Answer from these figures, never from memory of the meta. Where they do not settle a point, say so rather than filling the gap.\n\n")
-		out.WriteString(DataLine(d.b))
+		if archon != nil {
+			out.WriteString(ArchonDataLine(d.b, archon))
+		} else {
+			out.WriteString(DataLine(d.b))
+		}
 		return &mcp.CallToolResult{Content: []mcp.Content{&mcp.TextContent{Text: out.String()}}}, nil, nil
 	})
 }
@@ -239,7 +252,7 @@ func featureName(f string) string {
 	return strings.TrimPrefix(f, "l:")
 }
 
-func writeWindow(out *strings.Builder, d *data, cur, prev *tally, months int) {
+func writeWindow(out *strings.Builder, d *data, cur, prev *tally, archon *Archon, member bool, months int) {
 	r := d.rel
 	c := r.Class
 	length := fmt.Sprintf("%d months", months)
@@ -253,18 +266,213 @@ func writeWindow(out *strings.Builder, d *data, cur, prev *tally, months int) {
 	if n := cur.unweighted + prev.unweighted; n > 0 {
 		fmt.Fprintf(out, " %d of these decks have no player count and weigh nothing.", n)
 	}
-	out.WriteString(" These decks won: a share says what wins, not what is played, and the full field is not served.\n")
+	switch {
+	case archon != nil:
+		out.WriteString(" These decks won: their share says what wins across the TWDA; the full-field section below sets play share against win share over the Archon events that published decklists beyond the winner.\n")
+	case member:
+		out.WriteString(" These decks won: a share says what wins, not what is played; the Archon export is not loaded on this server yet, so full-field play share against win share is not available right now.\n")
+	default:
+		out.WriteString(" These decks won: a share says what wins, not what is played; full-field play share against win share requires Archon login at https://mcp.krcg.org/mcp.\n")
+	}
 	fmt.Fprintf(out, "Archetypes: codex-of-the-damned's labels (codex-of-the-damned.org), by its maintainer, pass of %s, curated and revisable, "+
 		"a variant counted in its archetype. A deck the labels lack (most since that pass, some before it) is placed in its nearest archetype "+
 		"when at %.2f or more from it, the bar vtes_deck uses, which 95 in 100 of an archetype's own decks reach.\n\n", c.Pass(), r.Threshold)
 }
 
-func writeMeta(out *strings.Builder, d *data, m *metaData, months int, detail bool) {
+type fieldShare struct {
+	played, wins int
+}
+
+type fieldDeck struct {
+	deck         *ArchonDeck
+	tour         *ArchonTournament
+	arch         *bundle.Archetype
+	sim          float64
+	won          bool
+	beyondWinner bool
+}
+
+type fieldTally struct {
+	finishedEvents  int
+	events, players int
+	decks, wins     int
+	groups, roots   map[*bundle.Archetype]*fieldShare
+	none            fieldShare
+	windowDecks     []fieldDeck
+}
+
+func (ft *fieldTally) of(a *bundle.Archetype) fieldShare {
+	s := ft.groups[a]
+	if a.VariantOf == "" {
+		s = ft.roots[a]
+	}
+	if s == nil {
+		return fieldShare{}
+	}
+	return *s
+}
+
+func (ft *fieldTally) playPct(n int) float64 {
+	if ft.decks == 0 {
+		return 0
+	}
+	return 100 * float64(n) / float64(ft.decks)
+}
+
+func (ft *fieldTally) winPct(n int) float64 {
+	if ft.wins == 0 {
+		return 0
+	}
+	return 100 * float64(n) / float64(ft.wins)
+}
+
+func convPct(wins, played int) float64 {
+	if played == 0 {
+		return 0
+	}
+	return 100 * float64(wins) / float64(played)
+}
+
+func (d *data) fieldTally(a *Archon, s span) *fieldTally {
+	if a == nil {
+		return nil
+	}
+	r := d.rel
+	ft := &fieldTally{
+		groups: map[*bundle.Archetype]*fieldShare{},
+		roots:  map[*bundle.Archetype]*fieldShare{},
+	}
+	for i := range a.Tournaments {
+		t := &a.Tournaments[i]
+		if t.State != "Finished" || !s.holds(t.StartDate()) {
+			continue
+		}
+		ft.finishedEvents++
+		tDecks := a.DecksByTournament[t.UID]
+		if len(tDecks) == 0 {
+			continue
+		}
+		beyondWinner, hasMarkedWinner := false, false
+		for _, ad := range tDecks {
+			if ad.Winner {
+				hasMarkedWinner = true
+			} else if t.Winner == "" || ad.UserUID != t.Winner {
+				beyondWinner = true
+			}
+		}
+		if beyondWinner {
+			ft.events++
+			ft.players += t.PlayerCount()
+		}
+		eventWon := false
+		for _, ad := range tDecks {
+			won := ad.Winner || (!hasMarkedWinner && t.Winner != "" && ad.UserUID == t.Winner)
+			if won && eventWon {
+				won = false
+			}
+			if won {
+				eventWon = true
+			}
+			var arch *bundle.Archetype
+			var sim float64
+			if v := r.Vector(ad.DeckCards()); !v.Empty() {
+				if best := r.Archetypes(v, "", 1); len(best) > 0 {
+					sim = best[0].Similarity
+					if sim >= r.Threshold {
+						arch = &r.Class.Archetypes[best[0].Index]
+					}
+				}
+			}
+			ft.windowDecks = append(ft.windowDecks, fieldDeck{
+				deck:         ad,
+				tour:         t,
+				arch:         arch,
+				sim:          sim,
+				won:          won,
+				beyondWinner: beyondWinner,
+			})
+			if !beyondWinner {
+				continue
+			}
+			ft.decks++
+			if won {
+				ft.wins++
+			}
+			if arch == nil {
+				ft.none.played++
+				if won {
+					ft.none.wins++
+				}
+				continue
+			}
+			for _, x := range []struct {
+				shares map[*bundle.Archetype]*fieldShare
+				a      *bundle.Archetype
+			}{{ft.groups, arch}, {ft.roots, r.Root(arch)}} {
+				if x.shares[x.a] == nil {
+					x.shares[x.a] = &fieldShare{}
+				}
+				x.shares[x.a].played++
+				if won {
+					x.shares[x.a].wins++
+				}
+			}
+		}
+	}
+	return ft
+}
+
+func (ft *fieldTally) ranked(cur *tally) []*bundle.Archetype {
+	return slices.SortedFunc(maps.Keys(ft.roots), func(a, b *bundle.Archetype) int {
+		sa, sb := ft.roots[a], ft.roots[b]
+		return cmp.Or(sb.played-sa.played, sb.wins-sa.wins, cur.of(b).players-cur.of(a).players, strings.Compare(a.Name, b.Name))
+	})
+}
+
+func writeField(out *strings.Builder, r *bundle.Relatives, cur *tally, ft *fieldTally, shown int) {
+	if ft == nil {
+		return
+	}
+	out.WriteString("## Full-field play against win share (Archon)\n\n")
+	if ft.events == 0 {
+		fmt.Fprintf(out, "Of %d finished Archon tournaments in the window, none published decklists beyond the winner.\n\n", ft.finishedEvents)
+		return
+	}
+	placed := ft.decks - ft.none.played
+	fmt.Fprintf(out, "In the window, %d of %d finished Archon tournaments (%d players in all) published decklists beyond the winner: "+
+		"%d published decks (%d winners, %d other decks). Placed by similarity at %.2f or more: %d decks (%.0f%% of the field) in an archetype, "+
+		"and **%d decks (%.0f%%) near no archetype** (%d wins).\n\n",
+		ft.events, ft.finishedEvents, ft.players, ft.decks, ft.wins, ft.decks-ft.wins, r.Threshold,
+		placed, ft.playPct(placed), ft.none.played, ft.playPct(ft.none.played), ft.none.wins)
+	ranked := ft.ranked(cur)
+	out.WriteString("| # | Archetype | Play share | Played | Win share (these events) | Wins | Conversion | TWDA win share |\n|---|---|---|---|---|---|---|---|\n")
+	for i, a := range ranked[:min(len(ranked), shown)] {
+		s := ft.of(a)
+		fmt.Fprintf(out, "| %d | %s | %.1f%% | %d | %.1f%% | %d | %.1f%% | %.1f%% |\n",
+			i+1, archetypeName(r, a), ft.playPct(s.played), s.played, ft.winPct(s.wins), s.wins, convPct(s.wins, s.played), cur.pct(cur.of(a).players))
+	}
+	if rest := ranked[min(len(ranked), shown):]; len(rest) > 0 {
+		played, wins := 0, 0
+		for _, a := range rest {
+			s := ft.of(a)
+			played += s.played
+			wins += s.wins
+		}
+		fmt.Fprintf(out, "| | %d more archetypes (detail lists more) | %.1f%% together | %d | %.1f%% together | %d | %.1f%% | |\n",
+			len(rest), ft.playPct(played), played, ft.winPct(wins), wins, convPct(wins, played))
+	}
+	fmt.Fprintf(out, "| | near no archetype | %.1f%% | %d | %.1f%% | %d | %.1f%% | %.1f%% |\n\n",
+		ft.playPct(ft.none.played), ft.none.played, ft.winPct(ft.none.wins), ft.none.wins, convPct(ft.none.wins, ft.none.played),
+		cur.pct(cur.noise.players+cur.none.players))
+}
+
+func writeMeta(out *strings.Builder, d *data, m *metaData, archon *Archon, member bool, months int, detail bool) {
 	r := d.rel
 	shown := metaShown[detail]
 	cur, prev := d.tally(m, m.span(months, 0)), d.tally(m, m.span(months, 1))
+	ft := d.fieldTally(archon, cur.span)
 	out.WriteString("# The meta among tournament-winning decks\n\n")
-	writeWindow(out, d, cur, prev, months)
+	writeWindow(out, d, cur, prev, archon, member, months)
 
 	labelled, placed := 0, 0
 	for _, s := range cur.roots {
@@ -306,6 +514,7 @@ func writeMeta(out *strings.Builder, d *data, m *metaData, months int, detail bo
 		fmt.Fprintf(out, "Their variants' decks in the window: %s.\n\n", strings.Join(variants, "; "))
 	}
 
+	writeField(out, r, cur, ft, shown.archetypes)
 	writeMoves(out, r, cur, prev, shown.moves)
 	writeCardMoves(out, cur, prev, shown.cards)
 
@@ -466,10 +675,11 @@ func coreLine(cards []coreCard, of, n int) string {
 	return strings.Join(parts, ", ")
 }
 
-func writeArchetype(out *strings.Builder, d *data, m *metaData, a *bundle.Archetype, months int, detail bool) {
+func writeArchetype(out *strings.Builder, d *data, m *metaData, archon *Archon, member bool, a *bundle.Archetype, months int, detail bool) {
 	r := d.rel
 	shown := metaShown[detail]
 	cur, prev := d.tally(m, m.span(months, 0)), d.tally(m, m.span(months, 1))
+	ft := d.fieldTally(archon, cur.span)
 	root := r.Root(a)
 	fmt.Fprintf(out, "# %s in the meta\n\n", archetypeName(r, a))
 	var variants []string
@@ -481,7 +691,7 @@ func writeArchetype(out *strings.Builder, d *data, m *metaData, a *bundle.Archet
 	if len(variants) > 0 {
 		fmt.Fprintf(out, "Its variants, counted with it: %s.\n\n", strings.Join(variants, ", "))
 	}
-	writeWindow(out, d, cur, prev, months)
+	writeWindow(out, d, cur, prev, archon, member, months)
 
 	out.WriteString("## Share\n\n")
 	c, p := cur.of(a), prev.of(a)
@@ -494,6 +704,15 @@ func writeArchetype(out *strings.Builder, d *data, m *metaData, a *bundle.Archet
 		fmt.Fprintf(out, ", of %s's %.1f%%", root.Name, cur.pct(cur.of(root).players))
 	}
 	fmt.Fprintf(out, ". Previous window: %.1f%%, %d decks. Change: %+.1f points.\n\n", prev.pct(p.players), p.decks, cur.pct(c.players)-prev.pct(p.players))
+	if ft != nil {
+		if ft.events == 0 {
+			fmt.Fprintf(out, "Full-field (Archon): of %d finished tournaments in the window, none published decklists beyond the winner.\n\n", ft.finishedEvents)
+		} else {
+			fs := ft.of(a)
+			fmt.Fprintf(out, "Full-field (Archon, %d events with decklists beyond the winner, %d published decks, %d wins): play share %.1f%% (%d decks), win share %.1f%% (%d wins), conversion %.1f%%.\n\n",
+				ft.events, ft.decks, ft.wins, ft.playPct(fs.played), fs.played, ft.winPct(fs.wins), fs.wins, convPct(fs.wins, fs.played))
+		}
+	}
 	fmt.Fprintf(out, "Over the whole windows of %d months since the labels' window opened, oldest first:\n", months)
 	var history []string
 	for back := 0; !m.span(months, back).from.Before(m.since); back++ {
@@ -569,12 +788,36 @@ func writeArchetype(out *strings.Builder, d *data, m *metaData, a *bundle.Archet
 		return cmp.Or(strings.Compare(r.Decks[y].Date, r.Decks[x].Date), r.Decks[y].Players-r.Decks[x].Players)
 	})
 	if len(newest) == 0 {
-		out.WriteString("\nNo deck of it won in the window.\n\n")
-		return
+		out.WriteString("\nNo deck of it won in the window.\n")
+	} else {
+		fmt.Fprintf(out, "\nIts newest decks in the window, of %d:\n", len(newest))
+		for _, i := range newest[:min(len(newest), shown.decks)] {
+			deckLine(i)
+		}
 	}
-	fmt.Fprintf(out, "\nIts newest decks in the window, of %d:\n", len(newest))
-	for _, i := range newest[:min(len(newest), shown.decks)] {
-		deckLine(i)
+	if ft != nil {
+		var archonDecks []fieldDeck
+		for _, fd := range ft.windowDecks {
+			if fd.arch != nil && (fd.arch == a || r.Root(fd.arch) == a) {
+				archonDecks = append(archonDecks, fd)
+			}
+		}
+		slices.SortStableFunc(archonDecks, func(x, y fieldDeck) int {
+			return cmp.Or(strings.Compare(y.tour.StartDate(), x.tour.StartDate()), y.tour.PlayerCount()-x.tour.PlayerCount(), strings.Compare(x.deck.UID, y.deck.UID))
+		})
+		if len(archonDecks) > 0 {
+			fmt.Fprintf(out, "\nIts published Archon decks in the window, of %d:\n", len(archonDecks))
+			for _, fd := range archonDecks[:min(len(archonDecks), shown.decks)] {
+				verb := "played by"
+				if fd.won {
+					verb = "won by"
+				}
+				fmt.Fprintf(out, "- %s, %s: %s %s at %s (%s), %s, %s, %d players. Placed by similarity in %s (%.2f).\n",
+					fd.deck.UID, cmp.Or(fd.deck.Name, "(unnamed)"), verb, archon.VEKN(fd.deck.UserUID),
+					fd.tour.Name, cmp.Or(fd.tour.EventCode, fd.tour.UID), cmp.Or(fd.tour.Place(), "no location"), fd.tour.StartDate(), fd.tour.PlayerCount(),
+					archetypeName(r, fd.arch), fd.sim)
+			}
+		}
 	}
 	out.WriteString("\n")
 }
