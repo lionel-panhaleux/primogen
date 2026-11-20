@@ -14,7 +14,7 @@ One file per graded exchange:
 date: 2026-08-25
 mode: rules | analysis | advice
 answered-by: primogen <short commit> | vtes-skill <short commit>
-model: <only when not the default model of the session>
+model: <model name; omitted on older entries answered by the default model>
 status: graded | candidate | retired
 regression: yes | no
 settled-by: <what settles it: rulebook or advanced rules section titles, ruling references, or "owner's grade">

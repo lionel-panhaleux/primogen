@@ -32,6 +32,7 @@ reasoning die with their task. Every page is reachable from here.
 - [`../BOARD.md`](../BOARD.md): what must change. Nothing in these docs is an
   ask; nothing on the board is context.
 - The harness: [`../AGENTS.md`](../AGENTS.md), `.claude/skills/` (`intake`,
-  `ship`, `upkeep`, `sync`, `calibrate`), `.claude/agents/reviewer.md`.
+  `ship`, `upkeep`, `sync`, `calibrate`, symlinked at `.agents/skills`),
+  `.claude/agents/reviewer.md` and `.agents/agents/reviewer.md`.
 - [`../calibration/`](../calibration/README.md): the owner-graded corpus,
   its regression set, and the codex strategist's graded cases.

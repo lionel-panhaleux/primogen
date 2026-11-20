@@ -16,9 +16,11 @@ Every artifact has exactly one. What fits none is noise: delete it.
 - **Task context** (plans, findings, reasoning): dies with its task. A line
   in progress may keep its plan in `board/<slug>.md`, deleted with the line.
 
-No other tracker: no plan document, no TODO file, no TODO comment. Discovered
-work goes through `/intake` or is done now. No memory outside the repository
-(`autoMemoryEnabled` is off): a fact worth keeping goes in `docs/`.
+No other tracker: no plan document, no TODO file, no TODO comment, no plan
+artifact outside the repository. Discovered work goes through `/intake` or is
+done now. No memory outside the repository (`autoMemoryEnabled` is off; do not
+write agent memory or use `/learn`): a fact worth keeping goes in `docs/`, and
+`/upkeep` alone changes this harness.
 
 ## Start here
 
@@ -52,9 +54,11 @@ board here holds only the line that says what must exist upstream.
 
 ## Models
 
-Review and decisions on the strongest model (Fable 5.2: the `reviewer` agent
-is pinned to it). Implementation on Opus 5.5. A mechanical-edit agent on the
-cheapest model only once it is earned. The owner changes this, not a session.
+Review and decisions on the strongest model (Claude Code: Fable 5.2, which the
+`reviewer` agent is pinned to; Antigravity: the strongest model / `pro` tier).
+Implementation on Opus 5.5 in Claude Code, or the session's model in
+Antigravity. A mechanical-edit agent on the cheapest model only once it is
+earned. The owner changes this, not a session.
 
 ## Talking to the owner
 
@@ -66,10 +70,10 @@ ends the message.
 
 ## Commits
 
-Trunk-based: straight to `main`, no feature branch, no worktree. Describe the
-change itself. A commit that met friction (a correction by the owner, a
-second review round, a surprise, a failing check) says so in a `Friction:`
-trailer; upkeep reads them.
+Trunk-based: straight to `main`, no feature branch, no worktree (subagents stay
+on `workspace: "inherit"`). Describe the change itself. A commit that met
+friction (a correction by the owner, a second review round, a surprise, a
+failing check) says so in a `Friction:` trailer; upkeep reads them.
 
 ## Right now
 

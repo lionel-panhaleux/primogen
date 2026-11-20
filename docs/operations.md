@@ -193,7 +193,7 @@ pushed on its own.
   revision in use is named in the code's dependency on the Go SDK,
   `github.com/modelcontextprotocol/go-sdk`).
 - Libraries: the Context7 server, then the official pages.
-- Claude Code: `code.claude.com/docs`.
+- Claude Code: `code.claude.com/docs`; Antigravity: `antigravity.google/docs`.
 - The KRCG services: [sources.md](sources.md), then each service's own
   documentation (`api.krcg.org`, `api.archon.vekn.net/docs`,
   `engine.krcg.org/docs`).
