@@ -8,10 +8,4 @@ date or an outside event is not a line.
 
 ---
 
-- The deploy runs from CI: `mise run release` on a GitHub Actions
-  workflow, the server-setup deploy key decrypting `secrets.sops.yaml`
-  (added to `.sops.yaml`, `sops updatekeys`) and reaching frankfurt. Done
-  when: a release tagged from a workflow run deploys and `mcp.krcg.org`
-  reports its tag. Docs: operations.md (Secrets, Releases and deploys).
-
-<!-- completed-since-upkeep: 18 -->
+<!-- completed-since-upkeep: 19 -->
