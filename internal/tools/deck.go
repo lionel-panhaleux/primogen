@@ -1133,7 +1133,7 @@ func playable(c *bundle.Card, crypt []deckEntry, nCrypt int) string {
 		}
 	}
 	var able []string
-	n, superior := 0, 0
+	n, superior, elected := 0, 0, 0
 	for _, e := range crypt {
 		levels, ok := meets(c, e.card)
 		if !ok {
@@ -1142,6 +1142,10 @@ func playable(c *bundle.Card, crypt []deckEntry, nCrypt int) string {
 		name := copies(e)
 		if len(levels) > 0 {
 			name += " [" + strings.Join(levels, " ") + "]"
+		}
+		if electsPath(c, e.card) {
+			name += " electing the Path"
+			elected += e.count
 		}
 		if len(levels) == 1 && levels[0] == strings.ToUpper(levels[0]) {
 			superior += e.count
@@ -1155,10 +1159,13 @@ func playable(c *bundle.Card, crypt []deckEntry, nCrypt int) string {
 		line = head + ": none."
 	case len(c.Disciplines) == 1 && len(c.Clans) == 0 && c.Path == "":
 		line = fmt.Sprintf("%s: %d of %d, %d at superior (the crypt's [%s] line names them).", head, n, nCrypt, superior, strings.ToLower(c.Disciplines[0]))
-	case len(c.Disciplines) == 0 && n == nCrypt:
+	case len(c.Disciplines) == 0 && n == nCrypt && elected == 0:
 		line = fmt.Sprintf("%s: all %d.", head, nCrypt)
 	default:
 		line = fmt.Sprintf("%s: %d of %d: %s.", head, n, nCrypt, strings.Join(able, "; "))
+	}
+	if elected > 0 {
+		line += " " + electionNote
 	}
 	if m := reTextRequires.FindString(c.Text); m != "" {
 		line += fmt.Sprintf(" Its text also requires, unchecked here: %q", m)
@@ -1193,11 +1200,24 @@ func meets(c, v *bundle.Card) ([]string, bool) {
 }
 
 // clanAndPath says whether a crypt card has the clan and the path a library
-// card requires as the card data holds them.
+// card requires as the card data holds them, or can follow that path.
 func clanAndPath(c, v *bundle.Card) bool {
 	return (len(c.Clans) == 0 || slices.ContainsFunc(v.Clans, func(cl string) bool { return slices.Contains(c.Clans, cl) })) &&
-		(c.Path == "" || v.Path != "" && strings.Contains(c.Path, v.Path))
+		(c.Path == "" || v.Path != "" && strings.Contains(c.Path, v.Path) || electsPath(c, v))
 }
+
+// electsPath says whether crypt card v meets library card c's path only by
+// following it: a Sabbat vampire with no printed Path can, by the rulebook's
+// Paths of Enlightenment. The sect is the vampire text's first word.
+func electsPath(c, v *bundle.Card) bool {
+	return c.Path != "" && v.Path == "" && slices.Contains(v.Types, "Vampire") && reSabbat.MatchString(v.Text)
+}
+
+var reSabbat = regexp.MustCompile(`^(?:Advanced, )?Sabbat\b`)
+
+const electionRule = "a Sabbat vampire with no printed Path can burn 1 blood during your influence phase to follow a Sabbat Path, and follows only one (vtes_rules_read " + bundle.PathsSection + ")"
+
+var electionNote = "Electing the Path: " + electionRule + "."
 
 func copies(e deckEntry) string {
 	if e.count > 1 {

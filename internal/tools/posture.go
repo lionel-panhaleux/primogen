@@ -116,7 +116,7 @@ func answerNeeds(c *bundle.Card, level [][]string, crypt []deckEntry, nCrypt int
 	case nCrypt == 0:
 		line = ", needs " + strings.Join(needs, " and ") + ", unchecked without a crypt"
 	default:
-		n := 0
+		n, elected := 0, 0
 		for _, e := range crypt {
 			has := cryptDisciplines(e.card)
 			if clanAndPath(c, e.card) && (len(level) == 0 || slices.ContainsFunc(level, func(set []string) bool {
@@ -127,11 +127,17 @@ func answerNeeds(c *bundle.Card, level [][]string, crypt []deckEntry, nCrypt int
 				})
 			})) {
 				n += e.count
+				if electsPath(c, e.card) {
+					elected += e.count
+				}
 			}
 		}
-		if n == 0 {
+		switch {
+		case n == 0:
 			line = ", needs " + strings.Join(needs, " and ") + ": no crypt card here has it"
-		} else {
+		case elected > 0:
+			line = fmt.Sprintf(", needs %s: %d of %d crypt cards, %d of them electing the Path: %s", strings.Join(needs, " and "), n, nCrypt, elected, electionRule)
+		default:
 			line = fmt.Sprintf(", needs %s: %d of %d crypt cards", strings.Join(needs, " and "), n, nCrypt)
 		}
 	}

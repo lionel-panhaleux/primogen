@@ -13,9 +13,9 @@ of real questions ([product.md](product.md) "Evaluation").
 
 Served at `mcp.krcg.org`, not announced. Ends when the owner announces it
 to the community; real users change the ranking and may change the harness.
-The announcement waits for M:meta, so it covers the three questions of
-[product.md](product.md) (owner, 2026-11-20); `vtes_feedback` turns what
-users report into the issues `/intake` reads.
+The tools cover the three questions of [product.md](product.md), each
+through an owner-graded session; the announcement is the owner's to make.
+`vtes_feedback` turns what users report into the issues `/intake` reads.
 
 ## Ranking
 
@@ -31,11 +31,7 @@ At most three open, each named by what someone can do afterwards. A board
 line serving one carries its token; done is deleted. Opening one is the
 owner's decision.
 
-- **M:meta**: a player gets the current meta read with numbers. Done when
-  an owner-graded session of meta questions passes. `vtes_meta` reads the
-  archetype labels, the decks since the labels placed by their nearest
-  archetype, and the build proposes new archetypes from the decks still
-  unplaced, curated by the owner (owner, 2026-11-20).
+None open: the next is the owner's to open.
 
 ## Later, in this order unless the owner reorders
 

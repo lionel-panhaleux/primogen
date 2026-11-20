@@ -260,6 +260,43 @@ func writeOdds(out *strings.Builder, recipes []recipe, library, crypt []deckEntr
 	out.WriteString("\n")
 }
 
+// recipePath says whether crypt card v meets a held card of each group, and
+// the Path it must elect for it: one Path for every group that needs one,
+// since a vampire follows only one.
+func recipePath(r recipe, held map[*bundle.Card]int, v *bundle.Card) (string, bool) {
+	var paths []string // the Paths every group needing one allows; nil before the first
+	for _, group := range r {
+		var elect []string
+		direct := slices.ContainsFunc(group, func(c *bundle.Card) bool {
+			if _, ok := meets(c, v); held[c] == 0 || !ok {
+				return false
+			}
+			if electsPath(c, v) {
+				elect = append(elect, c.Path)
+				return false
+			}
+			return true
+		})
+		switch {
+		case direct:
+		case len(elect) == 0:
+			return "", false
+		case paths == nil:
+			paths = elect
+		default:
+			paths = slices.DeleteFunc(paths, func(p string) bool { return !slices.Contains(elect, p) })
+			if len(paths) == 0 {
+				return "", false
+			}
+		}
+	}
+	if len(paths) == 0 {
+		return "", true
+	}
+	slices.Sort(paths)
+	return strings.Join(slices.Compact(paths), " or "), true
+}
+
 // ableToPlay names the crypt cards having what a card the deck holds of each
 // group requires, with their levels in those cards' disciplines.
 func ableToPlay(r recipe, held map[*bundle.Card]int, crypt []deckEntry, nCrypt int) string {
@@ -279,11 +316,10 @@ func ableToPlay(r recipe, held map[*bundle.Card]int, crypt []deckEntry, nCrypt i
 		}
 	}
 	var able []string
-	n := 0
+	n, elected := 0, false
 	for _, e := range crypt {
-		if slices.ContainsFunc(r, func(group []*bundle.Card) bool {
-			return !slices.ContainsFunc(group, func(c *bundle.Card) bool { _, ok := meets(c, e.card); return held[c] > 0 && ok })
-		}) {
+		elects, ok := recipePath(r, held, e.card)
+		if !ok {
 			continue
 		}
 		name := copies(e)
@@ -296,6 +332,10 @@ func ableToPlay(r recipe, held map[*bundle.Card]int, crypt []deckEntry, nCrypt i
 		if len(levels) > 0 {
 			name += " [" + strings.Join(levels, " ") + "]"
 		}
+		if elects != "" {
+			name += " electing the Path of " + elects
+			elected = true
+		}
 		able = append(able, name)
 		n += e.count
 	}
@@ -303,5 +343,9 @@ func ableToPlay(r recipe, held map[*bundle.Card]int, crypt []deckEntry, nCrypt i
 	if n == 0 {
 		return head + ": none."
 	}
-	return fmt.Sprintf("%s: %d of %d: %s.", head, n, nCrypt, strings.Join(able, "; "))
+	line := fmt.Sprintf("%s: %d of %d: %s.", head, n, nCrypt, strings.Join(able, "; "))
+	if elected {
+		line += " " + electionNote
+	}
+	return line
 }

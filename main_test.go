@@ -477,6 +477,30 @@ func TestQueryDeck(t *testing.T) {
 			t.Errorf("the deck idea: missing %q in:\n%s", w, idea)
 		}
 	}
+	// a Sabbat vampire with no printed Path elects one; a vampire printed with another Path, or not Sabbat, does not
+	caine, err := query("-draft", "deck", "Soulgrinder", "Qawiyya el-Ghaduba", "Eulogio Sánchez de los Reyes", "Theo Bell (G2)")
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, w := range []string{
+		"and path Caine it requires (each effect's symbols in the text say which): 1 of 3: Qawiyya el-Ghaduba (G5) [POT] electing the Path. Electing the Path: a Sabbat vampire with no printed Path can burn 1 blood during your influence phase to follow a Sabbat Path, and follows only one (vtes_rules_read rulebook:paths-of-enlightenment).",
+		"Answered here by Soulgrinder, damage past Fortitude only, needs [POT] or [THA] and path Caine: 1 of 3 crypt cards, 1 of them electing the Path",
+	} {
+		if !strings.Contains(caine, w) {
+			t.Errorf("a Path elected: missing %q in:\n%s", w, caine)
+		}
+	}
+	// a recipe: a Path elected only where no held card is met without it, and one Path for every group
+	for _, tc := range []struct{ recipe, want string }{
+		{`[[["Soulgrinder"], ["Abuse of Power"]]]`, ": 1 of 3: Qawiyya el-Ghaduba (G5) [POT] electing the Path of Caine. Electing the Path: "},
+		{`[[["Soulgrinder", "Freak Drive"]]]`, ": 1 of 3: Qawiyya el-Ghaduba (G5) [FOR POT].\n"},
+		{`[[["Abuse of Power"], ["Forward Momentum"]]]`, ": none.\n"},
+	} {
+		out, err := query("-draft", "-together", tc.recipe, "deck", "Soulgrinder", "Abuse of Power", "Forward Momentum", "Freak Drive", "Qawiyya el-Ghaduba", "Eulogio Sánchez de los Reyes", "Theo Bell (G2)")
+		if err != nil || !strings.Contains(out, "gives what)"+tc.want) {
+			t.Errorf("a Path elected for %s: want %q in:\n%s (%v)", tc.recipe, tc.want, out, err)
+		}
+	}
 	if strings.Contains(idea[strings.Index(idea, "## Library by module"):strings.Index(idea, "## Relatives")], "per hand") {
 		t.Errorf("a density computed for a deck idea:\n%s", idea)
 	}
