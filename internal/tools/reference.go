@@ -137,8 +137,41 @@ func (d *data) windowMeasures() map[string]*measures {
 
 // reference are the decks a list is set beside, and what they are.
 type reference struct {
-	what  string
-	decks []*bundle.Deck
+	what      string
+	decks     []*bundle.Deck
+	archetype *bundle.Archetype // nil when the reference is no archetype
+}
+
+// hasVariants says whether another archetype varies a.
+func hasVariants(r *bundle.Relatives, a *bundle.Archetype) bool {
+	return slices.ContainsFunc(r.Class.Archetypes, func(o bundle.Archetype) bool { return o.VariantOf == a.Ref })
+}
+
+// cards are the list's copies by card, as deck cards, and its TWDA id or "".
+func (dk *deck) cards() (map[int]int, []bundle.DeckCard, string) {
+	here := map[int]int{}
+	var list []bundle.DeckCard
+	for _, e := range dk.entries {
+		here[e.card.ID] += e.count
+		list = append(list, bundle.DeckCard{ID: e.card.ID, Count: e.count})
+	}
+	id := ""
+	if dk.twda != nil {
+		id = dk.twda.ID
+	}
+	return here, list, id
+}
+
+// archetypeDecks are an archetype's decks of the window with its variants', id left out.
+func (d *data) archetypeDecks(a *bundle.Archetype, id string) []*bundle.Deck {
+	r := d.rel
+	var decks []*bundle.Deck
+	for _, t := range r.Decks {
+		if l := r.Label(t.ID); l != nil && t.ID != id && (l == a || r.Root(l) == a) {
+			decks = append(decks, t)
+		}
+	}
+	return decks
 }
 
 // referenceOf is the nearest archetype with its variants, when the list is
@@ -152,18 +185,12 @@ func (d *data) referenceOf(cards []bundle.DeckCard, id string) reference {
 		best := r.Archetypes(v, id, 1)[0]
 		if best.Similarity >= r.Threshold {
 			a := &r.Class.Archetypes[best.Index]
-			var decks []*bundle.Deck
-			for _, t := range r.Decks {
-				if l := r.Label(t.ID); l != nil && t.ID != id && (l == a || r.Root(l) == a) {
-					decks = append(decks, t)
-				}
-			}
-			if len(decks) >= referenceMin {
+			if decks := d.archetypeDecks(a, id); len(decks) >= referenceMin {
 				what := "its decks"
-				if slices.ContainsFunc(r.Class.Archetypes, func(o bundle.Archetype) bool { return o.VariantOf == a.Ref }) {
+				if hasVariants(r, a) {
 					what = "its decks and its variants'"
 				}
-				return reference{what: fmt.Sprintf("its nearest archetype, %s, %s among %s: %d decks", archetypeName(r, a), what, window, len(decks)), decks: decks}
+				return reference{what: fmt.Sprintf("its nearest archetype, %s, %s among %s: %d decks", archetypeName(r, a), what, window, len(decks)), decks: decks, archetype: a}
 			}
 		}
 		var decks []*bundle.Deck
@@ -194,26 +221,20 @@ func (d *data) referenceOf(cards []bundle.DeckCard, id string) reference {
 func (dk *deck) writeReference(out *strings.Builder, d *data, fit int) *reference {
 	out.WriteString("## Beside its reference\n\n")
 	_, _, _, nLibrary := dk.split()
-	switch {
-	case d.rel == nil:
+	if d.rel == nil {
 		out.WriteString("This data bundle holds no archetype labels: no reference until it is rebuilt.\n\n")
 		return nil
+	}
+	cards, list, id := dk.cards()
+	switch {
 	case dk.draft:
-		out.WriteString("A deck idea is not set beside winning lists: its sizes are not a list's.\n\n")
+		out.WriteString("A deck idea is not set beside winning lists: its sizes are not a list's.\n")
+		dk.writeNearestStaples(out, d, cards, list, id, fit)
+		out.WriteString("\n")
 		return nil
 	case nLibrary == 0:
 		out.WriteString("No library card given: nothing to set beside a reference.\n\n")
 		return nil
-	}
-	cards := map[int]int{}
-	var list []bundle.DeckCard
-	for _, e := range dk.entries {
-		cards[e.card.ID] += e.count
-		list = append(list, bundle.DeckCard{ID: e.card.ID, Count: e.count})
-	}
-	id := ""
-	if dk.twda != nil {
-		id = dk.twda.ID
 	}
 	ref := d.referenceOf(list, id)
 	all := d.windowMeasures()
@@ -268,12 +289,184 @@ func (dk *deck) writeReference(out *strings.Builder, d *data, fit int) *referenc
 		}
 	}
 	if fit > full {
-		out.WriteString("\nThe staples this list lacks and its cards few of the reference play are counted, not named, to fit this result.\n")
+		out.WriteString("\nThe reference's staples this list lacks and its cards few of the reference play are counted, not named, to fit this result.\n")
 	}
 	writeStaples(out, d, here, ms, plays, fit == full)
 	writeFew(out, d, here, ms, plays, fit == full)
+	if ref.archetype == nil {
+		dk.writeNearestStaples(out, d, cards, list, id, fit)
+	}
 	out.WriteString("\n")
 	return &ref
+}
+
+// bleedDefense is the section of modules.md whose cards count as defenses
+// beside the reactions.
+const bleedDefense = "Bleed defense"
+
+// nearerShown are the nearer archetypes too small to be a reference named.
+const nearerShown = 3
+
+// writeNearestStaples names, for a list set beside no archetype, the staples
+// it lacks of the nearest archetype large enough to be a reference.
+func (dk *deck) writeNearestStaples(out *strings.Builder, d *data, here map[int]int, list []bundle.DeckCard, id string, fit int) {
+	r := d.rel
+	out.WriteString("\n### Its nearest archetype's staples\n\n")
+	v := r.Vector(list)
+	if v.Empty() {
+		fmt.Fprintf(out, "No card of this list is played by %d or more of the window's decks: no archetype is near it.\n", r.Class.MinDF)
+		return
+	}
+	var nearer []string
+	for i, m := range r.Archetypes(v, id, len(r.Class.Archetypes)) {
+		a := &r.Class.Archetypes[m.Index]
+		decks := d.archetypeDecks(a, id)
+		if len(decks) < referenceMin {
+			if i == 0 && m.Similarity >= r.Threshold {
+				fmt.Fprintf(out, "This list is of %s, at %.2f from it (95 in 100 of an archetype's own decks are at %.2f or more from it), "+
+					"whose %d decks are too few to give staples (%d or more): no other archetype's staples are set beside it.\n",
+					archetypeName(r, a), m.Similarity, r.Threshold, len(decks), referenceMin)
+				return
+			}
+			nearer = append(nearer, fmt.Sprintf("%s at %.2f, %d decks", archetypeName(r, a), m.Similarity, len(decks)))
+			continue
+		}
+		with := ""
+		if hasVariants(r, a) {
+			with = " with its variants'"
+		}
+		fmt.Fprintf(out, "Its nearest archetype of %d decks or more: %s, at %.2f from this list, %d decks%s "+
+			"(95 in 100 of an archetype's own decks are at %.2f or more from it).", referenceMin, archetypeName(r, a), m.Similarity, len(decks), with, r.Threshold)
+		if len(nearer) > 0 {
+			if k := len(nearer); k > nearerShown {
+				nearer = append(nearer[:nearerShown], fmt.Sprintf("and %d more", k-nearerShown))
+			}
+			fmt.Fprintf(out, " Nearer but smaller: %s.", strings.Join(nearer, "; "))
+		}
+		if m.Similarity < r.Threshold {
+			out.WriteString(" This list is not of it: its staples are what the nearest established plan plays, options to weigh with what each costs the build, not fixes.")
+		}
+		out.WriteString("\n\n")
+		writeLacked(out, d, dk, here, decks, fit)
+		return
+	}
+	fmt.Fprintf(out, "No archetype holds %d decks or more of the window: no staples to set beside.\n", referenceMin)
+}
+
+// writeLacked names an archetype's staples a list holds no copy of, defenses
+// (reactions and the bleed defense modules' cards) first.
+func writeLacked(out *strings.Builder, d *data, dk *deck, here map[int]int, decks []*bundle.Deck, fit int) {
+	n := len(decks)
+	copiesOf := map[int][]float64{}
+	for i, t := range decks {
+		for _, c := range t.Cards {
+			if d.byID[c.ID].IsCrypt() {
+				continue
+			}
+			if copiesOf[c.ID] == nil {
+				copiesOf[c.ID] = make([]float64, n)
+			}
+			copiesOf[c.ID][i] += float64(c.Count)
+		}
+	}
+	defense := map[int]string{}
+	for _, m := range d.b.Modules {
+		if m.Section != bleedDefense {
+			continue
+		}
+		for _, t := range slices.Concat(m.Core, m.Support) {
+			for _, id := range t.IDs {
+				defense[id] = cmp.Or(defense[id], m.Name)
+			}
+		}
+	}
+	type lack struct {
+		card    *bundle.Card
+		plays   int
+		median  float64
+		defense bool
+	}
+	var lacks []lack
+	staples := 0
+	for id, s := range copiesOf {
+		k := 0
+		for _, c := range s {
+			if c > 0 {
+				k++
+			}
+		}
+		if float64(k) < stapleShare*float64(n) {
+			continue
+		}
+		staples++
+		if here[id] > 0 {
+			continue
+		}
+		slices.Sort(s)
+		c := d.byID[id]
+		lacks = append(lacks, lack{c, k, quantile(s, 0.5), slices.Contains(c.Types, "Reaction") || defense[id] != ""})
+	}
+	if staples == 0 {
+		out.WriteString("No library card is in three quarters of its decks or more: it has no staples.\n")
+		return
+	}
+	fmt.Fprintf(out, "Its staples are the library cards in three quarters of its decks or more: %d. This list holds no copy of %d of them", staples, len(lacks))
+	if len(lacks) == 0 {
+		out.WriteString(".\n")
+		return
+	}
+	out.WriteString(", defenses (reactions and the cards of `modules.md`'s bleed defense modules) first")
+	crypt, _, nCrypt, _ := dk.split()
+	if nCrypt > 0 && fit > full {
+		out.WriteString("; which crypt cards can play each is left out to fit this result, its requirements given")
+	}
+	out.WriteString(":\n")
+	slices.SortFunc(lacks, func(a, b lack) int {
+		if a.defense != b.defense {
+			if a.defense {
+				return -1
+			}
+			return 1
+		}
+		return cmp.Or(cmp.Compare(b.plays, a.plays), strings.Compare(a.card.Name, b.card.Name))
+	})
+	for _, l := range lacks {
+		what := strings.Join(l.card.Types, "/")
+		if m := defense[l.card.ID]; m != "" {
+			what += ", " + m
+		}
+		unit := "copies"
+		if l.median == 1 {
+			unit = "copy"
+		}
+		fmt.Fprintf(out, "- %s (%s): in %d of %d decks, median %s %s.", l.card.Name, what, l.plays, n, num(l.median), unit)
+		req, quoted := "", false
+		if nCrypt > 0 && fit == full {
+			req = playable(l.card, crypt, nCrypt)
+			quoted = req != ""
+		} else {
+			var needs []string
+			if len(l.card.Disciplines) > 0 {
+				needs = append(needs, "["+strings.Join(l.card.Disciplines, "] or [")+"]")
+			}
+			if len(l.card.Clans) > 0 {
+				needs = append(needs, "clan "+strings.Join(l.card.Clans, " or "))
+			}
+			if l.card.Path != "" {
+				needs = append(needs, "path "+l.card.Path)
+			}
+			if len(needs) > 0 {
+				req = "Requires " + strings.Join(needs, " and ") + "."
+			}
+		}
+		if m := reTextRequires.FindString(l.card.Text); m != "" && !quoted {
+			req += fmt.Sprintf(" Its text requires, unchecked here: %q", m)
+		}
+		if req = strings.TrimSpace(req); req != "" {
+			out.WriteString(" " + req)
+		}
+		out.WriteString("\n")
+	}
 }
 
 // writeGains counts the list's blood and pool sources by kind, naming its cards.

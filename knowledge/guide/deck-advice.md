@@ -30,6 +30,7 @@ deck first (its crypt, modules and pillars, as `vtes_deck` gives them).
    named card endorsed alone. Against opposing vote blocks, denial (cancel,
    lock out) usually beats added votes. The archetype's staples the list
    lacks, defenses first, are offered with what they cost the build (a
-   title, a crypt group); for a draft, `vtes_card_stats` within its nearest
-   archetype names them.
+   title, a crypt group), a staple the crypt cannot play too, with the
+   crypt change it needs; for a draft or a list near no archetype,
+   `vtes_deck` names its nearest archetype's.
 6. **The changes.** Cuts and adds in copies, each with the pillar it serves.

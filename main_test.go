@@ -480,6 +480,26 @@ func TestQueryDeck(t *testing.T) {
 	if strings.Contains(idea[strings.Index(idea, "## Library by module"):strings.Index(idea, "## Relatives")], "per hand") {
 		t.Errorf("a density computed for a deck idea:\n%s", idea)
 	}
+	// the graded werewolf draft (calibration 2026-11-20): its nearest archetype's staples it lacks, defenses first
+	entry, err := os.ReadFile("calibration/corpus/2026-11-20-werewolf-gangrel-playgroup.md")
+	if err != nil {
+		t.Fatal(err)
+	}
+	_, draft, _ := strings.Cut(string(entry), "Crypt:\n")
+	draft, _, _ = strings.Cut(draft, "\n[00:31]")
+	wolves, err := query("-draft", "deck", strings.Replace(draft, "\nDeck\n", "\n", 1))
+	if err != nil {
+		t.Fatal(err)
+	}
+	i, j := strings.Index(wolves, "- Bait and Switch (Reaction, Baron defense): in "), strings.Index(wolves, "- Rewilding (Action): in ")
+	if !strings.Contains(wolves, "Its nearest archetype of 10 decks or more: **Gangrel Renegades** (C8), a variant of **Gangrel Resistance**, at ") ||
+		!strings.Contains(wolves, `Its text requires, unchecked here: "Requires a baron."`) || i < 0 || j < i {
+		t.Errorf("the werewolf draft's nearest staples:\n%s", wolves[strings.Index(wolves, "## Beside its reference"):strings.Index(wolves, "## Track record")])
+	}
+	// a list of an archetype too small to give staples is given no other's
+	if out, err := query("deck", "12936"); err != nil || !strings.Contains(out, "This list is of **Matawall** (C53), at ") || strings.Contains(out, "Its nearest archetype of 10 decks or more") {
+		t.Errorf("a list of a small archetype: %v\n%s", err, out[strings.Index(out, "## Beside its reference"):strings.Index(out, "## Track record")])
+	}
 	// the graded Banu list: its answers to combat ends and to prevention, with the crypt cards at their level
 	banu, err := query("deck", "https://vdb.im/decks/7dcfd9fcb")
 	if err != nil {
@@ -651,7 +671,7 @@ func TestQueryDeck(t *testing.T) {
 		}
 		long = append(long, "1x "+c.Name)
 	}
-	if out, err := query("deck", strings.Join(long, "\n")); err != nil || len(out) > 40000 || !strings.Contains(out, "Left out to fit this result: the texts of the library's cards.") || !strings.Contains(out, "This reference is loose") {
+	if out, err := query("deck", strings.Join(long, "\n")); err != nil || len(out) > 40000 || !strings.Contains(out, "Left out to fit this result: the texts of the library's cards.") || !strings.Contains(out, "This reference is loose") || !strings.Contains(out, "### Its nearest archetype's staples") {
 		t.Errorf("a list past the bound: %v, %d characters", err, len(out))
 	}
 	// the same crypt and the 70 shortest library texts: only the relatives' details left out
