@@ -31,15 +31,11 @@ At most three open, each named by what someone can do afterwards. A board
 line serving one carries its token; done is deleted. Opening one is the
 owner's decision.
 
-None open.
+- **`[M:rulings]` What the rules directors settled on cards is in the rulings database**: the rulings primogen's calibration, the advanced rules, the `zero-vtes` ledger and the archive audit (Ankha's tenure from 2017–present, plus cards played in the TWDA window since 2021-07 and co-named card pairs) surface are curated by the rulemongers in `vtes-rulings`, and `vtes_cards` and `vtes_rules_case` serve them as official rulings.
 
 ## Later, in this order unless the owner reorders
 
 - The announcement (the phase above).
-- A pass over the rulings database, with primogen's tools finding what the
-  rules directors settled and no ruling holds, the curated rulings kept by
-  the rulemongers (owner, 2026-11-12). Until then the tools work around
-  what it misses.
 - The legality check on the engine (`vtes_engine_check`), which needs a
   position-check endpoint in zero-vtes.
 - Bot-based deck testing, once the engine covers the pool and the bot is
