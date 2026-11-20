@@ -16,9 +16,9 @@ commands are added here by the lines that create them.
 
 ## Secrets
 
-`secrets.sops.yaml`, encrypted with sops to the SSH key `.sops.yaml` lists
-(the owner's: deploys run from this machine, so no other key decrypts it),
-holds one secret: `github_app_key`, the private key of the
+`secrets.sops.yaml`, encrypted with sops to the SSH keys `.sops.yaml` lists
+(the owner's, and server-setup's `deploy` key, which the release workflow
+holds), holds one secret: `github_app_key`, the private key of the
 GitHub App `app-feedback-issues` (Issues read and write, no webhook),
 installed on several of the owner's repositories: each token the server
 asks for is scoped to this repository's issues. `mise run deploy` decrypts it and puts it
@@ -75,7 +75,7 @@ The server refreshes itself; there is no cron job and no operator.
 
 ## Commands
 
-Go, jq, node and uv come from mise: `mise install` in the checkout reads
+Go, jq, node, sops and uv come from mise: `mise install` in the checkout reads
 `mise.toml`.
 
 - `primogen build` fetches the card data, the TWDA, `vtes-rulings` and `archon-vibe`
@@ -135,6 +135,11 @@ Go, jq, node and uv come from mise: `mise install` in the checkout reads
   (its PEM file), it files `vtes_feedback`'s reports; without, the tool
   refuses, pointing to the repository's issues. It builds one first if there is none, and reads
   `knowledge/` from GitHub unless given `-knowledge`.
+- `gh workflow run release` runs `mise run release` on a GitHub Actions
+  runner (`.github/workflows/release.yml`), as server-setup's `deploy`
+  user: its key, the `production` environment's `DEPLOY_SSH_KEY` (pushed
+  by server-setup's `just sync-key`, primogen being in its
+  `deploy_targets.py`), reaches frankfurt and decrypts the secrets.
 - `mise run release` releases: on a clean `main` not behind `origin`, it
   runs the checks, tags the next `v0.N.0` (none if HEAD has a tag already),
   deploys with pyinfra without asking, pushes `main` and the tag, and fails
@@ -172,13 +177,15 @@ updates that test in the same change.
 
 Trunk-based. Every deploy is a release, a tag `v0.N.0` the binary reports
 as its version; `mise run release` does it all. When the owner says
-deploy, a session runs it; nothing is deployed untagged. Knowledge files
+deploy, a session runs the release workflow, which releases what is
+already on `origin/main`; nothing is deployed untagged. Knowledge files
 travel inside the data bundle, and the hosted server reads them from `main`
 on GitHub: a pushed knowledge change reaches users within the hour, without
 a deploy. Pushing `knowledge/` is publishing it, and the deployed binary
 reads it: a change to a knowledge file's format is deployed before it is
-pushed, and a binary reading a new knowledge file after it is pushed (that
-file pushed on its own first, since a release deploys before it pushes).
+pushed, by `mise run release` from this machine (which deploys before it
+pushes), and a binary reading a new knowledge file after that file is
+pushed on its own.
 
 ## Looking things up
 

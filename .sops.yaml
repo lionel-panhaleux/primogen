@@ -1,3 +1,4 @@
 creation_rules:
   - age:
       - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIE+Fa+dmnpPBYM0G7xPupl+GkVdF6YFmZ/NkpyqOzWoI  # the owner
+      - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDlN9QsXPGklb1BhEyGYankvkqoKGFlls4O0UWKe/YKf  # deploy (GitHub Actions)

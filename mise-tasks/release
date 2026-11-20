@@ -29,7 +29,7 @@ else
 	echo "release: tagged $tag"
 fi
 
-# Deployed before pushed: a pushed knowledge change is read by the binary already running.
+# From this machine, deployed before pushed: a pushed knowledge change is read by the binary already running.
 (cd deploy && uv run pyinfra -y inventory.py deploy.py)
 git push origin main "$tag"
 
