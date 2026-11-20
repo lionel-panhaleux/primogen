@@ -29,6 +29,7 @@ type Archive struct {
 type Thread struct {
 	ID       string
 	Title    string
+	URL      string
 	Messages []Message
 }
 
@@ -147,12 +148,13 @@ func ReadArchive(r io.Reader) (*Archive, error) {
 				var t struct {
 					ThreadId string
 					Title    string
+					Url      string
 					Messages []struct{ Id, Author, Date, Body string }
 				}
 				if err := dec.Decode(&t); err != nil {
 					return nil, err
 				}
-				th := Thread{ID: t.ThreadId, Title: t.Title, Messages: make([]Message, len(t.Messages))}
+				th := Thread{ID: t.ThreadId, Title: t.Title, URL: t.Url, Messages: make([]Message, len(t.Messages))}
 				for i, m := range t.Messages {
 					th.Messages[i] = Message{ID: m.Id, Author: m.Author, Date: archiveDate(m.Date), Body: m.Body}
 				}

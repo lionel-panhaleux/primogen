@@ -3,9 +3,9 @@
 # archetype labels' window (their params.since) and three decks the tests
 # name, decks of three deckbuilders, vtes-rulings at its head, archon-vibe's rules documents
 # at its head with the ids archon.vekn.net gives them, zero-vtes's rules-qa and rulings ledger, and the archive cut to
-# its ids and titles, with the text of the posts the rulings and the advanced
+# its ids, titles and URLs, with the text of the posts the rulings and the advanced
 # rules cite, of the threads the calibration corpus's settled-by names and of
-# the threads the tests name.
+# the four threads the tests name.
 # Needs curl, jq, node and npm (mise install).
 set -eu
 cd "$(dirname "$0")"
@@ -73,10 +73,10 @@ cited=$(
 whole=$({
 	grep -h '^settled-by:' ../../calibration/corpus/*.md | grep -oE 'usenet\.krcg\.org/t/[^/#]+/' |
 		sed -E 's|usenet\.krcg\.org/t/([^/]+)/|\1|'
-	printf '%s\n' z_kvG6T-DTQ w6jOOcMIUbM
+	printf '%s\n' z_kvG6T-DTQ w6jOOcMIUbM vekn-79165 M9f7z02UbzI
 } | jq -Rn '[inputs]')
 curl -fsS https://usenet.krcg.org/archive.json.gz | gunzip |
 	jq -c --argjson cited "$cited" --argjson whole "$whole" '{LastPost, Threads: [.Threads[] | .ThreadId as $t | ($cited[$t] // []) as $c |
-		{ThreadId, Title, Messages: [.Messages | to_entries[] | .key as $i | .value as $m |
+		{ThreadId, Title, Url, Messages: [.Messages | to_entries[] | .key as $i | .value as $m |
 			if ($whole | index([$t])) or ($c | index("m\($i)")) or ($m.Id != null and ($c | index($m.Id)))
 			then $m | {Id, Author, Date, Body} else {Id: $m.Id} end]}]}' | gzip -9 > archive.json.gz

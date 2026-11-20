@@ -124,9 +124,10 @@ Go, jq, node, sops and uv come from mise: `mise install` in the checkout reads
   they answer, outside a decklist) that no ruling on those cards cites in
   `vtes-rulings`, each with its link, date, author standing, quoted question
   and answer, existing rulings on the card, and any entry of `card-changes.md`
-  dated after the post (`-since` for a date lower bound, `-twda` for cards
-  played in the TWDA window only, `-out` to write to a file, and optional card
-  names to narrow the audit).
+  dated after the post, skipping non-rules forum categories (event reports/TWD,
+  deck clinic, logistics, off-topic) and TWD or tournament-report threads
+  (`-since` for a date lower bound, `-twda` for cards played in the TWDA window
+  only, `-out` to write to a file, and optional card names to narrow the audit).
 - `primogen query TOOL ARG...` (`-detail` for the detailed mode) calls a
   tool through the MCP server and prints what the model reads: `cards
   NAME...`, `case QUESTION [CARD...]`, `search WORDS...`, `read ID...`,
@@ -183,9 +184,9 @@ decks the tests name, the deckbuilders' APIs, each under its host (one deck as V
 each, the ids archon.vekn.net gives those documents' headings by archon's
 own renderer at that commit, which every link of theirs and of the
 advanced rules to them is checked against, the archive cut to
-its ids and titles with the text of the posts the rulings and the advanced
+its ids, titles and URLs with the text of the posts the rulings and the advanced
 rules cite, of the threads the calibration corpus's `settled-by`
-names and of two threads the tests name), with `knowledge/` as it stands, then query it as a user does,
+names and of four threads the tests name), with `knowledge/` as it stands, then query it as a user does,
 and run the evidence tests ([product.md](product.md) "Evaluation") on it,
 with zero-vtes's `rules-qa` and rulings ledger pinned beside them. They
 also run the hosted server through its refreshes against that server (the

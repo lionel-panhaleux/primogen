@@ -96,8 +96,10 @@ reference id and its URL).
 `usenet.krcg.org/archive.json.gz` (about 57 MB) is rebuilt with the site on
 every push and every sweep that finds something. Unzipped, it is one JSON
 object: `LastPost`, the date of the newest post the archive holds (ISO, no
-time zone), and `Threads`, every thread file as the repository holds it, in
-the format its README describes. A message carries its author, date and body
+time zone), and `Threads`, every thread file as the repository holds it
+(`ThreadId`, `Title`, `Url` — carrying the V:EKN forum category for forum
+threads — and `Messages`), in the format its README describes. A message
+carries its author, date and body
 (and a forum or BoardGameGeek post its number), never the post it replies
 to.
 

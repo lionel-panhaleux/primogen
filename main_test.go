@@ -1517,4 +1517,13 @@ func TestAudit(t *testing.T) {
 	if _, _, err := runAudit("-since", "not-a-date"); err == nil {
 		t.Error("expected error for invalid -since")
 	}
+
+	// Non-rules forum categories (vekn-79165, deck-clinic) and tourney-report titles (M9f7z02UbzI) are skipped.
+	noiseReport, _, err := runAudit("Villein", "Steam Tunnels")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(noiseReport, "vekn-74643/#m4") || strings.Contains(noiseReport, "vekn-79165") || strings.Contains(noiseReport, "M9f7z02UbzI") {
+		t.Errorf("noise thread filter unexpected in audit report")
+	}
 }

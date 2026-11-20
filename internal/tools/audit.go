@@ -4,12 +4,43 @@ import (
 	"cmp"
 	"fmt"
 	"maps"
+	"regexp"
 	"slices"
 	"strconv"
 	"strings"
 
 	"github.com/lionel-panhaleux/primogen/internal/bundle"
 )
+
+var (
+	noiseForumCategories = map[string]bool{
+		"event-reports-and-twd":                 true,
+		"deck-clinic":                           true,
+		"trading-post":                          true,
+		"off-topic-forum":                       true,
+		"site-forum-feedback-and-news":          true,
+		"v-tes-inventory-deckbuilding-programs": true,
+		"polling-forum":                         true,
+		"v-tes-websites-podcasts-blogs":         true,
+		"lackeyccg":                             true,
+		"jol":                                   true,
+		"europe":                                true,
+		"city-state-country-region-talk":        true,
+		"organizational-questions":              true,
+	}
+	reNoiseTitle = regexp.MustCompile(`(?i)(?:^|\b)(?:twda?|twds|(?:tourney|tournament|event) reports?|tournament winning decks?)(?:\b|$)`)
+	reCatPrefix  = regexp.MustCompile(`^\d+-`)
+)
+
+func isNoiseThread(th *bundle.Thread) bool {
+	if _, rest, ok := strings.Cut(th.URL, "/forum/"); ok {
+		cat, _, _ := strings.Cut(rest, "/")
+		if noiseForumCategories[reCatPrefix.ReplaceAllString(cat, "")] {
+			return true
+		}
+	}
+	return reNoiseTitle.MatchString(th.Title)
+}
 
 // AuditOptions narrows an uncited-posts audit for the rulemongers.
 type AuditOptions struct {
@@ -133,6 +164,9 @@ func Audit(b *bundle.Bundle, a *bundle.Archive, opt AuditOptions) (string, error
 	directorCount := 0
 	for _, k := range as.directors {
 		m := as.msgs[k]
+		if isNoiseThread(m.thread) {
+			continue
+		}
 		if opt.Since != "" && m.thread.Messages[m.i].Date < opt.Since {
 			continue
 		}
