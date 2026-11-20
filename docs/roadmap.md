@@ -32,10 +32,10 @@ line serving one carries its token; done is deleted. Opening one is the
 owner's decision.
 
 - **M:meta**: a player gets the current meta read with numbers. Done when
-  an owner-graded session of meta questions passes. First `vtes_meta` over
-  the archetype labels, the decks since the labels placed by their nearest
-  archetype; then the decks still unplaced clustered into new archetypes,
-  curated by the owner (owner, 2026-11-20).
+  an owner-graded session of meta questions passes. `vtes_meta` reads the
+  archetype labels, the decks since the labels placed by their nearest
+  archetype, and the build proposes new archetypes from the decks still
+  unplaced, curated by the owner (owner, 2026-11-20).
 
 ## Later, in this order unless the owner reorders
 

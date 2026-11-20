@@ -175,9 +175,19 @@ func Build(ctx context.Context, up Upstream, archive *Archive) (*Bundle, []strin
 		return nil, nil, err
 	}
 	b.Decks, b.Sources = decks, append(b.Sources, Source{SourceTWDA, twdaVersion})
-	if unmatched := NewRelatives(b).Unmatched(); len(unmatched) > 0 {
-		warn("%d TWDA decks since %s, not in the archetype labels of %s, match no archetype (a new one, or a pass over the labels): %s",
-			len(unmatched), labels.Since, labels.Generated, strings.Join(unmatched, "; "))
+	props, alone := NewRelatives(b).Proposals()
+	for i, p := range props {
+		var decks []string
+		for _, d := range p.Decks {
+			decks = append(decks, fmt.Sprintf("%s %q (%s)", d.ID, d.Name, d.Date))
+		}
+		warn("proposed archetype %d of %d, TWDA decks since %s in no archetype of knowledge/classification.json (name it there, or put its decks in its noise): %d decks, %s; their vampires: %s; their library: %s; nearest archetype %s at %.2f",
+			i+1, len(props), labels.Since, len(p.Decks), strings.Join(decks, ", "), strings.Join(p.Vampires, " / "), strings.Join(p.Library, " / "),
+			labels.Archetypes[p.Nearest.Index].Name, p.Nearest.Similarity)
+	}
+	if len(alone) > 0 {
+		warn("%d TWDA decks since %s, not in the archetype labels (knowledge/classification.json), match no archetype nor proposal (a new one, or a pass over the labels): %s",
+			len(alone), labels.Since, strings.Join(alone, "; "))
 	}
 	if untagged := b.untagged(); len(untagged) > 0 {
 		shown := untagged[:min(len(untagged), untaggedShown)]

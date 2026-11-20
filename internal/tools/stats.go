@@ -239,8 +239,8 @@ func writeStats(out *strings.Builder, d *data, c *bundle.Card, arch *bundle.Arch
 	} else {
 		fmt.Fprintf(out, "Scope: %s. ", window)
 	}
-	out.WriteString("Archetypes: codex-of-the-damned's labels (codex-of-the-damned.org), curated and revisable. " +
-		"These decks won a tournament: a count says what winners play, not what is strong.\n\n")
+	fmt.Fprintf(out, "Archetypes: codex-of-the-damned's labels (codex-of-the-damned.org), by its maintainer, pass of %s, curated and revisable. ", r.Class.Pass())
+	out.WriteString("These decks won a tournament: a count says what winners play, not what is strong.\n\n")
 
 	out.WriteString("## Play rate\n\n")
 	if len(its) == 0 {

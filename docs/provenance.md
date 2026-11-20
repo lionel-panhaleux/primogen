@@ -50,11 +50,26 @@ compares them with upstream and records the commit below.
   and its sources by kind beside its reference.
 - `classification.json`: the owner's archetype labels for the
   tournament-winning decks since 2021-07 (the 2026-07 pass), forked from
-  codex-of-the-damned @ `18be59e`. `vtes_deck` places a deck among its
-  archetypes ([product.md](product.md)); the build names the decks since
-  that the labels lack and no archetype matches. `vtes_meta` counts the
-  decks of a window by archetype with them. A variant is of an archetype
-  that is itself no variant; a file breaking that fails the build.
+  codex-of-the-damned @ `18be59e`. Its `editor_state` is that site's
+  review page's, and its `params` but `since`, `crypt_weight` and `min_df`
+  describe that site's clustering pass: no code here reads them. Its
+  `revised` date is the last day the owner ruled on the build's proposals:
+  seven named on 2026-11-20 (G32 to G38, not among that site's labels),
+  from 11 decks the labels lacked and 20 of the owner's noise; the tools
+  date the labels with both days.
+  `vtes_deck` places a deck among its archetypes ([product.md](product.md)).
+  The build groups the window's decks in no archetype, the owner's noise
+  and those near none: a group of three decks or more, each of which, left
+  out, is at `vtes_deck`'s bar or more from the rest, is proposed when one
+  of its decks is not the owner's noise, with its decks, the vampires and
+  library cards in half of them or more (most particular to them first, at
+  most 5 and 6)
+  and its nearest archetype. The owner names it (a group of its own, or a
+  variant) or rejects it, its decks put in the noise, where they are
+  proposed again only with a deck not ruled on. The build names the decks
+  near none that no proposal holds. `vtes_meta` counts the decks of a
+  window by archetype with them. A variant is of an archetype that is
+  itself no variant; a file breaking that fails the build.
 - `game-terms.json`: the game terms in English (the 2024 rulebook's, plus
   the two 2025 terms and Seraph, a trait printed on Black Hand vampires)
   and their translations in six languages, from

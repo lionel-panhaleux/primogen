@@ -81,8 +81,9 @@ trailer; upkeep reads them.
 from a local install (`primogen stdio`) downloading the published bundle;
 `vtes_meta` (the archetypes' shares of the latest window, the decks since
 the labels placed by similarity, the unplaced share stated) in `main`, live
-from the next release. Cards, rules and the deck are done; the meta is the
-open milestone, its clustering next, and the announcement waits for it and
-for a feedback tool. From a checkout:
+from the next release, the build proposing new archetypes from the unplaced
+decks for the owner to name. Cards, rules and the deck are done; the meta is
+the open milestone, its graded session next, and the announcement waits for
+it and for a feedback tool. From a checkout:
 `primogen build`, then `primogen query` or `primogen stdio` with
 `-bundle data/bundle.json.gz`. The board holds the next lines.

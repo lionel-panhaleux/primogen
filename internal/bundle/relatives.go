@@ -14,6 +14,7 @@ import (
 // knowledge/classification.json.
 type Classification struct {
 	Generated   string
+	Revised     string // the last day the owner ruled on the build's proposals, if after Generated
 	Since       string // the first date of the labelled window
 	CryptWeight float64
 	MinDF       int // the decks a card must be in to count
@@ -30,9 +31,18 @@ type Archetype struct {
 	Representative []string
 }
 
+// Pass dates the labels.
+func (c *Classification) Pass() string {
+	if c.Revised == "" {
+		return c.Generated
+	}
+	return c.Generated + ", revised on " + c.Revised + " by the same maintainer from primogen's build's proposals"
+}
+
 func readClassification(raw []byte) (Classification, error) {
 	var f struct {
 		Generated string
+		Revised   string
 		Params    struct {
 			Since       string  `json:"since"`
 			CryptWeight float64 `json:"crypt_weight"`
@@ -52,7 +62,7 @@ func readClassification(raw []byte) (Classification, error) {
 	if err := json.Unmarshal(raw, &f); err != nil {
 		return Classification{}, fmt.Errorf("classification.json: %w", err)
 	}
-	c := Classification{Generated: f.Generated, Since: f.Params.Since, CryptWeight: f.Params.CryptWeight, MinDF: f.Params.MinDF}
+	c := Classification{Generated: f.Generated, Revised: f.Revised, Since: f.Params.Since, CryptWeight: f.Params.CryptWeight, MinDF: f.Params.MinDF}
 	if c.Since == "" || c.CryptWeight <= 0 || c.CryptWeight >= 1 || c.MinDF < 1 || len(f.Groups) == 0 {
 		return Classification{}, fmt.Errorf("classification.json: no groups, or params without since, crypt_weight in (0, 1) and min_df")
 	}
@@ -404,15 +414,143 @@ func (r *Relatives) Placement(i int) (g int, labelled bool) {
 	return -1, false
 }
 
-// Unmatched are the decks of the window the owner has not labelled, archetype
-// or noise, that reach no archetype's threshold.
-func (r *Relatives) Unmatched() []string {
-	var out []string
-	for i, d := range r.Decks {
-		if g, labelled := r.Placement(i); g < 0 && !labelled {
-			best := r.Archetypes(r.vecs[i], d.ID, 1)[0]
-			out = append(out, fmt.Sprintf("%s %q (%s, closest %s at %.2f)", d.ID, d.Name, d.Date, r.Class.Archetypes[best.Index].Name, best.Similarity))
+// Proposal is a group of the window's decks in no archetype of which each,
+// left out, reaches the threshold to the rest: it would be placed back in the
+// group were the group an archetype.
+type Proposal struct {
+	Decks             []*Deck
+	Vampires, Library []string // in half its decks or more, most particular to them first, at most 5 and 6
+	Nearest           Match    // the archetype nearest it
+}
+
+const (
+	proposalMin      = 3
+	proposalVampires = 5
+	proposalLibrary  = 6
+)
+
+// Proposals groups the window's decks in no archetype, the owner's noise and
+// those near none; a group is proposed when one of its decks is not the
+// owner's noise. Alone are the decks near none in no proposal.
+func (r *Relatives) Proposals() (props []Proposal, alone []string) {
+	var rows []int
+	for i := range r.Decks {
+		if g, _ := r.Placement(i); g < 0 {
+			rows = append(rows, i)
 		}
 	}
-	return out
+	type group struct {
+		members []int
+		sum     []float64
+	}
+	groups := make([]*group, len(rows))
+	score := make([][]float64, len(rows))
+	for a, i := range rows {
+		groups[a] = &group{members: []int{i}, sum: make([]float64, len(r.idf))}
+		for j, col := range r.vecs[i].cols {
+			groups[a].sum[col] = r.vecs[i].vals[j]
+		}
+		score[a] = make([]float64, len(rows))
+		for b, j := range rows[:a] {
+			score[a][b] = r.vecs[i].dot(r.vecs[j])
+			score[b][a] = score[a][b]
+		}
+	}
+	// the least similarity of a member, left out, to the rest of a and b merged
+	merged := func(a, b *group) float64 {
+		sum := slices.Clone(a.sum)
+		for k, v := range b.sum {
+			sum[k] += v
+		}
+		norm := 0.0
+		for _, v := range sum {
+			norm += v * v
+		}
+		least := math.Inf(1)
+		for _, i := range append(slices.Clone(a.members), b.members...) {
+			dot := r.vecs[i].dotDense(sum)
+			least = min(least, (dot-1)/math.Sqrt(max(norm-2*dot+1, 1e-12)))
+		}
+		return least
+	}
+	for {
+		a, b, best := -1, -1, r.Threshold
+		for x := range groups {
+			for y := range x {
+				if groups[x] != nil && groups[y] != nil && score[x][y] >= best {
+					a, b, best = x, y, score[x][y]
+				}
+			}
+		}
+		if a < 0 {
+			break
+		}
+		for k, v := range groups[b].sum {
+			groups[a].sum[k] += v
+		}
+		groups[a].members, groups[b] = append(groups[a].members, groups[b].members...), nil
+		for x, g := range groups {
+			if g != nil && x != a {
+				score[a][x] = merged(groups[a], g)
+				score[x][a] = score[a][x]
+			}
+		}
+	}
+	df := map[string]int{}
+	for _, d := range r.Decks {
+		for k := range r.counts(d.Cards) {
+			df[k]++
+		}
+	}
+	proposed := map[int]bool{}
+	for _, g := range groups {
+		if g == nil || len(g.members) < proposalMin || !slices.ContainsFunc(g.members, func(i int) bool { return !r.noise[r.Decks[i].ID] }) {
+			continue
+		}
+		var p Proposal
+		n := map[string]int{}
+		for _, i := range g.members {
+			proposed[i] = true
+			p.Decks = append(p.Decks, r.Decks[i])
+			for k := range r.counts(r.Decks[i].Cards) {
+				n[k]++
+			}
+		}
+		lift := func(k string) float64 { return float64(n[k]) / float64(df[k]) }
+		var cards []string
+		for k, c := range n {
+			if 2*c >= len(g.members) {
+				cards = append(cards, k)
+			}
+		}
+		slices.SortFunc(cards, func(x, y string) int { return cmp.Or(cmp.Compare(lift(y), lift(x)), cmp.Compare(x, y)) })
+		for _, k := range cards {
+			if k[0] == 'c' && len(p.Vampires) < proposalVampires {
+				p.Vampires = append(p.Vampires, k[2:])
+			} else if k[0] == 'l' && len(p.Library) < proposalLibrary {
+				p.Library = append(p.Library, k[2:])
+			}
+		}
+		var v vector
+		norm := 0.0
+		for col, x := range g.sum {
+			if x != 0 {
+				v.cols, v.vals, norm = append(v.cols, col), append(v.vals, x), norm+x*x
+			}
+		}
+		for j := range v.vals {
+			v.vals[j] /= math.Sqrt(norm)
+		}
+		p.Nearest = r.Archetypes(v, "", 1)[0]
+		slices.SortFunc(p.Decks, func(x, y *Deck) int { return cmp.Compare(y.Date, x.Date) })
+		props = append(props, p)
+	}
+	slices.SortStableFunc(props, func(x, y Proposal) int { return cmp.Compare(len(y.Decks), len(x.Decks)) })
+	for i, d := range r.Decks {
+		if g, labelled := r.Placement(i); g < 0 && !labelled && !proposed[i] {
+			best := r.Archetypes(r.vecs[i], d.ID, 1)[0]
+			alone = append(alone, fmt.Sprintf("%s %q (%s, closest %s at %.2f)", d.ID, d.Name, d.Date, r.Class.Archetypes[best.Index].Name, best.Similarity))
+		}
+	}
+	return props, alone
 }

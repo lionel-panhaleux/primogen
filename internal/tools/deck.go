@@ -1242,7 +1242,7 @@ func (dk *deck) writeRelatives(out *strings.Builder, d *data, detail bool, fit i
 	fmt.Fprintf(out, "Similarity from card counts against the %d TWDA decks since %s, rare cards weighing more, the crypt %.0f%% and the library %.0f%%: "+
 		"1 for the same list, 0 for no card in common. Archetypes: codex-of-the-damned's labels (codex-of-the-damned.org), by its maintainer, "+
 		"pass of %s, curated and revisable; each of their decks left out in turn, %.0f%% are placed back in their archetype, %.0f%% in its family (variants merged).\n\n",
-		len(r.Decks), c.Since, 100*c.CryptWeight, 100*(1-c.CryptWeight), c.Generated, 100*r.GroupRate, 100*r.RootRate)
+		len(r.Decks), c.Since, 100*c.CryptWeight, 100*(1-c.CryptWeight), c.Pass(), 100*r.GroupRate, 100*r.RootRate)
 	v := r.Vector(cards)
 	if v.Empty() {
 		fmt.Fprintf(out, "No card of this deck is played by %d or more of those decks: it has no relatives there.\n\n", c.MinDF)

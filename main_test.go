@@ -348,7 +348,7 @@ func TestQueryDeck(t *testing.T) {
 		"- With one library copy or none (one copy: in 8% of opening hands): **Big-cap ramp** (Information Highway); **Permanent intercept** (Mr. Winthrop)\n",
 		"In no module shown (23 copies, 25.6% of the library): Thing ×11, Deep Ecology ×5, Powerbase: Savannah ×2, Anarch Railroad, Backways, Ecoterrorists, Ennoia's Theater, Revolutionary Council\n",
 		// its relatives, the deck left out of them, and how well the labels classify back
-		"pass of 2026-07-05, curated and revisable; each of their decks left out in turn, 97% are placed back in their archetype, 99% in its family (variants merged).",
+		"pass of 2026-07-05, revised on 2026-11-20 by the same maintainer from primogen's build's proposals, curated and revisable; each of their decks left out in turn, 97% are placed back in their archetype, 99% in its family (variants merged).",
 		"Nearest archetypes (95 in 100 of an archetype's own decks are at 0.49 or more from it):\n- **Gangrel Resistance** (C11): 0.92; 44 decks, its representative decks 12101.\n- **Gangrel Grinder** (C64), a variant of **Gangrel Resistance**: ",
 		"### 12511, Intelligent Gangrel: 0.99\n\nWon by Milos Krstic at Shell Game in Belgrade, Belgrade, Serbia, 2025-11-15, 13 players. Event report: https://www.vekn.net/event-calendar/event/12511 Labelled **Gangrel Resistance** (C11).",
 		"Only in this deck: 1× Monkey Wrench; 1× Revolutionary Council.\nOnly in 12511: 1× The Barrens; 1× The Parthenon.\nOther counts: Thing, 11 here and 9 there;",
@@ -420,9 +420,11 @@ func TestQueryDeck(t *testing.T) {
 			"### 12947, (unnamed): 0.93\n\nWon by Jozef Patrnciak at Year of the Sabbat Paths IV: Amaranth, Herne, Germany, 2026-10-24, 20 players. Event report: https://archon.vekn.net/t/12947\n" +
 				"Only in this deck: 3× Elemental Stoicism; 1× Theo Bell (G6).\nOnly in 12947: 3× Earth Control; 1× Indira (G6).\n",
 		}},
-		// a deck near no archetype, its twin the nearest deck
-		{"13019", []string{"- **Zillah + Villein ramp-bloat** (Bloat & pool economy): 6 copies, 6.7%, tactical, 0.5 per hand, in 39% of opening hands; core: Villein ×6;", "- **Matawall** (C53): 0.15;", "This deck is near no archetype: even the closest is under 0.49.",
-			"### 13163, Agnieszka: 1.00\n\nWon by Martin Weinmayer at The Vozhd of JOL, Online, 2026-03-17, 45 players. Event report: https://www.vekn.net/event-calendar/event/13163\nThe same list as this deck.\n"}},
+		// a deck of an archetype the build proposed, its twin the nearest deck
+		{"13019", []string{"- **Zillah + Villein ramp-bloat** (Bloat & pool economy): 6 copies, 6.7%, tactical, 0.5 per hand, in 39% of opening hands; core: Villein ×6;", "This deck is labelled **Agnieszka Wall** (G35).", "- **Matawall** (C53): 0.15;",
+			"### 13163, Agnieszka: 1.00\n\nWon by Martin Weinmayer at The Vozhd of JOL, Online, 2026-03-17, 45 players. Event report: https://www.vekn.net/event-calendar/event/13163 Labelled **Agnieszka Wall** (G35).\nThe same list as this deck.\n"}},
+		// a deck near no archetype
+		{"13020", []string{"- **Weenie Toreador** (C70): 0.28;", "This deck is near no archetype: even the closest is under 0.49."}},
 		{"12434", []string{"(cut at 1500 of 6967 characters: detail gives it whole)"}},
 		// a deck the TWDA archives, illegal today
 		{"zink2k1", []string{"Tournament legal today (", "): no, as archived:\n- Protect Thine Own is banned since 2008-01-01: take it out"}},
@@ -1086,6 +1088,65 @@ func TestHistoryFullyFiled(t *testing.T) {
 	}
 }
 
+// TestBuildProposesArchetypes undoes two of the owner's rulings: Agnieszka
+// Wall unnamed is proposed again; Usurper High Council rejected, its decks all
+// the owner's noise, is not.
+func TestBuildProposesArchetypes(t *testing.T) {
+	dir := t.TempDir()
+	if err := os.CopyFS(dir, os.DirFS("knowledge")); err != nil {
+		t.Fatal(err)
+	}
+	path := filepath.Join(dir, "classification.json")
+	raw, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var labels map[string]any
+	json.Unmarshal(raw, &labels)
+	var groups []any
+	noise := labels["noise"].([]any)
+	for _, g := range labels["groups"].([]any) {
+		switch g.(map[string]any)["name"] {
+		case "Agnieszka Wall":
+		case "Usurper High Council":
+			noise = append(noise, g.(map[string]any)["decks"].([]any)...)
+		default:
+			groups = append(groups, g)
+		}
+	}
+	labels["groups"], labels["noise"] = groups, noise
+	raw, _ = json.Marshal(labels)
+	if err := os.WriteFile(path, raw, 0o644); err != nil {
+		t.Fatal(err)
+	}
+	u, up, err := newUpstream()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer u.srv.Close()
+	up.KnowledgeDir = dir
+	archive, err := bundle.FetchArchive(context.Background(), up)
+	if err != nil {
+		t.Fatal(err)
+	}
+	_, warnings, err := bundle.Build(context.Background(), up, archive)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var proposed []string
+	for _, w := range warnings {
+		if strings.HasPrefix(w, "proposed archetype") {
+			proposed = append(proposed, w)
+		}
+	}
+	if len(proposed) != 1 || !strings.Contains(proposed[0], `proposed archetype 1 of 1, TWDA decks since 2021-07-01 in no archetype of knowledge/classification.json `+
+		`(name it there, or put its decks in its noise): 4 decks, 13460 "Agnieszka, The Unbreakable [Joab Version]" (2026-08-16), `) ||
+		!strings.Contains(proposed[0], `13163 "Agnieszka" (2026-03-17); their vampires: Agnieszka, Tempter of Legions / Verrix, Naughty Boy / `) ||
+		!strings.Contains(proposed[0], "nearest archetype Goratrix High Tower at 0.15") {
+		t.Errorf("want Agnieszka Wall proposed alone, got:\n%s", strings.Join(proposed, "\n"))
+	}
+}
+
 // TestServe follows the hosted server through its refreshes, as a client and
 // a local install see it.
 func TestServe(t *testing.T) {
@@ -1195,7 +1256,7 @@ func TestServe(t *testing.T) {
 		}
 	}
 	expect("status page", get("/status"), "Data: cards of static.krcg.org 2026-11-01 00:00 UTC", "Last refresh",
-		"TWDA decks since 2021-07-01, not in the archetype labels of 2026-07-05, match no archetype", `13019 "Agnieszka, The Unbreakable" (2026-06-16, closest Matawall at 0.15)`,
+		"TWDA decks since 2021-07-01, not in the archetype labels (knowledge/classification.json), match no archetype nor proposal", `13020 "Louvre Heist!" (2026-06-17, closest Weenie Toreador at 0.28)`,
 		"library cards the TWDA decks since 2021-07-01 play have no module tag (knowledge/guide/module-tags.json); the 50 most played, with their decks: ")
 	for _, path := range []string{"/", "/llms.txt"} {
 		expect("catalog", get(path), "# KRCG\n", "(https://mcp.krcg.org/mcp)", "(https://static.krcg.org/data/vtes.json)")

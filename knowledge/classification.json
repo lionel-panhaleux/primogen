@@ -1,5 +1,6 @@
 {
  "generated": "2026-07-05",
+ "revised": "2026-11-20",
  "params": {
   "since": "2021-07-01",
   "until": "",
@@ -9866,6 +9867,317 @@
      "representative": false
     }
    ]
+  },
+  {
+   "ref": "G32",
+   "name": "Usurper High Council",
+   "variant_of": null,
+   "anchors": [],
+   "reviewed": true,
+   "decks": [
+    {
+     "id": "13303",
+     "date": "2026-10-11",
+     "name": "Ippal sai kkin Righetti",
+     "players": 21,
+     "qualifying": true,
+     "representative": false
+    },
+    {
+     "id": "13517",
+     "date": "2026-08-29",
+     "name": "Ippal sai kkin Righetti",
+     "players": 22,
+     "qualifying": true,
+     "representative": false
+    },
+    {
+     "id": "11506",
+     "date": "2024-07-21",
+     "name": "Usurper High Council",
+     "players": 22,
+     "qualifying": true,
+     "representative": false
+    },
+    {
+     "id": "11310",
+     "date": "2024-03-24",
+     "name": "",
+     "players": 28,
+     "qualifying": true,
+     "representative": false
+    },
+    {
+     "id": "10909",
+     "date": "2023-10-14",
+     "name": "Usurper High Council",
+     "players": 269,
+     "qualifying": true,
+     "representative": false
+    },
+    {
+     "id": "10481",
+     "date": "2023-02-18",
+     "name": "Usurper High Council",
+     "players": 28,
+     "qualifying": false,
+     "representative": false
+    }
+   ]
+  },
+  {
+   "ref": "G33",
+   "name": "Imbued",
+   "variant_of": null,
+   "anchors": [],
+   "reviewed": true,
+   "decks": [
+    {
+     "id": "13417",
+     "date": "2026-07-25",
+     "name": "",
+     "players": 12,
+     "qualifying": false,
+     "representative": false
+    },
+    {
+     "id": "12361",
+     "date": "2025-05-31",
+     "name": "Wormwood",
+     "players": 12,
+     "qualifying": false,
+     "representative": false
+    },
+    {
+     "id": "11049",
+     "date": "2023-11-26",
+     "name": "The New Inquisition",
+     "players": 18,
+     "qualifying": false,
+     "representative": false
+    },
+    {
+     "id": "10044",
+     "date": "2022-05-21",
+     "name": "Dumpster Fire of Pure Hate",
+     "players": 54,
+     "qualifying": false,
+     "representative": false
+    },
+    {
+     "id": "9848",
+     "date": "2021-10-01",
+     "name": "Balls of Stihl",
+     "players": 10,
+     "qualifying": false,
+     "representative": false
+    }
+   ]
+  },
+  {
+   "ref": "G34",
+   "name": "Tremere Mages",
+   "variant_of": null,
+   "anchors": [],
+   "reviewed": true,
+   "decks": [
+    {
+     "id": "13162",
+     "date": "2026-07-26",
+     "name": "Grimgroth's Mage Squad",
+     "players": 23,
+     "qualifying": true,
+     "representative": false
+    },
+    {
+     "id": "11756",
+     "date": "2024-10-19",
+     "name": "Outcast",
+     "players": 17,
+     "qualifying": false,
+     "representative": false
+    },
+    {
+     "id": "10837",
+     "date": "2023-07-08",
+     "name": "SOY TERCO Y QUE LARGA VIDA A LOS TREMERE",
+     "players": 10,
+     "qualifying": false,
+     "representative": false
+    },
+    {
+     "id": "10608",
+     "date": "2023-03-19",
+     "name": "Tremere and mage",
+     "players": 23,
+     "qualifying": false,
+     "representative": false
+    },
+    {
+     "id": "9875",
+     "date": "2021-09-07",
+     "name": "Gran Circle",
+     "players": 14,
+     "qualifying": false,
+     "representative": false
+    }
+   ]
+  },
+  {
+   "ref": "G35",
+   "name": "Agnieszka Wall",
+   "variant_of": null,
+   "anchors": [],
+   "reviewed": true,
+   "decks": [
+    {
+     "id": "13460",
+     "date": "2026-08-16",
+     "name": "Agnieszka, The Unbreakable [Joab Version]",
+     "players": 13,
+     "qualifying": false,
+     "representative": false
+    },
+    {
+     "id": "13377",
+     "date": "2026-08-02",
+     "name": "Ha por \u00e9l, Agnieszka",
+     "players": 18,
+     "qualifying": false,
+     "representative": false
+    },
+    {
+     "id": "13019",
+     "date": "2026-06-16",
+     "name": "Agnieszka, The Unbreakable",
+     "players": 30,
+     "qualifying": true,
+     "representative": false
+    },
+    {
+     "id": "13163",
+     "date": "2026-03-17",
+     "name": "Agnieszka",
+     "players": 45,
+     "qualifying": true,
+     "representative": false
+    }
+   ]
+  },
+  {
+   "ref": "G36",
+   "name": "Malk 94",
+   "variant_of": null,
+   "anchors": [],
+   "reviewed": true,
+   "decks": [
+    {
+     "id": "13590",
+     "date": "2026-10-17",
+     "name": "Etrius \u00e9 malk 94",
+     "players": 13,
+     "qualifying": false,
+     "representative": false
+    },
+    {
+     "id": "11413",
+     "date": "2024-04-28",
+     "name": "What we do in the shadows",
+     "players": 10,
+     "qualifying": false,
+     "representative": false
+    },
+    {
+     "id": "10114",
+     "date": "2022-06-08",
+     "name": "Gilbert's Back From Vacation",
+     "players": 18,
+     "qualifying": false,
+     "representative": false
+    },
+    {
+     "id": "10127",
+     "date": "2022-03-12",
+     "name": "Lucian stronghold",
+     "players": 33,
+     "qualifying": false,
+     "representative": false
+    }
+   ]
+  },
+  {
+   "ref": "G37",
+   "name": "Shadow Court Satyrs",
+   "variant_of": null,
+   "anchors": [],
+   "reviewed": true,
+   "decks": [
+    {
+     "id": "13373",
+     "date": "2026-06-21",
+     "name": "Glorioso Goulet",
+     "players": 15,
+     "qualifying": false,
+     "representative": false
+    },
+    {
+     "id": "10239",
+     "date": "2022-06-19",
+     "name": "Fadas de Goulet",
+     "players": 13,
+     "qualifying": false,
+     "representative": false
+    },
+    {
+     "id": "10185",
+     "date": "2022-06-04",
+     "name": "Sebastien Goulet S&B",
+     "players": 20,
+     "qualifying": false,
+     "representative": false
+    },
+    {
+     "id": "9966",
+     "date": "2021-12-05",
+     "name": "SUPER Sebastian",
+     "players": 18,
+     "qualifying": false,
+     "representative": false
+    }
+   ]
+  },
+  {
+   "ref": "G38",
+   "name": "Akunanse",
+   "variant_of": null,
+   "anchors": [],
+   "reviewed": true,
+   "decks": [
+    {
+     "id": "13342",
+     "date": "2026-06-21",
+     "name": "fakir matador",
+     "players": 10,
+     "qualifying": false,
+     "representative": false
+    },
+    {
+     "id": "12868",
+     "date": "2025-12-13",
+     "name": "Akunanse Anarch",
+     "players": 12,
+     "qualifying": false,
+     "representative": false
+    },
+    {
+     "id": "11001",
+     "date": "2023-10-01",
+     "name": "Akunanse Will",
+     "players": 13,
+     "qualifying": false,
+     "representative": false
+    }
+   ]
   }
  ],
  "noise": [
@@ -9986,14 +10298,6 @@
    "date": "2025-12-23",
    "name": "Pop\u00f3",
    "players": 13,
-   "qualifying": false,
-   "representative": false
-  },
-  {
-   "id": "12868",
-   "date": "2025-12-13",
-   "name": "Akunanse Anarch",
-   "players": 12,
    "qualifying": false,
    "representative": false
   },
@@ -10162,14 +10466,6 @@
    "date": "2025-06-01",
    "name": "Nosferatu Royalty 2025",
    "players": 10,
-   "qualifying": false,
-   "representative": false
-  },
-  {
-   "id": "12361",
-   "date": "2025-05-31",
-   "name": "Wormwood",
-   "players": 12,
    "qualifying": false,
    "representative": false
   },
@@ -10502,14 +10798,6 @@
    "representative": false
   },
   {
-   "id": "11756",
-   "date": "2024-10-19",
-   "name": "Outcast",
-   "players": 17,
-   "qualifying": false,
-   "representative": false
-  },
-  {
    "id": "11772",
    "date": "2024-10-13",
    "name": "Nosferatu New Royalty",
@@ -10598,14 +10886,6 @@
    "representative": false
   },
   {
-   "id": "11506",
-   "date": "2024-07-21",
-   "name": "Usurper High Council",
-   "players": 22,
-   "qualifying": true,
-   "representative": false
-  },
-  {
    "id": "11547",
    "date": "2024-07-21",
    "name": "",
@@ -10678,14 +10958,6 @@
    "representative": false
   },
   {
-   "id": "11413",
-   "date": "2024-04-28",
-   "name": "What we do in the shadows",
-   "players": 10,
-   "qualifying": false,
-   "representative": false
-  },
-  {
    "id": "11423",
    "date": "2024-04-27",
    "name": "Detroit Gang - Beast Dominate",
@@ -10723,14 +10995,6 @@
    "name": "Aguas de boqueir\u00e3o",
    "players": 17,
    "qualifying": false,
-   "representative": false
-  },
-  {
-   "id": "11310",
-   "date": "2024-03-24",
-   "name": "",
-   "players": 28,
-   "qualifying": true,
    "representative": false
   },
   {
@@ -10870,14 +11134,6 @@
    "representative": false
   },
   {
-   "id": "11049",
-   "date": "2023-11-26",
-   "name": "The New Inquisition",
-   "players": 18,
-   "qualifying": false,
-   "representative": false
-  },
-  {
    "id": "11110",
    "date": "2023-11-25",
    "name": "Royal with Cheese",
@@ -10910,14 +11166,6 @@
    "representative": false
   },
   {
-   "id": "10909",
-   "date": "2023-10-14",
-   "name": "Usurper High Council",
-   "players": 269,
-   "qualifying": true,
-   "representative": false
-  },
-  {
    "id": "10941",
    "date": "2023-10-07",
    "name": "The Bare Minimum",
@@ -10930,14 +11178,6 @@
    "date": "2023-10-01",
    "name": "Finnish Politics: The Next Generation",
    "players": 10,
-   "qualifying": false,
-   "representative": false
-  },
-  {
-   "id": "11001",
-   "date": "2023-10-01",
-   "name": "Akunanse Will",
-   "players": 13,
    "qualifying": false,
    "representative": false
   },
@@ -11046,14 +11286,6 @@
    "representative": false
   },
   {
-   "id": "10837",
-   "date": "2023-07-08",
-   "name": "SOY TERCO Y QUE LARGA VIDA A LOS TREMERE",
-   "players": 10,
-   "qualifying": false,
-   "representative": false
-  },
-  {
    "id": "10826",
    "date": "2023-07-03",
    "name": "Brujah Gun",
@@ -11134,14 +11366,6 @@
    "representative": false
   },
   {
-   "id": "10608",
-   "date": "2023-03-19",
-   "name": "Tremere and mage",
-   "players": 23,
-   "qualifying": false,
-   "representative": false
-  },
-  {
    "id": "10597",
    "date": "2023-03-05",
    "name": "Nobody expects the Spanish Inquisition",
@@ -11170,14 +11394,6 @@
    "date": "2023-02-25",
    "name": "Rebeca jost",
    "players": 17,
-   "qualifying": false,
-   "representative": false
-  },
-  {
-   "id": "10481",
-   "date": "2023-02-18",
-   "name": "Usurper High Council",
-   "players": 28,
    "qualifying": false,
    "representative": false
   },
@@ -11414,14 +11630,6 @@
    "representative": false
   },
   {
-   "id": "10239",
-   "date": "2022-06-19",
-   "name": "Fadas de Goulet",
-   "players": 13,
-   "qualifying": false,
-   "representative": false
-  },
-  {
    "id": "10144",
    "date": "2022-06-11",
    "name": "Aksinya v3 - Danish Nationals 2022",
@@ -11446,14 +11654,6 @@
    "representative": false
   },
   {
-   "id": "10114",
-   "date": "2022-06-08",
-   "name": "Gilbert's Back From Vacation",
-   "players": 18,
-   "qualifying": false,
-   "representative": false
-  },
-  {
    "id": "10113",
    "date": "2022-06-07",
    "name": "The Hungarian Coyote",
@@ -11470,26 +11670,10 @@
    "representative": false
   },
   {
-   "id": "10185",
-   "date": "2022-06-04",
-   "name": "Sebastien Goulet S&B",
-   "players": 20,
-   "qualifying": false,
-   "representative": false
-  },
-  {
    "id": "10194",
    "date": "2022-05-28",
    "name": "Descent into Bleed",
    "players": 15,
-   "qualifying": false,
-   "representative": false
-  },
-  {
-   "id": "10044",
-   "date": "2022-05-21",
-   "name": "Dumpster Fire of Pure Hate",
-   "players": 54,
    "qualifying": false,
    "representative": false
   },
@@ -11530,14 +11714,6 @@
    "date": "2022-03-19",
    "name": "Royal with Cheese",
    "players": 18,
-   "qualifying": false,
-   "representative": false
-  },
-  {
-   "id": "10127",
-   "date": "2022-03-12",
-   "name": "Lucian stronghold",
-   "players": 33,
    "qualifying": false,
    "representative": false
   },
@@ -11622,14 +11798,6 @@
    "representative": false
   },
   {
-   "id": "9966",
-   "date": "2021-12-05",
-   "name": "SUPER Sebastian",
-   "players": 18,
-   "qualifying": false,
-   "representative": false
-  },
-  {
    "id": "9976",
    "date": "2021-11-22",
    "name": "SUPER DEBATE",
@@ -11678,14 +11846,6 @@
    "representative": false
   },
   {
-   "id": "9848",
-   "date": "2021-10-01",
-   "name": "Balls of Stihl",
-   "players": 10,
-   "qualifying": false,
-   "representative": false
-  },
-  {
    "id": "9846",
    "date": "2021-09-30",
    "name": "Broccolini",
@@ -11706,14 +11866,6 @@
    "date": "2021-09-13",
    "name": "Fogo no Parkinho",
    "players": 18,
-   "qualifying": false,
-   "representative": false
-  },
-  {
-   "id": "9875",
-   "date": "2021-09-07",
-   "name": "Gran Circle",
-   "players": 14,
    "qualifying": false,
    "representative": false
   },

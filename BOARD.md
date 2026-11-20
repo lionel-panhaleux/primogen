@@ -8,12 +8,6 @@ date or an outside event is not a line.
 
 ---
 
-- Clustering (M:meta): the window's decks no archetype holds, grouped into
-  proposed archetypes with their core cards and decks, each named or
-  rejected by the owner in `classification.json`. Done when: the build
-  proposes the clusters, the owner has ruled on each, and `vtes_meta` shows
-  the unplaced share that remains. Docs: provenance.md
-  (`classification.json`), product.md.
 - `vtes_feedback`: a user's report on an answer (the question, what was
   wrong, what was expected) filed by a GitHub App as a public issue labelled
   `feedback` on `lionel-panhaleux/primogen`, the user told before filing
@@ -33,4 +27,4 @@ date or an outside event is not a line.
   staples, and a fresh regression answer to that entry offers it. Docs:
   product.md (the `vtes_deck` row, "Grading a deck").
 
-<!-- completed-since-upkeep: 15 -->
+<!-- completed-since-upkeep: 16 -->

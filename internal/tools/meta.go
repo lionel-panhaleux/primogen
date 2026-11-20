@@ -255,8 +255,8 @@ func writeWindow(out *strings.Builder, d *data, cur, prev *tally, months int) {
 	}
 	out.WriteString(" These decks won: a share says what wins, not what is played, and the full field is not served.\n")
 	fmt.Fprintf(out, "Archetypes: codex-of-the-damned's labels (codex-of-the-damned.org), by its maintainer, pass of %s, curated and revisable, "+
-		"a variant counted in its archetype. A deck the labels lack (every deck since that pass, and some before it) is placed in its nearest archetype "+
-		"when at %.2f or more from it, the bar vtes_deck uses, which 95 in 100 of an archetype's own decks reach.\n\n", c.Generated, r.Threshold)
+		"a variant counted in its archetype. A deck the labels lack (most since that pass, some before it) is placed in its nearest archetype "+
+		"when at %.2f or more from it, the bar vtes_deck uses, which 95 in 100 of an archetype's own decks reach.\n\n", c.Pass(), r.Threshold)
 }
 
 func writeMeta(out *strings.Builder, d *data, m *metaData, months int, detail bool) {

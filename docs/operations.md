@@ -73,8 +73,10 @@ Go, jq, node and uv come from mise: `mise install` in the checkout reads
   the history of changes naming no card exactly or under no dated heading,
   left out of the bundle: the fix is in the gist, then `/sync`; a TWDA deck
   naming a card the card data lacks, left out until the card data has it;
-  the TWDA decks of the archetype labels' window the owner has not labelled
-  that match no archetype (a new one, or a pass over the labels); a name of
+  each archetype it proposes from the decks of the archetype labels' window
+  in none ([provenance.md](provenance.md) `classification.json`), to name
+  or reject there, and the decks the owner has not labelled that match no
+  archetype nor proposal (a new one, or a pass over the labels); a name of
   `knowledge/guide/module-tags.json` no card has, left out, a module there
   that `modules.md` does not name under its section, or a module of
   `modules.md` with no tags and no reason under `untagged`, a reason there
