@@ -672,7 +672,7 @@ func TestQueryDeck(t *testing.T) {
 		!strings.Contains(out, "No crypt card given: the library's requirements are not checked against a crypt.") || strings.Contains(out, "Crypt cards with") {
 		t.Errorf("an idea without a vampire: %v\n%s", err, out)
 	}
-	if out, err := query("-draft", "deck", "12947"); err != nil || !strings.Contains(out, "draft left aside: a TWDA deck is read whole") || !strings.Contains(out, " per hand") {
+	if out, err := query("-draft", "deck", "12947"); err != nil || !strings.Contains(out, "draft left aside: a tournament deck is read whole, as archived") || !strings.Contains(out, " per hand") {
 		t.Errorf("a TWDA deck with draft: %v\n%s", err, out)
 	}
 	// a list past the bound: 20 vampires and 65 library cards, the longest texts
@@ -734,7 +734,7 @@ func TestQueryDeck(t *testing.T) {
 		{"https://vdb.im/decks/deck?name=x#100001", "not id=count pairs"},
 		{"https://amaranth.vtes.co.nz/#deck/notpinned", `Amaranth has no public deck "notpinned" (Deck not found)`},
 		{"https://vtesdecks.com/deck/notpinned", `VTES Decks has no public deck "notpinned" (404 Not Found)`},
-		{"https://example.com/deck/12947", "primogen reads deck links from VDB (vdb.im), VTES Decks (vtesdecks.com) and Amaranth (amaranth.vtes.co.nz), not example.com: give the list as text"},
+		{"https://example.com/deck/12947", "primogen reads deck links from VDB (vdb.im), VTES Decks (vtesdecks.com), Amaranth (amaranth.vtes.co.nz) and Archon (archon.vekn.net), not example.com: give the list as text"},
 		{strings.Join(vampires(b), "\n") + "\n60x Villein", "distinct cards does not fit a result of 40000 characters even without its texts"},
 	} {
 		_, err := query("deck", tc.deck)

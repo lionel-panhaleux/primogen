@@ -35,6 +35,7 @@ const usage = `usage:
       deck LIST|ID|LINK|-        vtes_deck: a decklist (its lines as one or several arguments, or - for stdin), a TWDA id or a deck link (VDB, VTES Decks, Amaranth); -draft: a deck idea's cards
       stats CARD [ARCHETYPE]     vtes_card_stats: a card's play rates, companions and competitors, overall or within an archetype
       meta [ARCHETYPE]           vtes_meta: the archetypes' shares of the latest window, or one archetype's (-months: the window's length)
+      events [TOURNAMENT]        vtes_events: tournaments, standings, rankings (-rankings, -category), a member (-member), leagues (-league) or community links (-links)
       feedback QUESTION WRONG EXPECTED   vtes_feedback: file a report on an answer as a public GitHub issue, through the hosted server
   primogen stdio [-bundle PATH]                    serve the tools over stdio, for a local MCP client
   primogen serve -bundle PATH [-addr ADDR] [-knowledge DIR] [-github-app ID -github-key PEM] [-archon-client ID -archon-secret FILE]   serve the tools over HTTP at /mcp, refreshing the bundle
@@ -114,11 +115,22 @@ func query(ctx context.Context, fs *flag.FlagSet, path *string, args []string, s
 	from := fs.String("from", published, "where to download the bundle when -bundle is not given")
 	archive := fs.String("archive", bundle.KRCG.Archive, "where to download the rulings archive")
 	months := fs.Int("months", 0, "meta: the window's length in months")
+	member := fs.String("member", "", "events: a member's VEKN ID or Archon uid")
+	rankings := fs.Bool("rankings", false, "events: list the rating rankings")
+	category := fs.String("category", "", "events: rating category (constructed_offline, constructed_online, limited_offline, limited_online)")
+	league := fs.String("league", "", "events: a league's Archon uid or words of its name, or all")
+	links := fs.Bool("links", false, "events: list community links")
+	country := fs.String("country", "", "events: ISO 3166-1 alpha-2 country code")
+	since := fs.String("since", "", "events: start date lower bound (YYYY-MM-DD)")
+	until := fs.String("until", "", "events: start date upper bound (YYYY-MM-DD)")
+	rank := fs.String("rank", "", "events: championship level (NC, CC, basic)")
+	format := fs.String("format", "", "events: tournament format (Standard, V5, Limited, Storyline)")
+	state := fs.String("state", "", "events: tournament state (Planned, Registration, Waiting, Playing, Finished)")
 	sites := fs.String("sites", "", "where the deckbuilders' APIs are read, each under its host, instead of https://")
 	if err := fs.Parse(args); err != nil {
 		return err
 	}
-	if fs.NArg() < 2 && fs.Arg(0) != "meta" {
+	if fs.NArg() < 2 && fs.Arg(0) != "meta" && fs.Arg(0) != "events" {
 		return errors.New(usage)
 	}
 	rest := fs.Args()[1:]
@@ -162,6 +174,26 @@ func query(ctx context.Context, fs *flag.FlagSet, path *string, args []string, s
 		}
 		if len(rest) > 0 {
 			in["archetype"] = strings.Join(rest, " ")
+		}
+	case "events":
+		tool = "vtes_events"
+		if len(rest) > 0 {
+			in["tournament"] = strings.Join(rest, " ")
+		}
+		for k, v := range map[string]string{
+			"member": *member, "category": *category, "league": *league,
+			"country": *country, "from": *since, "to": *until,
+			"rank": *rank, "format": *format, "state": *state,
+		} {
+			if v != "" {
+				in[k] = v
+			}
+		}
+		if *rankings {
+			in["rankings"] = true
+		}
+		if *links {
+			in["links"] = true
 		}
 	case "feedback":
 		if len(rest) != 3 {

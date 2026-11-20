@@ -82,7 +82,11 @@ failing check) says so in a `Friction:` trailer; upkeep reads them.
 `vtes_deck` (a list validated, its crypt, library, modules and their odds in a hand, combat posture, costs, budgets and blood and pool sources beside its reference decks, track record and relatives computed),
 `vtes_card_stats` (a card's play rates, companions and competitors for its slot),
 `vtes_meta` (the archetypes' shares of the latest window, the decks since
-the labels placed by similarity, the unplaced share stated) and
+the labels placed by similarity, the unplaced share stated),
+`vtes_events` (community links for everyone; with Archon OAuth login,
+tournaments, standings, published decklists, rating rankings, a member's
+ratings, known wins, tournament history and decks by VEKN ID, and leagues,
+with `vtes_deck` also reading published Archon decks) and
 `vtes_feedback` (a user's report on an answer filed as a public `feedback`
 issue, which `/intake` reads) hosted at
 `https://mcp.krcg.org/mcp` and refreshing themselves (not announced yet), and

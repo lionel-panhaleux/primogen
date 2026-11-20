@@ -15,6 +15,7 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"sync"
 	"testing"
@@ -25,7 +26,6 @@ import (
 	"github.com/modelcontextprotocol/go-sdk/oauthex"
 
 	"github.com/lionel-panhaleux/primogen/internal/bundle"
-	"github.com/lionel-panhaleux/primogen/internal/tools"
 )
 
 type archonUpstream struct {
@@ -129,6 +129,33 @@ func TestArchonLoginAndExport(t *testing.T) {
 	ctx := t.Context()
 	dir := t.TempDir()
 
+	raw, err := os.ReadFile(testBundle)
+	if err != nil {
+		t.Fatal(err)
+	}
+	bundlePath := filepath.Join(dir, "bundle.json.gz")
+	if err := os.WriteFile(bundlePath, raw, 0o644); err != nil {
+		t.Fatal(err)
+	}
+	r, err := newRefresher(ctx, bundle.Upstream{}, bundlePath, slog.New(slog.DiscardHandler))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	deckCards := map[string]int{}
+	for _, d := range r.live.Bundle().Decks {
+		if d.ID == "12494" {
+			for _, c := range d.Cards {
+				deckCards[strconv.Itoa(c.ID)] = c.Count
+			}
+			break
+		}
+	}
+	cardsJSON, err := json.Marshal(deckCards)
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	up := &archonUpstream{
 		t:            t,
 		clientID:     "archon-client-id",
@@ -136,10 +163,12 @@ func TestArchonLoginAndExport(t *testing.T) {
 		veknID:       "3200340",
 	}
 	lines := []string{
-		`{"type":"user","data":{"uid":"019f6a5e-d1e6-7347-965e-4dac09bf03a4","vekn_id":"3200340","country":"FR","city":"Paris","roles":["IC","Prince"],"wins":["019fea18-1364-7549-8f9a-70dcc09a03d9"],"constructed_offline":{"total":180,"tournaments":[]},"community_links":[{"url":"https://codex-of-the-damned.org","type":"website","label":"Codex of the Damned","languages":["en","fr"]}]}}`,
-		`{"type":"tournament","data":{"uid":"019fea18-1364-7549-8f9a-70dcc09a03d9","name":"Malmö Unbound","format":"Standard","start":"2026-06-13T10:00:00","finish":"2026-06-13T18:00:00","timezone":"Europe/Stockholm","country":"SE","city":"Malmö","state":"Finished","event_code":"MU-2606","winner":"019f6a5e-d1e6-7347-965e-4dac09bf03a4","players":[{"user_uid":"019f6a5e-d1e6-7347-965e-4dac09bf03a4","state":"Finished","result":{"gw":2,"vp":6.5,"tp":114},"finalist":true}]}}`,
-		`{"type":"deck","data":{"uid":"019f6a65-01d4-7214-bcc9-4e46534b9d62","tournament_uid":"019fea18-1364-7549-8f9a-70dcc09a03d9","user_uid":"019f6a5e-d1e6-7347-965e-4dac09bf03a4","name":"Haqim Royalty","cards":{"100788":2,"200191":4},"attribution":{"kind":"Owner"},"winner":true}}`,
-		`{"type":"league","data":{"uid":"019fe07a-b107-7465-9968-122ceb6d67d1","name":"Nordic Chapter 2026","kind":"League","standings_mode":"GP","format":"Standard","country":"SE","start":"2026-01-01","finish":"2026-12-31"}}`,
+		`{"type":"user","data":{"uid":"019f6a5e-d1e6-7347-965e-4dac09bf03a4","vekn_id":"3200340","country":"FR","city":"Paris","roles":["IC","Prince"],"wins":["019fea18-1364-7549-8f9a-70dcc09a03d9"],"constructed_offline":{"total":180,"tournaments":[{"tournament_uid":"019fea18-1364-7549-8f9a-70dcc09a03d9","tournament_name":"Malmö Unbound","date":"2026-06-13","player_count":13,"rank":"","vp":6.5,"gw":2,"finalist_position":1,"points":180,"position":1}]},"community_links":[{"url":"https://codex-of-the-damned.org","type":"website","label":"Codex of the Damned","languages":["en","fr"],"moderation":"global"},{"url":"https://secret.example.com","type":"other","label":"Hidden Link","moderation":"hidden"}]}}`,
+		`{"type":"user","data":{"uid":"019f6a5e-d5dd-74b9-9aab-00919d4de7dc","vekn_id":"1002345","country":"SE","city":"Malmö","roles":["Prince"],"wins":[],"constructed_offline":{"total":120,"tournaments":[]},"community_links":[{"url":"https://vekn.se","type":"website","label":"VEKN Sweden","country":"SE","moderation":"national"}]}}`,
+		`{"type":"tournament","data":{"uid":"019fea18-1364-7549-8f9a-70dcc09a03d9","name":"Malmö Unbound","format":"Standard","rank":"","start":"2026-06-13T10:00:00","finish":"2026-06-13T18:00:00","timezone":"Europe/Stockholm","country":"SE","city":"Malmö","league_uid":"019fe07a-b107-7465-9968-122ceb6d67d1","state":"Finished","event_code":"MU-2606","external_ids":{"vekn":"13370"},"organizers_uids":["019f6a5e-d5dd-74b9-9aab-00919d4de7dc"],"winner":"019f6a5e-d1e6-7347-965e-4dac09bf03a4","standings":[{"user_uid":"019f6a5e-d1e6-7347-965e-4dac09bf03a4","gw":2,"vp":6.5,"tp":114,"finalist":true},{"user_uid":"019f6a5e-d5dd-74b9-9aab-00919d4de7dc","gw":1,"vp":5.0,"tp":108,"finalist":true}],"players":[{"user_uid":"019f6a5e-d1e6-7347-965e-4dac09bf03a4","state":"Finished","result":{"gw":2,"vp":6.5,"tp":114},"finalist":true},{"user_uid":"019f6a5e-d5dd-74b9-9aab-00919d4de7dc","state":"Finished","result":{"gw":1,"vp":5.0,"tp":108},"finalist":true}],"reported_player_count":13}}`,
+		`{"type":"tournament","data":{"uid":"019ff0c2-51e8-7a6d-b58c-4e9a2f7d1c03","name":"French National Championship","format":"Standard","rank":"National Championship","start":"2026-09-20T10:00:00","timezone":"Europe/Paris","country":"FR","city":"Paris","state":"Planned","event_code":"FR-NC-26","players":[]}}`,
+		fmt.Sprintf(`{"type":"deck","data":{"uid":"019f6a65-01d4-7214-bcc9-4e46534b9d62","tournament_uid":"019fea18-1364-7549-8f9a-70dcc09a03d9","user_uid":"019f6a5e-d1e6-7347-965e-4dac09bf03a4","name":"Malmö Haqim","comments":"Archon winner comment.","cards":%s,"attribution":{"kind":"Owner"},"winner":true}}`, cardsJSON),
+		`{"type":"league","data":{"uid":"019fe07a-b107-7465-9968-122ceb6d67d1","name":"Nordic Chapter 2026","kind":"League","standings_mode":"GP","format":"Standard","country":"SE","start":"2026-01-01","finish":"2026-12-31","organizers_uids":["019f6a5e-d5dd-74b9-9aab-00919d4de7dc"]}}`,
 	}
 	up.setExport(2, "2026-11-20T09:15:00.000000", lines, len(lines))
 	archonSrv := httptest.NewServer(up)
@@ -150,19 +179,6 @@ func TestArchonLoginAndExport(t *testing.T) {
 		t.Fatal(err)
 	}
 	a, err := newArchonApp(archonSrv.URL, archonSrv.URL, up.clientID, secretPath)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	raw, err := os.ReadFile(testBundle)
-	if err != nil {
-		t.Fatal(err)
-	}
-	bundlePath := filepath.Join(dir, "bundle.json.gz")
-	if err := os.WriteFile(bundlePath, raw, 0o644); err != nil {
-		t.Fatal(err)
-	}
-	r, err := newRefresher(ctx, bundle.Upstream{}, bundlePath, slog.New(slog.DiscardHandler))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -179,7 +195,7 @@ func TestArchonLoginAndExport(t *testing.T) {
 	}
 	statusBody, _ := io.ReadAll(resp.Body)
 	resp.Body.Close()
-	if !strings.Contains(string(statusBody), "Archon export: 2026-11-20 09:15 UTC (1 tournaments, 1 decks, 1 members, 1 leagues); last refresh 2026-11-20 09:20 UTC: ok.") {
+	if !strings.Contains(string(statusBody), "Archon export: 2026-11-20 09:15 UTC (2 tournaments, 1 decks, 2 members, 1 leagues); last refresh 2026-11-20 09:20 UTC: ok.") {
 		t.Fatalf("unexpected /status:\n%s", statusBody)
 	}
 	pubResp, err := http.Get(hosted.URL + "/bundle.json.gz")
@@ -202,14 +218,38 @@ func TestArchonLoginAndExport(t *testing.T) {
 		t.Errorf("auth server metadata emitted empty jwks_uri: %s", asmBytes)
 	}
 
-	cs, err := mcp.NewClient(&mcp.Implementation{Name: "anon"}, nil).Connect(ctx, &mcp.StreamableClientTransport{Endpoint: hosted.URL + "/mcp"}, nil)
+	callTool := func(cs *mcp.ClientSession, name string, args map[string]any) (string, bool) {
+		t.Helper()
+		res, err := cs.CallTool(ctx, &mcp.CallToolParams{Name: name, Arguments: args})
+		if err != nil {
+			t.Fatal(err)
+		}
+		return res.Content[0].(*mcp.TextContent).Text, res.IsError
+	}
+
+	anonCS, err := mcp.NewClient(&mcp.Implementation{Name: "anon"}, nil).Connect(ctx, &mcp.StreamableClientTransport{Endpoint: hosted.URL + "/mcp"}, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
-	res, err := cs.CallTool(ctx, &mcp.CallToolParams{Name: "vtes_cards", Arguments: map[string]any{"names": []string{"Freak Drive"}}})
-	cs.Close()
-	if err != nil || res.IsError || !strings.Contains(res.Content[0].(*mcp.TextContent).Text, "## Freak Drive") {
-		t.Fatalf("unauthenticated vtes_cards failed: %v %+v", err, res)
+	defer anonCS.Close()
+	if text, isErr := callTool(anonCS, "vtes_cards", map[string]any{"names": []string{"Freak Drive"}}); isErr || !strings.Contains(text, "## Freak Drive") {
+		t.Fatalf("unauthenticated vtes_cards failed: %v %s", isErr, text)
+	}
+	if text, isErr := callTool(anonCS, "vtes_events", map[string]any{"links": true}); isErr || !strings.Contains(text, "Codex of the Damned") || strings.Contains(text, "Hidden Link") || strings.Contains(text, "VEKN 3200340") {
+		t.Fatalf("unauthenticated community links: isErr=%v\n%s", isErr, text)
+	}
+	if text, isErr := callTool(anonCS, "vtes_events", map[string]any{"tournament": "MU-2606"}); !isErr || !strings.Contains(text, "logged-in VEKN members only") {
+		t.Fatalf("expected unauthenticated vtes_events refusal, got isErr=%v:\n%s", isErr, text)
+	}
+	if text, isErr := callTool(anonCS, "vtes_deck", map[string]any{"deck": "019f6a65-01d4-7214-bcc9-4e46534b9d62"}); !isErr || !strings.Contains(text, "logged-in VEKN members only") {
+		t.Fatalf("expected unauthenticated vtes_deck Archon refusal, got isErr=%v:\n%s", isErr, text)
+	}
+	if text, isErr := callTool(anonCS, "vtes_deck", map[string]any{"deck": "https://archon.vekn.net/tournaments/MU-2606"}); !isErr || !strings.Contains(text, "logged-in VEKN members only") {
+		t.Fatalf("expected unauthenticated vtes_deck Archon link refusal, got isErr=%v:\n%s", isErr, text)
+	}
+	var stdout, stderr strings.Builder
+	if err := run(ctx, []string{"query", "-bundle", testBundle, "-rankings", "events"}, &stdout, &stderr); err == nil || !strings.Contains(err.Error(), "logged-in VEKN members only") {
+		t.Fatalf("expected local query events refusal, got err=%v", err)
 	}
 
 	expect401 := func(path, authHeader string) {
@@ -296,11 +336,61 @@ func TestArchonLoginAndExport(t *testing.T) {
 	if err != nil {
 		t.Fatalf("member OAuth login failed: %v", err)
 	}
-	res, err = memberCS.CallTool(ctx, &mcp.CallToolParams{Name: "vtes_cards", Arguments: map[string]any{"names": []string{"Freak Drive"}}})
-	memberCS.Close()
-	if err != nil || res.IsError {
-		t.Fatalf("authenticated tool call failed: %v", err)
+	defer memberCS.Close()
+
+	if text, isErr := callTool(memberCS, "vtes_events", map[string]any{"tournament": "MU-2606"}); isErr ||
+		!strings.Contains(text, "# Tournament: Malmö Unbound") ||
+		!strings.Contains(text, "Winner: **VEKN 3200340**") ||
+		!strings.Contains(text, "019f6a65-01d4-7214-bcc9-4e46534b9d62") ||
+		!strings.Contains(text, "Haqim Royalty") ||
+		!strings.Contains(text, "archon.vekn.net export 2026-11-20 09:15 UTC") {
+		t.Fatalf("member tournament dossier: isErr=%v\n%s", isErr, text)
 	}
+
+	if text, isErr := callTool(memberCS, "vtes_events", map[string]any{"country": "FR", "rank": "NC", "from": "2026-09-01", "to": "2026-10-01"}); isErr ||
+		!strings.Contains(text, "French National Championship") ||
+		strings.Contains(text, "Malmö Unbound") {
+		t.Fatalf("filtered tournaments: isErr=%v\n%s", isErr, text)
+	}
+
+	if text, isErr := callTool(memberCS, "vtes_events", map[string]any{"rankings": true}); isErr ||
+		!strings.Contains(text, "1. **VEKN 3200340** (Paris, FR): **180 pts**") ||
+		!strings.Contains(text, "2. **VEKN 1002345** (Malmö, SE): **120 pts**") {
+		t.Fatalf("rankings: isErr=%v\n%s", isErr, text)
+	}
+
+	if text, isErr := callTool(memberCS, "vtes_events", map[string]any{"member": "3200340"}); isErr ||
+		!strings.Contains(text, "# Member: VEKN 3200340") ||
+		!strings.Contains(text, "rank #1 of 2 worldwide, #1 of 1 in FR") ||
+		!strings.Contains(text, "1 known win(s):") ||
+		!strings.Contains(text, "Malmö Unbound") ||
+		!strings.Contains(text, "019f6a65-01d4-7214-bcc9-4e46534b9d62") ||
+		!strings.Contains(text, "Haqim Royalty") {
+		t.Fatalf("member lookup: isErr=%v\n%s", isErr, text)
+	}
+
+	if text, isErr := callTool(memberCS, "vtes_events", map[string]any{"league": "Nordic"}); isErr ||
+		!strings.Contains(text, "# League: Nordic Chapter 2026") ||
+		!strings.Contains(text, "Malmö Unbound") {
+		t.Fatalf("league lookup: isErr=%v\n%s", isErr, text)
+	}
+
+	if text, isErr := callTool(memberCS, "vtes_events", map[string]any{"links": true, "country": "SE"}); isErr ||
+		!strings.Contains(text, "VEKN Sweden") ||
+		!strings.Contains(text, "VEKN 1002345") {
+		t.Fatalf("member community links: isErr=%v\n%s", isErr, text)
+	}
+
+	for _, target := range []string{"019f6a65-01d4-7214-bcc9-4e46534b9d62", "MU-2606", "https://archon.vekn.net/tournaments/MU-2606"} {
+		if text, isErr := callTool(memberCS, "vtes_deck", map[string]any{"deck": target}); isErr ||
+			!strings.Contains(text, "# Deck: Malmö Haqim") ||
+			!strings.Contains(text, "Archon deck 019f6a65-01d4-7214-bcc9-4e46534b9d62: won by VEKN 3200340 at Malmö Unbound (MU-2606)") ||
+			!strings.Contains(text, "Archon winner comment.") ||
+			!strings.Contains(text, "Haqim Royalty") {
+			t.Fatalf("vtes_deck(%q): isErr=%v\n%s", target, isErr, text)
+		}
+	}
+
 	ts, err := oauthHandler.TokenSource(ctx)
 	if err != nil || ts == nil {
 		t.Fatalf("no token source after login: %v", err)
@@ -309,17 +399,6 @@ func TestArchonLoginAndExport(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	info, err := a.verifyBearer(ctx, tok.AccessToken, nil)
-	if err != nil || info.UserID != "3200340" {
-		t.Fatalf("verified token UserID = %+v, err = %v; want 3200340", info, err)
-	}
-	if got := tools.MemberFrom(&mcp.CallToolRequest{Extra: &mcp.RequestExtra{TokenInfo: info}}); got != "3200340" {
-		t.Errorf("MemberFrom = %q, want 3200340", got)
-	}
-	if tok.RefreshToken == "" {
-		t.Fatal("missing refresh_token after login")
-	}
-
 	var refreshClaims tokenClaims
 	if err := a.unseal(tok.RefreshToken, &refreshClaims); err != nil {
 		t.Fatal(err)

@@ -120,9 +120,11 @@ Go, jq, node, sops and uv come from mise: `mise install` in the checkout reads
   NAME...`, `case QUESTION [CARD...]`, `search WORDS...`, `read ID...`,
   `archive WORDS...` (`-directors` for the sitting rules directors' posts
   only), `deck LIST|ID|LINK` (the list's lines as one or
-  several arguments, or `-` to read it from stdin; a link of VDB, VTES Decks
-  or Amaranth; `-draft` for a deck idea's cards), `stats CARD
+  several arguments, or `-` to read it from stdin; a link of VDB, VTES Decks,
+  Amaranth or Archon; `-draft` for a deck idea's cards), `stats CARD
   [ARCHETYPE]`, `meta [ARCHETYPE]` (`-months` for the window's length),
+  `events [TOURNAMENT]` (`-member`, `-rankings`, `-category`, `-league`,
+  `-links`, `-country`, `-since`, `-until`, `-rank`, `-format`, `-state`),
   `feedback QUESTION WRONG EXPECTED` (files a public issue, through the
   hosted server, or the one `-from` names).
 - `primogen stdio` serves the tools over stdio for a local MCP client.

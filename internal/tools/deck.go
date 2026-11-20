@@ -37,7 +37,7 @@ var deckSchema = &jsonschema.Schema{
 	Type: "object",
 	Properties: map[string]*jsonschema.Schema{
 		"deck": {Type: "string", Description: `the deck: a decklist as text, one card per line with its count ("3x Conditioning", ` +
-			`"Anson x2", crypt lines with their capacity and disciplines accepted), a TWDA deck id ("2k6munduko"), or a deck link from VDB (https://vdb.im/decks/...), VTES Decks (https://vtesdecks.com/deck/...) or Amaranth (https://amaranth.vtes.co.nz/#deck/...)`},
+			`"Anson x2", crypt lines with their capacity and disciplines accepted), a TWDA deck id ("2k6munduko"), a deck link from VDB (https://vdb.im/decks/...), VTES Decks (https://vtesdecks.com/deck/...) or Amaranth (https://amaranth.vtes.co.nz/#deck/...), or, with Archon login, a published Archon deck uid, tournament code/uid or archon.vekn.net tournament link`},
 		"draft": {Type: "boolean", Description: "a deck idea rather than a whole list: its cards, a line without a count read as one copy, " +
 			"the crypt's and library's sizes not checked and no density computed"},
 		"library_size": {Type: "integer", Description: "with draft: the library's size the odds are computed over, 60 to 90; 90 when not given"},
@@ -56,7 +56,7 @@ func addDeck(s *mcp.Server, l *Live) {
 		Name:  "vtes_deck",
 		Title: "VTES deck",
 		Description: "Call first to analyze or improve a Vampire: The Eternal Struggle (VTES) deck or a deck idea: never read a decklist from memory " +
-			"of its cards. Takes a decklist as text, a TWDA deck id or a deck link from VDB, VTES Decks or Amaranth, or an idea's cards with draft; validates it (sizes, crypt groups, banned cards, " +
+			"of its cards. Takes a decklist as text, a TWDA deck id, a deck link from VDB, VTES Decks or Amaranth, or, with Archon login, a published Archon deck uid, tournament code/uid or archon.vekn.net link, or an idea's cards with draft; validates it (sizes, crypt groups, banned cards, " +
 			"legality today) and returns the computed facts: the crypt table with capacities, disciplines, titles and texts, " +
 			"which crypt cards have what each library card requires and at which level, the library by type with every card's official text, " +
 			"the library by module with each module's density, expected copies per hand and chance of an opening hand holding one, " +
@@ -64,13 +64,13 @@ func addDeck(s *mcp.Server, l *Live) {
 			"its answers to the field's combat defenses, the costs, its budgets, concentration and staples beside its reference decks, its track record among winning decks (rarely played cards, cards no winner plays), the nearest archetypes and tournament decks with the cards that differ, and the procedure a deck analysis and advice follow.",
 		InputSchema: deckSchema,
 		Annotations: &mcp.ToolAnnotations{ReadOnlyHint: true, IdempotentHint: true, OpenWorldHint: new(false)},
-	}, func(ctx context.Context, _ *mcp.CallToolRequest, in deckInput) (*mcp.CallToolResult, any, error) {
+	}, func(ctx context.Context, req *mcp.CallToolRequest, in deckInput) (*mcp.CallToolResult, any, error) {
 		text := strings.TrimSpace(in.Deck)
 		if text == "" || len(text) > maxDeckInput {
 			return nil, nil, fmt.Errorf(`give one deck of at most %d characters: a decklist as text, a TWDA id or a deck link, e.g. {"deck": "2k6munduko"}`, maxDeckInput)
 		}
 		d := l.p.Load()
-		dk, err := d.readDeck(ctx, l, text, in.Draft)
+		dk, err := d.readDeck(ctx, l, text, in.Draft, MemberFrom(req))
 		if err != nil {
 			return nil, nil, err
 		}
@@ -84,7 +84,7 @@ func addDeck(s *mcp.Server, l *Live) {
 		dk.recipes, dk.librarySize = recipes, in.LibrarySize
 		today := time.Now().UTC().Format(time.DateOnly)
 		fixes, short := dk.fixes(today)
-		if dk.twda == nil && !dk.draft && len(fixes) > 0 {
+		if !dk.isArchived() && !dk.draft && len(fixes) > 0 {
 			hint := ""
 			if short {
 				hint = "\nFor a deck idea rather than a whole list, call vtes_deck with draft: its sizes are not checked."
@@ -96,17 +96,21 @@ func addDeck(s *mcp.Server, l *Live) {
 		if in.Detail {
 			limit = detailBudget
 		}
+		dataLine := DataLine(d.b)
+		if dk.archon != "" {
+			dataLine = ArchonDataLine(d.b, l.Archon())
+		}
 		var out strings.Builder
 		for fit := full; ; fit++ {
 			out.Reset()
-			if dk.write(&out, d, today, fixes, in.Detail, fit); out.Len()+len(DataLine(d.b)) <= limit {
+			if dk.write(&out, d, today, fixes, in.Detail, fit); out.Len()+len(dataLine) <= limit {
 				break
 			}
 			if fit == bare {
 				return nil, nil, fmt.Errorf("this list of %d distinct cards does not fit a result of %d characters even without its texts: give a list of fewer distinct cards", len(dk.entries), limit)
 			}
 		}
-		out.WriteString(DataLine(d.b))
+		out.WriteString(dataLine)
 		return &mcp.CallToolResult{Content: []mcp.Content{&mcp.TextContent{Text: out.String()}}}, nil, nil
 	})
 }
@@ -120,12 +124,17 @@ type deckEntry struct {
 type deck struct {
 	name, author, description string
 	source                    string
+	archon                    string
 	twda                      *bundle.Deck
 	entries                   []deckEntry
 	notes                     []string // how the list was read
 	draft                     bool     // an idea's cards: no size checked, no density computed
 	recipes                   []recipe // the caller's, for the odds of a hand
 	librarySize               int      // the caller's, for a draft's odds
+}
+
+func (dk *deck) isArchived() bool {
+	return dk.twda != nil || dk.archon != ""
 }
 
 // oddsSize is the library size the odds are computed over, and a sentence
@@ -144,19 +153,22 @@ func (dk *deck) oddsSize(nLibrary int) (int, string) {
 	return max(draftLibrary, nLibrary), fmt.Sprintf(" This deck idea's library taken as %d cards; library_size gives another.", draftLibrary)
 }
 
-var reSchemeless = regexp.MustCompile(`(?i)^(www\.)?(vdb\.im|vtesdecks\.com|amaranth\.vtes\.co\.nz)/`)
+var (
+	reSchemeless = regexp.MustCompile(`(?i)^(www\.)?(vdb\.im|vtesdecks\.com|amaranth\.vtes\.co\.nz|archon\.vekn\.net)/`)
+	reUUID       = regexp.MustCompile(`(?i)^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$`)
+)
 
-func (d *data) readDeck(ctx context.Context, l *Live, text string, draft bool) (*deck, error) {
-	dk, err := d.readAny(ctx, l, text, draft)
+func (d *data) readDeck(ctx context.Context, l *Live, text string, draft bool, member string) (*deck, error) {
+	dk, err := d.readAny(ctx, l, text, draft, member)
 	if dk != nil && draft {
-		if dk.draft = dk.twda == nil; !dk.draft {
-			dk.notes = append(dk.notes, "draft left aside: a TWDA deck is read whole, as archived")
+		if dk.draft = !dk.isArchived(); !dk.draft {
+			dk.notes = append(dk.notes, "draft left aside: a tournament deck is read whole, as archived")
 		}
 	}
 	return dk, err
 }
 
-func (d *data) readAny(ctx context.Context, l *Live, text string, draft bool) (*deck, error) {
+func (d *data) readAny(ctx context.Context, l *Live, text string, draft bool, member string) (*deck, error) {
 	if reSchemeless.MatchString(text) {
 		text = "https://" + text
 	}
@@ -168,16 +180,121 @@ func (d *data) readAny(ctx context.Context, l *Live, text string, draft bool) (*
 			return d.readVTESDecks(ctx, l, u)
 		case "amaranth.vtes.co.nz":
 			return d.readAmaranth(ctx, l, u)
+		case "archon.vekn.net":
+			return d.readArchonURL(l, u, member)
 		}
-		return nil, fmt.Errorf("primogen reads deck links from VDB (vdb.im), VTES Decks (vtesdecks.com) and Amaranth (amaranth.vtes.co.nz), not %s: give the list as text, one card per line with its count", u.Host)
+		return nil, fmt.Errorf("primogen reads deck links from VDB (vdb.im), VTES Decks (vtesdecks.com), Amaranth (amaranth.vtes.co.nz) and Archon (archon.vekn.net), not %s: give the list as text, one card per line with its count", u.Host)
 	}
 	if !strings.ContainsAny(text, " \t\n") {
 		if t := d.decks[text]; t != nil {
 			return d.fromTWDA(t), nil
 		}
+		if dk, err := d.readArchonID(l, text, member); dk != nil || err != nil {
+			return dk, err
+		}
 		return nil, fmt.Errorf("no deck of the TWDA has the id %q: give a TWDA id (e.g. 2k6munduko), a deck link, or the list as text, one card per line with its count", text)
 	}
 	return d.readText(text, draft)
+}
+
+func (d *data) readArchonURL(l *Live, u *url.URL, member string) (*deck, error) {
+	parts := strings.Split(strings.Trim(u.Path, "/"), "/")
+	id := parts[len(parts)-1]
+	dk, err := d.readArchonTarget(l.Archon(), id, member)
+	if dk != nil {
+		dk.source = u.String()
+	}
+	return dk, err
+}
+
+func (d *data) readArchonID(l *Live, text, member string) (*deck, error) {
+	a := l.Archon()
+	inArchon := a != nil && (a.DeckByUID[text] != nil || a.FindTournament(text) != nil)
+	if !inArchon && !reUUID.MatchString(text) {
+		return nil, nil
+	}
+	return d.readArchonTarget(a, text, member)
+}
+
+func (d *data) readArchonTarget(a *Archon, target, member string) (*deck, error) {
+	if member == "" {
+		return nil, fmt.Errorf("%s", archonLoginRequired)
+	}
+	if a == nil {
+		return nil, fmt.Errorf("the Archon export is not loaded on this server yet: try again shortly, or give the decklist as text")
+	}
+	ad := a.DeckByUID[target]
+	var otherDecks []string
+	if ad == nil {
+		if t := a.FindTournament(target); t != nil {
+			decks := a.DecksByTournament[t.UID]
+			if len(decks) == 0 {
+				return nil, fmt.Errorf("tournament %q (%s) has no published decklist in Archon", t.Name, cmp.Or(t.EventCode, t.UID))
+			}
+			for _, candidate := range decks {
+				if candidate.Winner && ad == nil {
+					ad = candidate
+				} else {
+					otherDecks = append(otherDecks, fmt.Sprintf("%s (%s)", candidate.UID, a.VEKN(candidate.UserUID)))
+				}
+			}
+			if ad == nil {
+				if len(decks) == 1 {
+					ad, otherDecks = decks[0], nil
+				} else {
+					return nil, fmt.Errorf("tournament %q (%s) has %d published decklists and no winner marked; call vtes_deck with one of their deck uids: %s",
+						t.Name, cmp.Or(t.EventCode, t.UID), len(decks), strings.Join(otherDecks, ", "))
+				}
+			}
+		}
+	}
+	if ad == nil {
+		return nil, fmt.Errorf("no published Archon deck or tournament has the id %q: call vtes_events to find the deck or tournament uid, or give the decklist as text", target)
+	}
+	t := a.TournamentByUID[ad.TournamentUID]
+	player := a.VEKN(ad.UserUID)
+	dk := &deck{name: ad.Name, description: ad.Comments}
+	if ad.Attribution.Kind == "Member" && ad.Attribution.VEKNID != "" {
+		dk.author = "VEKN " + ad.Attribution.VEKNID
+	}
+	if t != nil {
+		role := "played"
+		if ad.Winner {
+			role = "won"
+		}
+		dk.archon = fmt.Sprintf("Archon deck %s: %s by %s at %s (%s), %s, %s, %d players (%s).",
+			ad.UID, role, player, t.Name, cmp.Or(t.EventCode, t.UID), cmp.Or(t.Place(), "unspecified"), t.StartDate(), t.PlayerCount(), t.Format)
+		if ad.Winner {
+			if vekn := t.ExternalIDs["vekn"]; vekn != "" && d.decks[vekn] != nil {
+				dk.twda = d.decks[vekn]
+			}
+		}
+	} else {
+		dk.archon = fmt.Sprintf("Archon deck %s (%s).", ad.UID, player)
+	}
+	if len(otherDecks) > 0 {
+		dk.notes = append(dk.notes, fmt.Sprintf("other published decklists of this tournament (pass their uid to vtes_deck): %s", strings.Join(otherDecks, ", ")))
+	}
+	var unknown []string
+	for _, id := range slices.Sorted(maps.Keys(ad.Cards)) {
+		n := ad.Cards[id]
+		if n <= 0 {
+			continue
+		}
+		c := d.byID[id]
+		if c == nil {
+			unknown = append(unknown, strconv.Itoa(id))
+			continue
+		}
+		dk.entries = append(dk.entries, deckEntry{card: c, count: n})
+	}
+	if len(unknown) > 0 {
+		return nil, fmt.Errorf("the Archon deck %s names cards the card data does not hold (ids %s)", ad.UID, strings.Join(unknown, ", "))
+	}
+	if len(dk.entries) == 0 {
+		return nil, fmt.Errorf("the Archon deck %s holds no card", ad.UID)
+	}
+	return dk, nil
 }
 
 func (d *data) fromTWDA(t *bundle.Deck) *deck {
@@ -649,7 +766,12 @@ func (dk *deck) write(out *strings.Builder, d *data, today string, fixes []strin
 	b := d.b
 	crypt, library, nCrypt, nLibrary := dk.split()
 	fmt.Fprintf(out, "# Deck: %s\n", cmp.Or(dk.name, "(unnamed)"))
-	if t := dk.twda; t != nil {
+	if dk.archon != "" {
+		fmt.Fprintln(out, dk.archon)
+		if dk.author != "" {
+			fmt.Fprintf(out, "Deck by %s.\n", dk.author)
+		}
+	} else if t := dk.twda; t != nil {
 		fmt.Fprintf(out, "TWDA deck %s: won by %s at %s, %s, %s, %d players (%s).", t.ID, t.Player, t.Event, t.Place, t.Date, t.Players, t.Format)
 		if t.URL != "" {
 			fmt.Fprintf(out, " Event report: %s", t.URL)
@@ -665,7 +787,7 @@ func (dk *deck) write(out *strings.Builder, d *data, today string, fixes []strin
 		fmt.Fprintf(out, "Read from %s\n", dk.source)
 	}
 	comment := dk.description
-	if dk.twda != nil {
+	if comment == "" && dk.twda != nil {
 		comment = dk.twda.Comment
 	}
 	if strings.TrimSpace(comment) != "" {

@@ -1,6 +1,7 @@
 package tools
 
 import (
+	"cmp"
 	"compress/gzip"
 	"encoding/json"
 	"fmt"
@@ -9,6 +10,8 @@ import (
 	"time"
 
 	"github.com/modelcontextprotocol/go-sdk/mcp"
+
+	"github.com/lionel-panhaleux/primogen/internal/bundle"
 )
 
 type Archon struct {
@@ -17,6 +20,16 @@ type Archon struct {
 	Tournaments []ArchonTournament
 	Decks       []ArchonDeck
 	Leagues     []ArchonLeague
+
+	UserByUID         map[string]*ArchonUser
+	UserByVEKN        map[string]*ArchonUser
+	TournamentByUID   map[string]*ArchonTournament
+	TournamentByCode  map[string]*ArchonTournament
+	TournamentByVEKN  map[string]*ArchonTournament
+	DeckByUID         map[string]*ArchonDeck
+	DecksByTournament map[string][]*ArchonDeck
+	DecksByUser       map[string][]*ArchonDeck
+	LeagueByUID       map[string]*ArchonLeague
 }
 
 func (a *Archon) Date() string {
@@ -24,6 +37,44 @@ func (a *Archon) Date() string {
 		return strings.Replace(a.GeneratedAt[:16], "T", " ", 1) + " UTC"
 	}
 	return a.GeneratedAt
+}
+
+func (a *Archon) VEKN(userUID string) string {
+	if userUID == "" {
+		return "anonymous"
+	}
+	if u := a.UserByUID[userUID]; u != nil && u.VEKNID != "" {
+		return "VEKN " + u.VEKNID
+	}
+	return userUID
+}
+
+func (a *Archon) FindUser(q string) *ArchonUser {
+	q = strings.TrimSpace(q)
+	if q == "" {
+		return nil
+	}
+	vekn := strings.TrimSpace(strings.TrimPrefix(strings.TrimSpace(strings.TrimPrefix(strings.ToUpper(q), "VEKN")), "#"))
+	if vekn != "" {
+		if u := a.UserByVEKN[vekn]; u != nil {
+			return u
+		}
+	}
+	return a.UserByUID[q]
+}
+
+func (a *Archon) FindTournament(q string) *ArchonTournament {
+	q = strings.TrimSpace(q)
+	if q == "" {
+		return nil
+	}
+	if t := a.TournamentByUID[q]; t != nil {
+		return t
+	}
+	if t := a.TournamentByCode[strings.ToLower(q)]; t != nil {
+		return t
+	}
+	return a.TournamentByVEKN[q]
 }
 
 type ArchonUser struct {
@@ -39,6 +90,20 @@ type ArchonUser struct {
 	LimitedOnline      *ArchonRating `json:"limited_online"`
 	LimitedOffline     *ArchonRating `json:"limited_offline"`
 	Wins               []string      `json:"wins"`
+}
+
+func (u *ArchonUser) Rating(cat string) *ArchonRating {
+	switch cat {
+	case "constructed_offline":
+		return u.ConstructedOffline
+	case "constructed_online":
+		return u.ConstructedOnline
+	case "limited_offline":
+		return u.LimitedOffline
+	case "limited_online":
+		return u.LimitedOnline
+	}
+	return nil
 }
 
 type ArchonLink struct {
@@ -108,6 +173,27 @@ type ArchonTournament struct {
 	ReportedPlayerCount int               `json:"reported_player_count"`
 }
 
+func (t *ArchonTournament) StartDate() string {
+	if len(t.Start) >= 10 {
+		return t.Start[:10]
+	}
+	return t.Start
+}
+
+func (t *ArchonTournament) PlayerCount() int {
+	return max(len(t.Players), len(t.Standings), t.ReportedPlayerCount)
+}
+
+func (t *ArchonTournament) Place() string {
+	if t.Online {
+		return "Online"
+	}
+	if t.City != "" && t.Country != "" {
+		return t.City + ", " + t.Country
+	}
+	return cmp.Or(t.City, t.Country)
+}
+
 type ArchonScore struct {
 	GW int     `json:"gw"`
 	VP float64 `json:"vp"`
@@ -164,6 +250,16 @@ type ArchonDeck struct {
 	Winner        bool              `json:"winner"`
 }
 
+func (ad *ArchonDeck) DeckCards() []bundle.DeckCard {
+	out := make([]bundle.DeckCard, 0, len(ad.Cards))
+	for id, count := range ad.Cards {
+		if count > 0 {
+			out = append(out, bundle.DeckCard{ID: id, Count: count})
+		}
+	}
+	return out
+}
+
 type ArchonAttribution struct {
 	Kind   string `json:"kind"`
 	VEKNID string `json:"vekn_id"`
@@ -209,7 +305,18 @@ func ReadArchon(r io.Reader) (*Archon, error) {
 	if head.Type != "header" || head.Version != 2 || len(head.GeneratedAt) < len(time.DateOnly) {
 		return nil, fmt.Errorf("no v2 export header")
 	}
-	a := &Archon{GeneratedAt: head.GeneratedAt}
+	a := &Archon{
+		GeneratedAt:       head.GeneratedAt,
+		UserByUID:         map[string]*ArchonUser{},
+		UserByVEKN:        map[string]*ArchonUser{},
+		TournamentByUID:   map[string]*ArchonTournament{},
+		TournamentByCode:  map[string]*ArchonTournament{},
+		TournamentByVEKN:  map[string]*ArchonTournament{},
+		DeckByUID:         map[string]*ArchonDeck{},
+		DecksByTournament: map[string][]*ArchonDeck{},
+		DecksByUser:       map[string][]*ArchonDeck{},
+		LeagueByUID:       map[string]*ArchonLeague{},
+	}
 	rows := 0
 	for dec.More() {
 		var line struct {
@@ -223,6 +330,37 @@ func ReadArchon(r io.Reader) (*Archon, error) {
 		if line.Type == "eof" {
 			if line.Count != rows || dec.More() {
 				return nil, fmt.Errorf("export eof count %d after %d rows", line.Count, rows)
+			}
+			for i := range a.Users {
+				u := &a.Users[i]
+				a.UserByUID[u.UID] = u
+				if u.VEKNID != "" {
+					a.UserByVEKN[u.VEKNID] = u
+				}
+			}
+			for i := range a.Tournaments {
+				t := &a.Tournaments[i]
+				a.TournamentByUID[t.UID] = t
+				if t.EventCode != "" {
+					a.TournamentByCode[strings.ToLower(t.EventCode)] = t
+				}
+				if vekn := t.ExternalIDs["vekn"]; vekn != "" {
+					a.TournamentByVEKN[vekn] = t
+				}
+			}
+			for i := range a.Decks {
+				d := &a.Decks[i]
+				a.DeckByUID[d.UID] = d
+				if d.TournamentUID != "" {
+					a.DecksByTournament[d.TournamentUID] = append(a.DecksByTournament[d.TournamentUID], d)
+				}
+				if d.UserUID != "" {
+					a.DecksByUser[d.UserUID] = append(a.DecksByUser[d.UserUID], d)
+				}
+			}
+			for i := range a.Leagues {
+				l := &a.Leagues[i]
+				a.LeagueByUID[l.UID] = l
 			}
 			return a, nil
 		}
