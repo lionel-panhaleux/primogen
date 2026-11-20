@@ -725,13 +725,13 @@ func (dk *deck) write(out *strings.Builder, d *data, today string, fixes []strin
 		"Primogen does not serve theory.md and modules.md, which the procedures name: what you say of them beyond these facts is your own reading, " +
 		"to be said so.\n\n")
 	if dk.draft {
-		out.WriteString("This is a deck idea: the advice procedure applies to it, the analysis' steps it names on these cards.\n\n")
+		out.WriteString("This is a deck idea: the advice procedure applies to it.\n\n")
 	}
 	out.WriteString(strings.TrimSpace(b.DeckAnalysis))
 	out.WriteString("\n\n")
 	out.WriteString(strings.TrimSpace(b.DeckAdvice))
 	out.WriteString("\n\nAnswer from these facts and texts, never from memory of the cards. " +
-		"Where neither a text nor a ruling settles a point, say it is unsettled rather than filling the gap.\n\n")
+		"Where neither a text nor a ruling settles a point, search vtes_rulings_archive (the card's name, directors only) before saying it is unsettled.\n\n")
 }
 
 func writeCrypt(out *strings.Builder, crypt []deckEntry, n, fit int) {

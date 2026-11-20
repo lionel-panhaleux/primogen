@@ -33,5 +33,12 @@ date or an outside event is not a line.
   it: chosen at ship with the owner). Docs: product.md (the tool's row,
   what becomes public), operations.md (the App's key in sops, the limits),
   the skill changed or added.
+- `vtes_deck` sets a draft, and a list near no archetype, beside its
+  nearest archetype's staples: the library cards in three quarters of its
+  decks that the list lacks, defenses first, the archetype named with its
+  distance. Done when: `primogen query -draft deck` on the 2026-11-20
+  werewolf draft lists Bait and Switch among its nearest archetype's missing
+  staples, and a fresh regression answer to that entry offers it. Docs:
+  product.md (the `vtes_deck` row, "Grading a deck").
 
 <!-- completed-since-upkeep: 14 -->

@@ -29,7 +29,8 @@ type Bundle struct {
 	// RulesAnswer is knowledge/guide/rules-answer.md, the procedure a rules answer follows.
 	RulesAnswer string
 	// DeckAnalysis and DeckAdvice are knowledge/guide/deck-analysis.md and
-	// deck-advice.md, the procedures a deck answer follows.
+	// deck-advice.md, the procedures a deck answer follows; DeckAdvice also
+	// closes a card's statistics.
 	DeckAnalysis string
 	DeckAdvice   string
 	// Decks is the TWDA, by id.

@@ -747,6 +747,9 @@ func TestQueryStats(t *testing.T) {
 		if strings.Contains(out[i:], "**Voter Captivation**") {
 			t.Errorf("%v: Voter Captivation, played with Awe at another timing, is no competitor:\n%s", args, out[i:])
 		}
+		if !strings.Contains(out, "# Procedure: advice on a deck or an idea") {
+			t.Errorf("%v: the advice procedure does not close the result", args)
+		}
 	}
 	for _, tc := range []struct {
 		args []string

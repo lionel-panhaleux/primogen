@@ -22,7 +22,7 @@ compares them with upstream and records the commit below.
   strategist's graded cases stay in `calibration/codex-cases.md`, unserved.
   `rules-answer.md` closes every `vtes_rules_case` pack as its answer
   contract, `deck-analysis.md` and `deck-advice.md` every `vtes_deck`
-  dossier; `theory.md`, `modules.md`, `card-comparison.md` and
+  dossier, `deck-advice.md` every `vtes_card_stats` result; `theory.md`, `modules.md`, `card-comparison.md` and
   `meta-reading.md` are served by no tool yet.
   `examples/` holds the served examples (principles.md, principle 8): each
   an excerpt of one of primogen's own answers the owner graded clean, named

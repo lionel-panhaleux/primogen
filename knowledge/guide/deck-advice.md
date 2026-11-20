@@ -1,54 +1,35 @@
 # Procedure: advice on a deck or an idea
 
-Advice makes mechanics load-bearing where analysis only grades them: the
-grounding bites hardest here. Run the analysis first (`deck-analysis.md`,
-steps 1 to 4 and 7 on the draft), then:
+Answer the player's question first, and keep it short. Say only what
+changes the advice: a rule the list already meets, a ruling that repeats a
+card's text, or a claim the evidence does not hold goes unsaid. Read the
+deck first (its crypt, modules and pillars, as `vtes_deck` gives them).
 
-1. **Ask for the plan when it is unclear.** Advice serves the player's plan,
+1. **The plan.** Advice serves the player's plan, asked for when unclear,
    or names the trade-off of changing it.
-2. **Check the premise before overruling it.** When an inclusion looks dead
-   or redundant, verify the card texts and requirements that would make it
-   so: the player may have seen a constraint you missed (a recruit
-   requirement, a trigger's condition, a single point of failure).
-3. **Enumerate what fires each engine**, conditions read literally, base
-   actions included, before declaring it live or dead. When a plan needs
-   cards together, name the recipe from the card texts (Hunger of Marduk,
-   then a card giving an additional strike) and call `vtes_deck` with
-   `together`: the odds, and who has every requirement at which level, are
-   computed; the texts say which level gives the effect.
-4. **Survey the slot, never endorse the named card.** For each slot the
-   player asks about, the competitors in the card pool with the evidence and
-   the trade-off: `vtes_card_stats` on the card, within the deck's archetype
-   when `vtes_deck` names one, gives the cards winning decks play in its
-   place. Against opposing vote blocks, denial (cancel, lock out)
-   usually beats adding votes.
-5. **A unique card cannot carry a deck alone**: a build-around starts with
-   its fetch engine and its density, and with what that engine implies (a
-   tutor for equipment brings an equipment toolbox).
-6. **Check the structure the rules impose**: crypt groups (one group or two
-   consecutive), strike cards competing for the one strike a minion has per
-   round unless a card grants more, requirements of every recruit. A
-   structure the list already meets goes unsaid, and so does a ruling that
-   only confirms what the card's text plainly says: name a rule or a ruling
-   only where it changes the advice.
-7. **Judge a new idea against its baseline**: the established archetype
-   doing the same job, and the standard answers it must survive. For a
-   combat plan, `vtes_deck`'s combat posture gives how many winners carry
-   each defense and the deck's answers at the level its crypt plays them:
-   a defense a rush plan leaves unanswered is the first weakness to name.
-   A defense matters only against what it stops: a grapple denies only
-   strikes that are not hand strikes, and a deck winning combat by blocking
-   lands its block regardless. `vtes_deck`'s track record gives the cards
-   no winner of the window plays, each with its years legal and its count
-   in the whole TWDA. A rarely played card marks distance (`theory.md`);
-   an engine legal for years and in no winning deck, or in none for years,
-   has had its chances and not won. Say the idea built on it is not
-   competitive, in those words, before any praise of the engine, then what
-   it would need to compete; a casual plan is still worth helping.
-8. **Name the cut and the add**, in copies, with the pillar each serves.
-   The staples a list lacks and its cards few of its reference play are
-   where to look first, never a prescription: a deviation may be the
-   player's plan (step 1). A draft is not set beside its reference: call
-   `vtes_card_stats` within the nearest archetype on that archetype's
-   defensive staples, and offer the ones the idea lacks with what adopting
-   them costs the build (a title, a crypt group).
+2. **Read before judging.** A card is dead or redundant only once its text
+   and requirements say so, an ally's recruit requirement included; an
+   engine only once what fires it is enumerated, its condition read
+   literally, base actions included. The player may have seen what you
+   missed.
+3. **The structure.** Crypt groups (one, or two consecutive), one strike per
+   round unless a card grants more, every recruit's requirement. A unique
+   card needs its fetch engine in numbers (Magic of the Smith for a unique
+   weapon), and that engine brings its toolbox. Cards a plan needs together:
+   `vtes_deck` with `together` gives the odds.
+4. **The baseline.** Set the idea beside the archetype doing the same job
+   and the answers it must survive: for a combat plan, the combat posture's
+   defenses (Strike: combat ends, Immortal Grapple). Name what the plan must
+   beat first, and weigh the player's favourite card against that, not for
+   its synergy. A rarely played card only marks distance, but an engine
+   legal for years and in no winning deck (`vtes_deck`'s track record) is
+   not competitive: say so first, then what it would need, then help the
+   casual plan.
+5. **The slot.** For a slot the player asks about, the competitors
+   (`vtes_card_stats`, within the archetype) with the trade-off, never the
+   named card endorsed alone. Against opposing vote blocks, denial (cancel,
+   lock out) usually beats added votes. The archetype's staples the list
+   lacks, defenses first, are offered with what they cost the build (a
+   title, a crypt group); for a draft, `vtes_card_stats` within its nearest
+   archetype names them.
+6. **The changes.** Cuts and adds in copies, each with the pillar it serves.

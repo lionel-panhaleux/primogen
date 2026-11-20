@@ -276,11 +276,11 @@ func writeStats(out *strings.Builder, d *data, c *bundle.Card, arch *bundle.Arch
 		writeCompetitors(out, d, c, arch, scope, its, shown.competitors)
 	}
 	out.WriteString("## How to answer\n\n" +
-		"Survey the slot before advising a card (deck-advice.md, step 4): weigh each competitor's text against the player's plan and the table they face, " +
-		"name the trade-off, and never endorse the card the player named for its play rate alone. " +
-		"Call vtes_cards for the rulings of any card the advice relies on, vtes_deck for a deck these figures should be read against.\n\n" +
-		"Answer from these figures and texts, never from memory of the cards. " +
-		"Where neither a text nor a ruling settles a point, say it is unsettled rather than filling the gap.\n\n")
+		"Call vtes_cards for the rulings of any card the advice relies on, " +
+		"vtes_deck for a deck these figures should be read against.\n\n")
+	out.WriteString(strings.TrimSpace(d.b.DeckAdvice))
+	out.WriteString("\n\nAnswer from these figures and texts, never from memory of the cards. " +
+		"Where neither a text nor a ruling settles a point, search vtes_rulings_archive (the card's name, directors only) before saying it is unsettled.\n\n")
 }
 
 // writeWith names the library cards most particular to the decks playing c,
