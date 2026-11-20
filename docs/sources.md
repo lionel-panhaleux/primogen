@@ -12,7 +12,7 @@ service is checked against that service before it is relied on.
 | `static.krcg.org/data` (`vtes.json`, `v5/expansions.json`, `twda.json`) | Cards with their rulings, each with the day it became tournament legal (30 days after its release before 2025-09-21: krcg's `vekn_csv.py`); the sets their printings name by code; the tournament winning deck archive: an object keyed by deck id, each deck with its event (date, place, players, the report's link), its winner, its author's comment, and its cards by card id, each with the author's comment on it | `vtes.json` and `twda.json` point at `data/v5`, in the krcg 5 model (`krcg/models.py`), rebuilt every 6 hours and at once when a ruling is approved; `data/v4`, the krcg 4 model, is a snapshot frozen on 2026-06-28 (krcg-static `62cab1c`). The `Last-Modified` of each file moves at each rebuild | Public files |
 | `vtes-biased/vtes-rulings` (`rulings.yaml`, `groups.yaml`, `references.yaml`) | The rulings database: the durable source of truth for rulings, the card groups they apply to, the URL of each reference | Pushed by the rulings site on each approval | Public repository |
 | `rulings.krcg.org` | Curation of the rulings database by the rulemongers; proposals under discussion | Live | Pages public; a public read API (below) |
-| `usenet.krcg.org` (`vtes-biased/newsgroup-archive`) | The rulings archive: 14,418 threads, 1994 to today (the newsgroup, the V:EKN forum, BoardGameGeek), each one a rules director took part in, or that a ruling or the history of changes cites (the 1998-08-01 DCI floor rules) | Nightly forum sweep at 04:17 UTC | Pages and a search index; every thread in one file, `usenet.krcg.org/archive.json.gz` (below) |
+| `usenet.krcg.org` (`vtes-biased/newsgroup-archive`) | The rulings archive: 14,464 threads, 1994 to today (the newsgroup, the V:EKN forum, BoardGameGeek), each one a rules director took part in, or that a ruling or the history of changes cites (the 1998-08-01 DCI floor rules) | Nightly forum sweep at 04:17 UTC | Pages and a search index; every thread in one file, `usenet.krcg.org/archive.json.gz` (below) |
 | `vtes-biased/vtes-advanced-rules` | The advanced rules | By hand; primogen copies them with `/sync` ([provenance.md](provenance.md)) | Public repository |
 | `vtes-biased/archon-vibe` (`frontend/src/lib/help-content/`) | The official rulebook, tournament rules, judges' guide and code of ethics, as markdown, served at `archon.vekn.net/help/<page>`, each heading's id made by archon's renderer (`frontend/src/lib/markdown.ts`) | On each push to `main`, deployed with Archon; primogen probes the last commit touching the documents, and warns when the renderer moved past the one it reproduces | Public repository; pages rendered in the browser, which scroll to an id once drawn |
 | `api.archon.vekn.net` | Tournaments, published decklists, members and ratings, community links | Export rebuilt within 15 minutes of a change | App token (below) |
@@ -107,10 +107,15 @@ compares the unzipped content.
 - A reply posted after the director's last post in a topic is seen only by
   the weekly refresh, which reads again the topics with a post in the last 60
   days: a reply to a topic quiet for longer is missed.
-- The forum's search under-reports (5,609 of the 6,947 posts on Ankha's
-  profile), so a topic no ruling cites can be missing. Every forum topic the
-  rulings database cites by its forum link is checked each night and fetched
-  if absent; one the forum no longer serves fails the sweep.
+- The sweep reads each director's public profile post listing
+  (`/forum/topics/posts/mode-latest/userid-<id>?sel=-1`), which returns every
+  public post (5,661 of 7,003 on Ankha's profile and 2,002 of 4,269 on Pascal
+  Bertrand's on 2026-11-20; the rest are in non-public forum categories
+  invisible without login, not a search gap — the old search missed 97
+  early-2011 posts by Pascal Bertrand across 58 topics, adding the 45 topics —
+  64 of his posts — the archive lacked). Every forum topic the rulings database
+  cites by its forum link is checked each night and fetched if absent; one the
+  forum no longer serves fails the sweep.
 - GitHub disables a scheduled workflow after 60 days without repository
   activity, a term its docs leave undefined. A monthly empty commit, dated in
   its message, is the activity.
