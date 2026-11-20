@@ -847,6 +847,56 @@ func TestQueryMeta(t *testing.T) {
 	if i < 0 || j < i || !strings.Contains(out[i:j], "- Hunger of Marduk: ") || !strings.Contains(out[j:], "The representative decks the labels pick:\n- 12494, ") {
 		t.Errorf("Haqim Royalty's core without Hunger of Marduk, or its decks without 12494:\n%s", out)
 	}
+	for _, w := range testWarnings {
+		if strings.Contains(w, "map to no country") {
+			t.Errorf("unmapped TWDA place in labels' window: %s", w)
+		}
+	}
+	outFR, err := query("-country", "FR", "meta")
+	if err != nil {
+		t.Fatal(err)
+	}
+	outFrance, err := query("-country", "France", "meta")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if outFR != outFrance {
+		t.Errorf("country code FR and name France differ")
+	}
+	if !strings.Contains(outFR, "(filtered to France (FR), online events excluded)") || !strings.Contains(outFR, "| 1 | **") {
+		t.Errorf("filtered country meta missing summary or shares:\n%s", outFR)
+	}
+	outEU, err := query("-continent", "Europe", "meta")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(outEU, "(filtered to Europe, online events excluded)") || !strings.Contains(outEU, "| 1 | **") {
+		t.Errorf("filtered continent meta missing summary or shares:\n%s", outEU)
+	}
+	outEmpty, err := query("-country", "IS", "meta")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(outEmpty, "(filtered to Iceland (IS), online events excluded)") ||
+		!strings.Contains(outEmpty, "No tournament-winning decks in the window match Iceland (IS).") ||
+		strings.Contains(outEmpty, "## The core of the leading archetypes") {
+		t.Errorf("empty-window country meta unexpected:\n%s", outEmpty)
+	}
+	outArchEU, err := query("-continent", "Europe", "meta", "Haqim Royalty")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(outArchEU, "(filtered to Europe, online events excluded)") || !strings.Contains(outArchEU, "## Share") {
+		t.Errorf("filtered archetype meta unexpected:\n%s", outArchEU)
+	}
+	outArchEmpty, err := query("-country", "IS", "meta", "Haqim Royalty")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(outArchEmpty, "No tournament-winning decks in the window match Iceland (IS).") ||
+		!strings.Contains(outArchEmpty, "No deck of it won in the window.") {
+		t.Errorf("empty-window archetype meta unexpected:\n%s", outArchEmpty)
+	}
 	for _, tc := range []struct {
 		args []string
 		err  string
@@ -854,6 +904,9 @@ func TestQueryMeta(t *testing.T) {
 		{[]string{"meta", "Toreador"}, `no archetype is named "Toreador". Those whose name holds a word of it: **Weenie Toreador** (C70).`},
 		{[]string{"meta", "Nothing"}, "None has a name holding a word of it. vtes_meta without an archetype names the leading ones"},
 		{[]string{"-months", "99", "meta"}, "months must be 1 to "},
+		{[]string{"-country", "Nowhere", "meta"}, `unknown country "Nowhere"`},
+		{[]string{"-continent", "Atlantis", "meta"}, `unknown continent "Atlantis": use one of Europe, North America, South America, Asia, Oceania, Africa`},
+		{[]string{"-country", "FR", "-continent", "Asia", "meta"}, `France (FR) is in Europe, not Asia`},
 	} {
 		if _, err := query(tc.args...); err == nil || !strings.Contains(err.Error(), tc.err) {
 			t.Errorf("%v: error %v, want %q", tc.args, err, tc.err)

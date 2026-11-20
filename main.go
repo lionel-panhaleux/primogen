@@ -34,7 +34,7 @@ const usage = `usage:
       archive WORDS...           vtes_rulings_archive (-directors: the sitting rules directors' posts only)
       deck LIST|ID|LINK|-        vtes_deck: a decklist (its lines as one or several arguments, or - for stdin), a TWDA id or a deck link (VDB, VTES Decks, Amaranth); -draft: a deck idea's cards
       stats CARD [ARCHETYPE]     vtes_card_stats: a card's play rates, companions and competitors, overall or within an archetype
-      meta [ARCHETYPE]           vtes_meta: the archetypes' shares of the latest window, or one archetype's (-months: the window's length)
+      meta [ARCHETYPE]           vtes_meta: the archetypes' shares of the latest window, or one archetype's (-months: the window's length; -country, -continent: geographic filter)
       events [TOURNAMENT]        vtes_events: tournaments, standings, rankings (-rankings, -category), a member (-member), leagues (-league) or community links (-links)
       feedback QUESTION WRONG EXPECTED   vtes_feedback: file a report on an answer as a public GitHub issue, through the hosted server
   primogen stdio [-bundle PATH]                    serve the tools over stdio, for a local MCP client
@@ -120,7 +120,8 @@ func query(ctx context.Context, fs *flag.FlagSet, path *string, args []string, s
 	category := fs.String("category", "", "events: rating category (constructed_offline, constructed_online, limited_offline, limited_online)")
 	league := fs.String("league", "", "events: a league's Archon uid or words of its name, or all")
 	links := fs.Bool("links", false, "events: list community links")
-	country := fs.String("country", "", "events: ISO 3166-1 alpha-2 country code")
+	country := fs.String("country", "", "events/meta: ISO 3166-1 alpha-2 country code (or country name for meta)")
+	continent := fs.String("continent", "", "meta: continent (Europe, North America, South America, Asia, Oceania, Africa)")
 	since := fs.String("since", "", "events: start date lower bound (YYYY-MM-DD)")
 	until := fs.String("until", "", "events: start date upper bound (YYYY-MM-DD)")
 	rank := fs.String("rank", "", "events: championship level (NC, CC, basic)")
@@ -171,6 +172,12 @@ func query(ctx context.Context, fs *flag.FlagSet, path *string, args []string, s
 		tool = "vtes_meta"
 		if *months != 0 {
 			in["months"] = *months
+		}
+		if *country != "" {
+			in["country"] = *country
+		}
+		if *continent != "" {
+			in["continent"] = *continent
 		}
 		if len(rest) > 0 {
 			in["archetype"] = strings.Join(rest, " ")

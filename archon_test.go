@@ -415,6 +415,53 @@ func TestArchonLoginAndExport(t *testing.T) {
 		!strings.Contains(text, "019f6a65-2222-7214-bcc9-4e46534b9d62, Paris Haqim: won by VEKN 1002345 at Paris Spring Open (PS-2605)") {
 		t.Fatalf("member vtes_meta(Haqim Royalty): isErr=%v\n%s", isErr, text)
 	}
+	if text, isErr := callTool(memberCS, "vtes_meta", map[string]any{"country": "SE"}); isErr ||
+		!strings.Contains(text, "(filtered to Sweden (SE), online events excluded)") ||
+		!strings.Contains(text, "1 of 1 finished Archon tournaments (13 players in all) published decklists beyond the winner") {
+		t.Fatalf("member vtes_meta(country=SE): isErr=%v\n%s", isErr, text)
+	}
+	if text, isErr := callTool(memberCS, "vtes_meta", map[string]any{"country": "France"}); isErr ||
+		!strings.Contains(text, "(filtered to France (FR), online events excluded)") ||
+		!strings.Contains(text, "Of 1 finished Archon tournaments in the window, none published decklists beyond the winner.") {
+		t.Fatalf("member vtes_meta(country=France): isErr=%v\n%s", isErr, text)
+	}
+	if text, isErr := callTool(memberCS, "vtes_meta", map[string]any{"continent": "Europe"}); isErr ||
+		!strings.Contains(text, "(filtered to Europe, online events excluded)") ||
+		!strings.Contains(text, "1 of 2 finished Archon tournaments (13 players in all) published decklists beyond the winner") {
+		t.Fatalf("member vtes_meta(continent=Europe): isErr=%v\n%s", isErr, text)
+	}
+	if text, isErr := callTool(memberCS, "vtes_meta", map[string]any{"continent": "Asia"}); isErr ||
+		!strings.Contains(text, "No finished Archon tournaments in the window match Asia.") {
+		t.Fatalf("member vtes_meta(continent=Asia): isErr=%v\n%s", isErr, text)
+	}
+	if text, isErr := callTool(memberCS, "vtes_meta", map[string]any{"archetype": "Haqim Royalty", "country": "SE"}); isErr ||
+		!strings.Contains(text, "Its published Archon decks in the window, of 1:") ||
+		!strings.Contains(text, "019f6a65-01d4-7214-bcc9-4e46534b9d62") ||
+		strings.Contains(text, "019f6a65-2222-7214-bcc9-4e46534b9d62") {
+		t.Fatalf("member vtes_meta(Haqim Royalty, country=SE): isErr=%v\n%s", isErr, text)
+	}
+	if text, isErr := callTool(memberCS, "vtes_meta", map[string]any{"archetype": "Haqim Royalty", "continent": "Asia"}); isErr ||
+		!strings.Contains(text, "Full-field (Archon): no finished tournaments in the window match Asia.") {
+		t.Fatalf("member vtes_meta(Haqim Royalty, continent=Asia): isErr=%v\n%s", isErr, text)
+	}
+	// Online Archon events are excluded when a geographic filter is set, even if country is populated.
+	withOnline := append(append([]string{}, lines...),
+		`{"type":"tournament","data":{"uid":"019fe999-3333-7549-8f9a-70dcc09a03d9","name":"Nordic Online Open","format":"Standard","rank":"","online":true,"start":"2026-06-20T10:00:00","finish":"2026-06-20T18:00:00","timezone":"Europe/Stockholm","country":"SE","state":"Finished","event_code":"NO-2606","winner":"019f6a5e-d1e6-7347-965e-4dac09bf03a4","reported_player_count":15}}`,
+		fmt.Sprintf(`{"type":"deck","data":{"uid":"019f6a65-3333-7214-bcc9-4e46534b9d62","tournament_uid":"019fe999-3333-7549-8f9a-70dcc09a03d9","user_uid":"019f6a5e-d1e6-7347-965e-4dac09bf03a4","name":"Online Haqim","cards":%s,"attribution":{"kind":"Owner"},"winner":true}}`, cardsJSON),
+		`{"type":"deck","data":{"uid":"019f6a65-4444-7214-bcc9-4e46534b9d62","tournament_uid":"019fe999-3333-7549-8f9a-70dcc09a03d9","user_uid":"019f6a5e-d5dd-74b9-9aab-00919d4de7dc","name":"Online Finalist","cards":{"100001":1,"200001":1},"attribution":{"kind":"Owner"},"winner":false}}`,
+	)
+	up.setExport(2, "2026-11-20T09:16:00.000000", withOnline, len(withOnline))
+	r.refreshArchon(ctx, now.Add(time.Minute))
+	if text, isErr := callTool(memberCS, "vtes_meta", map[string]any{}); isErr ||
+		!strings.Contains(text, "2 of 3 finished Archon tournaments (28 players in all)") {
+		t.Fatalf("unfiltered vtes_meta with online event: isErr=%v\n%s", isErr, text)
+	}
+	if text, isErr := callTool(memberCS, "vtes_meta", map[string]any{"country": "SE"}); isErr ||
+		!strings.Contains(text, "1 of 1 finished Archon tournaments (13 players in all)") {
+		t.Fatalf("country=SE vtes_meta should exclude online event: isErr=%v\n%s", isErr, text)
+	}
+	up.setExport(2, "2026-11-20T09:15:00.000000", lines, len(lines))
+	r.refreshArchon(ctx, now.Add(2*time.Minute))
 
 	ts, err := oauthHandler.TokenSource(ctx)
 	if err != nil || ts == nil {

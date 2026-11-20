@@ -18,6 +18,8 @@ import (
 type metaInput struct {
 	Archetype string `json:"archetype,omitempty"`
 	Months    int    `json:"months,omitempty"`
+	Country   string `json:"country,omitempty"`
+	Continent string `json:"continent,omitempty"`
 	Detail    bool   `json:"detail,omitempty"`
 }
 
@@ -26,6 +28,8 @@ var metaSchema = &jsonschema.Schema{
 	Properties: map[string]*jsonschema.Schema{
 		"archetype": {Type: "string", Description: `an archetype's name or ref, as this tool or vtes_deck names it ("Haqim Royalty", "C1"): its share over time, its core cards and its decks; omitted, the whole meta`},
 		"months":    {Type: "integer", Description: "the window's length in months, ending at the newest tournament-winning deck; 12 when omitted"},
+		"country":   {Type: "string", Description: `filter by country: ISO 3166-1 alpha-2 code or country name (e.g. "FR", "France", "US", "Brazil"); excludes online events`},
+		"continent": {Type: "string", Description: `filter by continent: Europe, North America, South America, Asia, Oceania, or Africa; excludes online events`},
 		"detail":    {Type: "boolean", Description: "longer lists"},
 	},
 }
@@ -54,6 +58,7 @@ func addMeta(s *mcp.Server, l *Live) {
 			"Returns the archetypes' shares of the tournament-winning decks (TWDA) of the latest window, weighted by event size, " +
 			"with the share in no archetype stated; what rises and falls against the previous window and the cards behind the move; " +
 			"each leading archetype's core cards; and for a logged-in VEKN member, full-field play share against win share and conversion across the window's Archon events that published decklists beyond the winner. " +
+			"Optional country (ISO 3166-1 alpha-2 code or country name) and continent filters narrow both TWDA winners and Archon full-field events, excluding online events. " +
 			"With an archetype: its share over time, its core cards and its representative and newest decks.",
 		InputSchema: metaSchema,
 		Annotations: &mcp.ToolAnnotations{ReadOnlyHint: true, IdempotentHint: true, OpenWorldHint: new(false)},
@@ -68,9 +73,12 @@ func addMeta(s *mcp.Server, l *Live) {
 			return nil, nil, fmt.Errorf("months must be 1 to %d: the labels' window opens %s and a window needs the one before it; call vtes_meta again with months in that range",
 				m.maxMonths, d.rel.Class.Since)
 		}
+		geo, err := parseMetaFilter(in.Country, in.Continent)
+		if err != nil {
+			return nil, nil, err
+		}
 		var arch *bundle.Archetype
 		if in.Archetype != "" {
-			var err error
 			if arch, err = d.findArchetype(in.Archetype, nil, "vtes_meta"); err != nil {
 				return nil, nil, err
 			}
@@ -82,12 +90,15 @@ func addMeta(s *mcp.Server, l *Live) {
 		}
 		var out strings.Builder
 		if arch == nil {
-			writeMeta(&out, d, m, archon, member, months, in.Detail)
+			writeMeta(&out, d, m, archon, member, months, geo, in.Detail)
 		} else {
-			writeArchetype(&out, d, m, archon, member, arch, months, in.Detail)
+			writeArchetype(&out, d, m, archon, member, arch, months, geo, in.Detail)
 		}
 		out.WriteString("## How to answer\n\n" +
 			"Read the meta from these figures: name the window, say the TWDA decks won their events (what wins, not what is played) and give the share in no archetype. ")
+		if geo.active() {
+			fmt.Fprintf(&out, "State the geographic filter (%s, online events excluded). ", geo.label())
+		}
 		if archon != nil {
 			out.WriteString("Where the full-field Archon section is present, distinguish play share and conversion across the events that published decklists beyond the winner from TWDA win share across all reported winners. ")
 		}
@@ -109,21 +120,87 @@ func addMeta(s *mcp.Server, l *Live) {
 	})
 }
 
+type metaFilter struct {
+	country   bundle.Country
+	continent string
+}
+
+func parseMetaFilter(country, continent string) (metaFilter, error) {
+	var f metaFilter
+	if s := strings.TrimSpace(country); s != "" {
+		c, ok := bundle.LookupCountry(s)
+		if !ok {
+			return f, fmt.Errorf("unknown country %q: pass an ISO 3166-1 alpha-2 code (e.g. \"FR\", \"US\", \"BR\") or a country name (e.g. \"France\", \"United States\", \"Brazil\")", s)
+		}
+		f.country = c
+	}
+	if s := strings.TrimSpace(continent); s != "" {
+		cont, ok := bundle.LookupContinent(s)
+		if !ok {
+			return f, fmt.Errorf("unknown continent %q: use one of %s", s, strings.Join(bundle.Continents, ", "))
+		}
+		f.continent = cont
+	}
+	if f.country.Code != "" && f.continent != "" && f.country.Continent != f.continent {
+		return f, fmt.Errorf("%s (%s) is in %s, not %s: pass either country or continent, or matching values",
+			f.country.Name, f.country.Code, f.country.Continent, f.continent)
+	}
+	return f, nil
+}
+
+func (f metaFilter) active() bool { return f.country.Code != "" || f.continent != "" }
+
+func (f metaFilter) label() string {
+	if f.country.Code != "" {
+		return fmt.Sprintf("%s (%s)", f.country.Name, f.country.Code)
+	}
+	return f.continent
+}
+
+func (f metaFilter) matchesCode(code string) bool {
+	if !f.active() {
+		return true
+	}
+	if code == "" {
+		return false
+	}
+	if f.country.Code != "" {
+		return strings.EqualFold(code, f.country.Code)
+	}
+	return bundle.CountryContinent(code) == f.continent
+}
+
+func (f metaFilter) matchesArchon(t *ArchonTournament) bool {
+	if !f.active() {
+		return true
+	}
+	if t.Online {
+		return false
+	}
+	return f.matchesCode(t.Country)
+}
+
 // metaData places the window's decks once per bundle.
 type metaData struct {
 	since     time.Time // the labels' window opens after it
 	newest    time.Time
 	maxMonths int
-	group     []int  // each window deck's archetype, -1 for none
-	labelled  []bool // placed by the owner, archetype or noise
+	group     []int    // each window deck's archetype, -1 for none
+	labelled  []bool   // placed by the owner, archetype or noise
+	country   []string // ISO 3166-1 alpha-2 from Place, "" for online/unmapped
 }
 
 func (d *data) meta() *metaData {
 	d.metaOnce.Do(func() {
 		r := d.rel
-		m := &metaData{group: make([]int, len(r.Decks)), labelled: make([]bool, len(r.Decks))}
+		m := &metaData{
+			group:    make([]int, len(r.Decks)),
+			labelled: make([]bool, len(r.Decks)),
+			country:  make([]string, len(r.Decks)),
+		}
 		for i, t := range r.Decks {
 			m.group[i], m.labelled[i] = r.Placement(i)
+			m.country[i], _ = bundle.PlaceCountry(t.Place)
 			if day, err := time.Parse(time.DateOnly, t.Date); err == nil && day.After(m.newest) {
 				m.newest = day
 			}
@@ -198,11 +275,11 @@ func (t *tally) pct(players int) float64 {
 	return 100 * float64(players) / float64(t.players)
 }
 
-func (d *data) tally(m *metaData, s span) *tally {
+func (d *data) tally(m *metaData, s span, geo metaFilter) *tally {
 	r := d.rel
 	t := &tally{span: s, groups: map[*bundle.Archetype]*share{}, roots: map[*bundle.Archetype]*share{}, cards: map[string]int{}}
 	for i, dk := range r.Decks {
-		if !s.holds(dk.Date) {
+		if !s.holds(dk.Date) || !geo.matchesCode(m.country[i]) {
 			continue
 		}
 		t.decks++
@@ -252,16 +329,20 @@ func featureName(f string) string {
 	return strings.TrimPrefix(f, "l:")
 }
 
-func writeWindow(out *strings.Builder, d *data, cur, prev *tally, archon *Archon, member bool, months int) {
+func writeWindow(out *strings.Builder, d *data, cur, prev *tally, archon *Archon, member bool, months int, geo metaFilter) {
 	r := d.rel
 	c := r.Class
 	length := fmt.Sprintf("%d months", months)
 	if months == 1 {
 		length = "month"
 	}
-	fmt.Fprintf(out, "Window: the %s to %s, the newest deck of the TWDA: %s, %d decks won at events of %d players in all. "+
+	filterNote := ""
+	if geo.active() {
+		filterNote = fmt.Sprintf(" (filtered to %s, online events excluded)", geo.label())
+	}
+	fmt.Fprintf(out, "Window: the %s to %s, the newest deck of the TWDA%s: %s, %d decks won at events of %d players in all. "+
 		"Previous window: %s, %d decks, %d players.\n",
-		length, cur.to.Format(time.DateOnly), cur.span, cur.decks, cur.players, prev.span, prev.decks, prev.players)
+		length, cur.to.Format(time.DateOnly), filterNote, cur.span, cur.decks, cur.players, prev.span, prev.decks, prev.players)
 	out.WriteString("A deck weighs its event's players: a share is the share of those players whose event a deck of the archetype won.")
 	if n := cur.unweighted + prev.unweighted; n > 0 {
 		fmt.Fprintf(out, " %d of these decks have no player count and weigh nothing.", n)
@@ -333,7 +414,7 @@ func convPct(wins, played int) float64 {
 	return 100 * float64(wins) / float64(played)
 }
 
-func (d *data) fieldTally(a *Archon, s span) *fieldTally {
+func (d *data) fieldTally(a *Archon, s span, geo metaFilter) *fieldTally {
 	if a == nil {
 		return nil
 	}
@@ -344,7 +425,7 @@ func (d *data) fieldTally(a *Archon, s span) *fieldTally {
 	}
 	for i := range a.Tournaments {
 		t := &a.Tournaments[i]
-		if t.State != "Finished" || !s.holds(t.StartDate()) {
+		if t.State != "Finished" || !s.holds(t.StartDate()) || !geo.matchesArchon(t) {
 			continue
 		}
 		ft.finishedEvents++
@@ -429,13 +510,17 @@ func (ft *fieldTally) ranked(cur *tally) []*bundle.Archetype {
 	})
 }
 
-func writeField(out *strings.Builder, r *bundle.Relatives, cur *tally, ft *fieldTally, shown int) {
+func writeField(out *strings.Builder, r *bundle.Relatives, cur *tally, ft *fieldTally, shown int, geo metaFilter) {
 	if ft == nil {
 		return
 	}
 	out.WriteString("## Full-field play against win share (Archon)\n\n")
 	if ft.events == 0 {
-		fmt.Fprintf(out, "Of %d finished Archon tournaments in the window, none published decklists beyond the winner.\n\n", ft.finishedEvents)
+		if ft.finishedEvents == 0 && geo.active() {
+			fmt.Fprintf(out, "No finished Archon tournaments in the window match %s.\n\n", geo.label())
+		} else {
+			fmt.Fprintf(out, "Of %d finished Archon tournaments in the window, none published decklists beyond the winner.\n\n", ft.finishedEvents)
+		}
 		return
 	}
 	placed := ft.decks - ft.none.played
@@ -466,68 +551,78 @@ func writeField(out *strings.Builder, r *bundle.Relatives, cur *tally, ft *field
 		cur.pct(cur.noise.players+cur.none.players))
 }
 
-func writeMeta(out *strings.Builder, d *data, m *metaData, archon *Archon, member bool, months int, detail bool) {
+func writeMeta(out *strings.Builder, d *data, m *metaData, archon *Archon, member bool, months int, geo metaFilter, detail bool) {
 	r := d.rel
 	shown := metaShown[detail]
-	cur, prev := d.tally(m, m.span(months, 0)), d.tally(m, m.span(months, 1))
-	ft := d.fieldTally(archon, cur.span)
+	cur, prev := d.tally(m, m.span(months, 0), geo), d.tally(m, m.span(months, 1), geo)
+	ft := d.fieldTally(archon, cur.span, geo)
 	out.WriteString("# The meta among tournament-winning decks\n\n")
-	writeWindow(out, d, cur, prev, archon, member, months)
+	writeWindow(out, d, cur, prev, archon, member, months, geo)
 
-	labelled, placed := 0, 0
-	for _, s := range cur.roots {
-		labelled += s.players - s.placedPlayers
-		placed += s.placedPlayers
-	}
 	out.WriteString("## Shares\n\n")
-	fmt.Fprintf(out, "Of the window's players, %.0f%% saw a deck the labels hold win, %.0f%% one placed by its nearest archetype, "+
-		"and **%.0f%% one in no archetype**: %.0f%% the labels put in none (%d decks), %.0f%% near no archetype (%d decks: a new archetype, or a pass over the labels).\n\n",
-		cur.pct(labelled), cur.pct(placed), cur.pct(cur.noise.players+cur.none.players),
-		cur.pct(cur.noise.players), cur.noise.decks, cur.pct(cur.none.players), cur.none.decks)
-
 	ranked := cur.ranked()
-	out.WriteString("| # | Archetype | Share | Decks (placed by similarity) | Previous share | Change, in points |\n|---|---|---|---|---|---|\n")
-	for i, a := range ranked[:min(len(ranked), shown.archetypes)] {
-		s, p := cur.of(a), prev.of(a)
-		fmt.Fprintf(out, "| %d | %s | %.1f%% | %d (%d) | %.1f%% | %+.1f |\n", i+1, archetypeName(r, a), cur.pct(s.players), s.decks, s.placed,
-			prev.pct(p.players), cur.pct(s.players)-prev.pct(p.players))
-	}
-	if rest := ranked[min(len(ranked), shown.archetypes):]; len(rest) > 0 {
-		players := 0
-		for _, a := range rest {
-			players += cur.of(a).players
+	if cur.decks == 0 {
+		if geo.active() {
+			fmt.Fprintf(out, "No tournament-winning decks in the window match %s.\n\n", geo.label())
+		} else {
+			out.WriteString("No tournament-winning decks in the window.\n\n")
 		}
-		fmt.Fprintf(out, "| | %d more archetypes (detail lists more) | %.1f%% together | | | |\n", len(rest), cur.pct(players))
-	}
-	fmt.Fprintf(out, "| | in no archetype | %.1f%% | %d (%d near none) | %.1f%% | %+.1f |\n\n",
-		cur.pct(cur.noise.players+cur.none.players), cur.noise.decks+cur.none.decks, cur.none.decks,
-		prev.pct(prev.noise.players+prev.none.players), cur.pct(cur.noise.players+cur.none.players)-prev.pct(prev.noise.players+prev.none.players))
-	var variants []string
-	for _, a := range ranked[:min(len(ranked), shown.archetypes)] {
-		for i := range r.Class.Archetypes {
-			if v := &r.Class.Archetypes[i]; v.VariantOf == a.Ref && cur.groups[v] != nil {
-				variants = append(variants, fmt.Sprintf("%s (%s) %d of %s's %d", v.Name, v.Ref, cur.groups[v].decks, a.Name, cur.of(a).decks))
+	} else {
+		labelled, placed := 0, 0
+		for _, s := range cur.roots {
+			labelled += s.players - s.placedPlayers
+			placed += s.placedPlayers
+		}
+		fmt.Fprintf(out, "Of the window's players, %.0f%% saw a deck the labels hold win, %.0f%% one placed by its nearest archetype, "+
+			"and **%.0f%% one in no archetype**: %.0f%% the labels put in none (%d decks), %.0f%% near no archetype (%d decks: a new archetype, or a pass over the labels).\n\n",
+			cur.pct(labelled), cur.pct(placed), cur.pct(cur.noise.players+cur.none.players),
+			cur.pct(cur.noise.players), cur.noise.decks, cur.pct(cur.none.players), cur.none.decks)
+
+		out.WriteString("| # | Archetype | Share | Decks (placed by similarity) | Previous share | Change, in points |\n|---|---|---|---|---|---|\n")
+		for i, a := range ranked[:min(len(ranked), shown.archetypes)] {
+			s, p := cur.of(a), prev.of(a)
+			fmt.Fprintf(out, "| %d | %s | %.1f%% | %d (%d) | %.1f%% | %+.1f |\n", i+1, archetypeName(r, a), cur.pct(s.players), s.decks, s.placed,
+				prev.pct(p.players), cur.pct(s.players)-prev.pct(p.players))
+		}
+		if rest := ranked[min(len(ranked), shown.archetypes):]; len(rest) > 0 {
+			players := 0
+			for _, a := range rest {
+				players += cur.of(a).players
+			}
+			fmt.Fprintf(out, "| | %d more archetypes (detail lists more) | %.1f%% together | | | |\n", len(rest), cur.pct(players))
+		}
+		fmt.Fprintf(out, "| | in no archetype | %.1f%% | %d (%d near none) | %.1f%% | %+.1f |\n\n",
+			cur.pct(cur.noise.players+cur.none.players), cur.noise.decks+cur.none.decks, cur.none.decks,
+			prev.pct(prev.noise.players+prev.none.players), cur.pct(cur.noise.players+cur.none.players)-prev.pct(prev.noise.players+prev.none.players))
+		var variants []string
+		for _, a := range ranked[:min(len(ranked), shown.archetypes)] {
+			for i := range r.Class.Archetypes {
+				if v := &r.Class.Archetypes[i]; v.VariantOf == a.Ref && cur.groups[v] != nil {
+					variants = append(variants, fmt.Sprintf("%s (%s) %d of %s's %d", v.Name, v.Ref, cur.groups[v].decks, a.Name, cur.of(a).decks))
+				}
 			}
 		}
-	}
-	if len(variants) > 0 {
-		fmt.Fprintf(out, "Their variants' decks in the window: %s.\n\n", strings.Join(variants, "; "))
+		if len(variants) > 0 {
+			fmt.Fprintf(out, "Their variants' decks in the window: %s.\n\n", strings.Join(variants, "; "))
+		}
 	}
 
-	writeField(out, r, cur, ft, shown.archetypes)
+	writeField(out, r, cur, ft, shown.archetypes, geo)
 	writeMoves(out, r, cur, prev, shown.moves)
 	writeCardMoves(out, cur, prev, shown.cards)
 
-	fmt.Fprintf(out, "## The core of the leading archetypes\n\nFrom each archetype's decks since %s, labelled or placed, its variants' with it: "+
-		"the vampires in a quarter of them or more and the library cards in half or more, the most played first "+
-		"(call vtes_meta with the archetype for its whole core and its decks).\n\n", r.Class.Since)
-	for _, a := range ranked[:min(len(ranked), shown.cores)] {
-		decks := archetypeDecks(d, m, a)
-		vampires, library := core(d, decks)
-		fmt.Fprintf(out, "- %s, %d decks: vampires %s; library %s.\n", archetypeName(r, a), len(decks),
-			coreLine(vampires, len(decks), shown.vampires), coreLine(library, len(decks), shown.library))
+	if len(ranked) > 0 {
+		fmt.Fprintf(out, "## The core of the leading archetypes\n\nFrom each archetype's decks since %s, labelled or placed, its variants' with it: "+
+			"the vampires in a quarter of them or more and the library cards in half or more, the most played first "+
+			"(call vtes_meta with the archetype for its whole core and its decks).\n\n", r.Class.Since)
+		for _, a := range ranked[:min(len(ranked), shown.cores)] {
+			decks := archetypeDecks(d, m, a)
+			vampires, library := core(d, decks)
+			fmt.Fprintf(out, "- %s, %d decks: vampires %s; library %s.\n", archetypeName(r, a), len(decks),
+				coreLine(vampires, len(decks), shown.vampires), coreLine(library, len(decks), shown.library))
+		}
+		out.WriteString("\n")
 	}
-	out.WriteString("\n")
 }
 
 func writeMoves(out *strings.Builder, r *bundle.Relatives, cur, prev *tally, n int) {
@@ -675,11 +770,11 @@ func coreLine(cards []coreCard, of, n int) string {
 	return strings.Join(parts, ", ")
 }
 
-func writeArchetype(out *strings.Builder, d *data, m *metaData, archon *Archon, member bool, a *bundle.Archetype, months int, detail bool) {
+func writeArchetype(out *strings.Builder, d *data, m *metaData, archon *Archon, member bool, a *bundle.Archetype, months int, geo metaFilter, detail bool) {
 	r := d.rel
 	shown := metaShown[detail]
-	cur, prev := d.tally(m, m.span(months, 0)), d.tally(m, m.span(months, 1))
-	ft := d.fieldTally(archon, cur.span)
+	cur, prev := d.tally(m, m.span(months, 0), geo), d.tally(m, m.span(months, 1), geo)
+	ft := d.fieldTally(archon, cur.span, geo)
 	root := r.Root(a)
 	fmt.Fprintf(out, "# %s in the meta\n\n", archetypeName(r, a))
 	var variants []string
@@ -691,22 +786,31 @@ func writeArchetype(out *strings.Builder, d *data, m *metaData, archon *Archon, 
 	if len(variants) > 0 {
 		fmt.Fprintf(out, "Its variants, counted with it: %s.\n\n", strings.Join(variants, ", "))
 	}
-	writeWindow(out, d, cur, prev, archon, member, months)
+	writeWindow(out, d, cur, prev, archon, member, months, geo)
 
 	out.WriteString("## Share\n\n")
 	c, p := cur.of(a), prev.of(a)
-	fmt.Fprintf(out, "In the window: %.1f%% of the players, %d decks (%d placed by similarity)", cur.pct(c.players), c.decks, c.placed)
-	if a == root {
-		if k := slices.Index(cur.ranked(), a); k >= 0 {
-			fmt.Fprintf(out, ", ranked %d of %d archetypes", k+1, len(cur.roots))
-		}
+	if cur.decks == 0 && geo.active() {
+		fmt.Fprintf(out, "No tournament-winning decks in the window match %s. Previous window: %.1f%%, %d decks.\n\n",
+			geo.label(), prev.pct(p.players), p.decks)
 	} else {
-		fmt.Fprintf(out, ", of %s's %.1f%%", root.Name, cur.pct(cur.of(root).players))
+		fmt.Fprintf(out, "In the window: %.1f%% of the players, %d decks (%d placed by similarity)", cur.pct(c.players), c.decks, c.placed)
+		if a == root {
+			if k := slices.Index(cur.ranked(), a); k >= 0 {
+				fmt.Fprintf(out, ", ranked %d of %d archetypes", k+1, len(cur.roots))
+			}
+		} else {
+			fmt.Fprintf(out, ", of %s's %.1f%%", root.Name, cur.pct(cur.of(root).players))
+		}
+		fmt.Fprintf(out, ". Previous window: %.1f%%, %d decks. Change: %+.1f points.\n\n", prev.pct(p.players), p.decks, cur.pct(c.players)-prev.pct(p.players))
 	}
-	fmt.Fprintf(out, ". Previous window: %.1f%%, %d decks. Change: %+.1f points.\n\n", prev.pct(p.players), p.decks, cur.pct(c.players)-prev.pct(p.players))
 	if ft != nil {
 		if ft.events == 0 {
-			fmt.Fprintf(out, "Full-field (Archon): of %d finished tournaments in the window, none published decklists beyond the winner.\n\n", ft.finishedEvents)
+			if ft.finishedEvents == 0 && geo.active() {
+				fmt.Fprintf(out, "Full-field (Archon): no finished tournaments in the window match %s.\n\n", geo.label())
+			} else {
+				fmt.Fprintf(out, "Full-field (Archon): of %d finished tournaments in the window, none published decklists beyond the winner.\n\n", ft.finishedEvents)
+			}
 		} else {
 			fs := ft.of(a)
 			fmt.Fprintf(out, "Full-field (Archon, %d events with decklists beyond the winner, %d published decks, %d wins): play share %.1f%% (%d decks), win share %.1f%% (%d wins), conversion %.1f%%.\n\n",
@@ -716,7 +820,7 @@ func writeArchetype(out *strings.Builder, d *data, m *metaData, archon *Archon, 
 	fmt.Fprintf(out, "Over the whole windows of %d months since the labels' window opened, oldest first:\n", months)
 	var history []string
 	for back := 0; !m.span(months, back).from.Before(m.since); back++ {
-		t := d.tally(m, m.span(months, back))
+		t := d.tally(m, m.span(months, back), geo)
 		history = append(history, fmt.Sprintf("- %s: %.1f%%, %d of %d decks.\n", t.span, t.pct(t.of(a).players), t.of(a).decks, t.decks))
 	}
 	for _, h := range slices.Backward(history) {
@@ -772,7 +876,7 @@ func writeArchetype(out *strings.Builder, d *data, m *metaData, archon *Archon, 
 		if slices.Contains(r.Class.Archetypes[m.group[i]].Representative, r.Decks[i].ID) {
 			reps = append(reps, i)
 		}
-		if cur.holds(r.Decks[i].Date) {
+		if cur.holds(r.Decks[i].Date) && geo.matchesCode(m.country[i]) {
 			newest = append(newest, i)
 		}
 	}

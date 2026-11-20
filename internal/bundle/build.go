@@ -198,6 +198,10 @@ func Build(ctx context.Context, up Upstream, archive *Archive) (*Bundle, []strin
 		warn("guide/module-tags.json: %d library cards the TWDA decks since %s play gain pool or blood by their text and the economy neither tags nor excludes: %s",
 			len(ungained), labels.Since, strings.Join(ungained, "; "))
 	}
+	if unmapped := b.unmappedPlaces(); len(unmapped) > 0 {
+		warn("%d TWDA places since %s map to no country (and are not Online): %s",
+			len(unmapped), labels.Since, strings.Join(unmapped[:min(len(unmapped), 20)], "; "))
+	}
 	b.attachRulings(db, archive, warn)
 	b.attachChanges(history, warn)
 	b.keepPosts(archive, warn)

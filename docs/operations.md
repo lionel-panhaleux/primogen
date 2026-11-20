@@ -108,7 +108,8 @@ Go, jq, node, sops and uv come from mise: `mise install` in the checkout reads
   of that window whose text gains pool or blood (a pattern in the code:
   "gain N pool", "from the blood bank", "steal N blood" and their kin) and
   that the tags' `economy` neither lists nor excludes with a reason, a
-  key of its `sources` that is none of its `kinds`; a post the
+  key of its `sources` that is none of its `kinds`; any TWDA `Place` in
+  the archetype labels' window that maps to no country and is not Online; a post the
   advanced rules cite that the archive does not hold, or a ruling's rulebook
   reference no section of the rulebook opens: the fix is upstream, unless
   archon gives that id to a paragraph `archon.go` opens no section at; and
@@ -122,7 +123,8 @@ Go, jq, node, sops and uv come from mise: `mise install` in the checkout reads
   only), `deck LIST|ID|LINK` (the list's lines as one or
   several arguments, or `-` to read it from stdin; a link of VDB, VTES Decks,
   Amaranth or Archon; `-draft` for a deck idea's cards), `stats CARD
-  [ARCHETYPE]`, `meta [ARCHETYPE]` (`-months` for the window's length),
+  [ARCHETYPE]`, `meta [ARCHETYPE]` (`-months` for the window's length,
+  `-country` and `-continent` for geographic filters),
   `events [TOURNAMENT]` (`-member`, `-rankings`, `-category`, `-league`,
   `-links`, `-country`, `-since`, `-until`, `-rank`, `-format`, `-state`),
   `feedback QUESTION WRONG EXPECTED` (files a public issue, through the
