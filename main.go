@@ -26,6 +26,7 @@ import (
 
 const usage = `usage:
   primogen build [-bundle PATH] [-knowledge DIR]   build the data bundle (default: data/bundle.json.gz)
+  primogen audit [-bundle PATH] [-archive PATH|URL] [-since YYYY-MM-DD] [-twda] [-out PATH] [CARD...]   list uncited sitting rules directors' posts by card and card pair for the rulemongers
   primogen query [-bundle PATH] [-detail] [-directors] [-draft] [-months N] TOOL ARG...   call a tool and print what the model reads:
       cards NAME...              vtes_cards
       case QUESTION [CARD...]    vtes_rules_case
@@ -70,6 +71,8 @@ func run(ctx context.Context, args []string, stdout, stderr io.Writer) error {
 	switch cmd {
 	case "build":
 		return build(ctx, fs, path, args, stdout, stderr)
+	case "audit":
+		return audit(ctx, fs, path, args, stdout, stderr)
 	case "query":
 		return query(ctx, fs, path, args, stdout, stderr)
 	case "stdio":
@@ -104,6 +107,54 @@ func build(ctx context.Context, fs *flag.FlagSet, path *string, args []string, s
 	}
 	fmt.Fprintf(stdout, "%d cards written to %s; query it with -bundle %[2]s\n", len(b.Cards), p)
 	return nil
+}
+
+func audit(ctx context.Context, fs *flag.FlagSet, path *string, args []string, stdout, stderr io.Writer) error {
+	from := fs.String("from", published, "where to download the bundle when -bundle is not given")
+	archive := fs.String("archive", bundle.KRCG.Archive, "path or URL of the rulings archive")
+	since := fs.String("since", "", "only posts on or after YYYY-MM-DD")
+	twda := fs.Bool("twda", false, "only cards played in the TWDA window")
+	outPath := fs.String("out", "", "write the report to this file instead of stdout")
+	if err := fs.Parse(args); err != nil {
+		return err
+	}
+	b, err := localBundle(ctx, *path, *from, stderr)
+	if err != nil {
+		return err
+	}
+	var a *bundle.Archive
+	if strings.HasPrefix(*archive, "http://") || strings.HasPrefix(*archive, "https://") {
+		p, err := installed("archive.json.gz")
+		if err != nil {
+			return err
+		}
+		a, err = cached(ctx, *archive, p, readArchive, stderr)
+		if err != nil {
+			return err
+		}
+	} else {
+		a, err = readArchive(*archive)
+		if err != nil {
+			return err
+		}
+	}
+	report, err := tools.Audit(b, a, tools.AuditOptions{
+		Since:    *since,
+		TWDAOnly: *twda,
+		Cards:    fs.Args(),
+	})
+	if err != nil {
+		return err
+	}
+	if *outPath != "" {
+		if err := os.WriteFile(*outPath, []byte(report), 0o644); err != nil {
+			return err
+		}
+		fmt.Fprintf(stderr, "wrote %d bytes to %s\n", len(report), *outPath)
+		return nil
+	}
+	_, err = io.WriteString(stdout, report)
+	return err
 }
 
 func query(ctx context.Context, fs *flag.FlagSet, path *string, args []string, stdout, stderr io.Writer) error {

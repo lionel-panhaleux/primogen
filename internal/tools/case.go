@@ -409,7 +409,7 @@ func (p *casePack) chooseDirectorPosts(as *archiveSearch) {
 				continue
 			}
 			own := together(a.own, b.own)
-			if own || together(a.question, b.question) && (pair[0] == pair[1] || p.shownNames(as, k, pair, spelled)) {
+			if own || together(a.question, b.question) && (pair[0] == pair[1] || shownNames(as, k, pair, spelled)) {
 				pairsOf[k] = append(pairsOf[k], pair)
 				p.pairPosts[pair]++
 				byOwn[k] = byOwn[k] || own
@@ -469,7 +469,7 @@ func (p *casePack) chooseDirectorPosts(as *archiveSearch) {
 // shownNames says whether the question a reply is shown after names both cards
 // of a pair within a few sentences: a reply may answer several questions, each
 // naming one.
-func (p *casePack) shownNames(as *archiveSearch, k int, pair [2]*bundle.Card, spelled map[*bundle.Card][]string) bool {
+func shownNames(as *archiveSearch, k int, pair [2]*bundle.Card, spelled map[*bundle.Card][]string) bool {
 	m := as.msgs[k]
 	body, before := answering(m.thread, m.i, append(slices.Clone(spelled[pair[0]]), spelled[pair[1]]...), 0, 0)
 	q := unquote(body)

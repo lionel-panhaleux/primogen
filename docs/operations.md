@@ -116,6 +116,17 @@ Go, jq, node, sops and uv come from mise: `mise install` in the checkout reads
   archon's renderer changed past the commit `archon.go` reproduces: re-pin
   the fixtures (`testdata/upstream/refresh.sh`), then `TestArchonLinks`
   says whether the links still land.
+- `primogen audit [-bundle PATH] [-archive PATH|URL] [-since YYYY-MM-DD] [-twda] [-out PATH] [CARD...]`
+  reads the bundle and the rulings archive (a local path or URL, cached like
+  `query` when a URL) and writes a Markdown report for the rulemongers listing,
+  by card (most played in the TWDA window first) and by card pair, the sitting
+  rules directors' posts naming them (in their own words or in the question
+  they answer, outside a decklist) that no ruling on those cards cites in
+  `vtes-rulings`, each with its link, date, author standing, quoted question
+  and answer, existing rulings on the card, and any entry of `card-changes.md`
+  dated after the post (`-since` for a date lower bound, `-twda` for cards
+  played in the TWDA window only, `-out` to write to a file, and optional card
+  names to narrow the audit).
 - `primogen query TOOL ARG...` (`-detail` for the detailed mode) calls a
   tool through the MCP server and prints what the model reads: `cards
   NAME...`, `case QUESTION [CARD...]`, `search WORDS...`, `read ID...`,
@@ -132,7 +143,7 @@ Go, jq, node, sops and uv come from mise: `mise install` in the checkout reads
 - `primogen stdio` serves the tools over stdio for a local MCP client.
   Like `query`, it files `vtes_feedback`'s reports through the hosted
   server's `/mcp`, at the host `-from` names.
-- Without `-bundle`, `query` and `stdio` are a local install: they use the
+- Without `-bundle`, `audit`, `query` and `stdio` are a local install: they use the
   published bundle in the user cache directory, which only the download
   writes, as "Data refresh" says (`-from` and `-archive` change where the
   bundle and the archive are downloaded from, `-sites` where the

@@ -1438,3 +1438,83 @@ func TestServe(t *testing.T) {
 	expect("offline local run", out, "## Freak Drive")
 	expect("offline local run", errs, "could not check for a newer bundle.json.gz, serving the one of ")
 }
+
+func TestAudit(t *testing.T) {
+	runAudit := func(args ...string) (string, string, error) {
+		var out, errBuf bytes.Buffer
+		err := run(t.Context(), append([]string{"audit", "-bundle", testBundle, "-archive", "testdata/upstream/archive.json.gz"}, args...), &out, &errBuf)
+		return out.String(), errBuf.String(), err
+	}
+
+	report, _, err := runAudit("Villein", "Conditioning", "Foreshadowing Destruction", "Political Flux")
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, want := range []string{
+		"# Uncited rules directors' posts",
+		"## By card (most played in the TWDA window first)",
+		"### Villein (",
+		"### Conditioning (",
+		"### Foreshadowing Destruction (",
+		"### Political Flux (1 TWDA decks, 2 uncited posts)",
+		"Existing rulings on Political Flux: none.",
+		"Link: https://usenet.krcg.org/t/z_kvG6T-DTQ/#m1",
+		"Link: https://usenet.krcg.org/t/w6jOOcMIUbM/#m1",
+		"| Both, yes.",
+		"Card changes after 2015-05-24 (Villein):",
+		"2018-05-11: The amount of blood you can move is now limited to 5.",
+		"## By card pair (most played in the TWDA window first)",
+		"### Conditioning + Foreshadowing Destruction (",
+		"Link: https://usenet.krcg.org/t/vekn-78044/#m3",
+		"Link: https://usenet.krcg.org/t/vekn-78044/#m13",
+	} {
+		if !strings.Contains(report, want) {
+			t.Errorf("audit report misses %q", want)
+		}
+	}
+	// Ordered by TWDA window play count: Villein > Conditioning > Foreshadowing Destruction > Political Flux.
+	for _, pair := range [][2]string{
+		{"### Villein (", "### Conditioning ("},
+		{"### Conditioning (", "### Foreshadowing Destruction ("},
+		{"### Foreshadowing Destruction (", "### Political Flux ("},
+	} {
+		if strings.Index(report, pair[0]) >= strings.Index(report, pair[1]) {
+			t.Errorf("expected %q before %q in audit report", pair[0], pair[1])
+		}
+	}
+	// A post already cited by a ruling on Foreshadowing Destruction (PIB 20110817, vekn-8405/#8414) is excluded.
+	if strings.Contains(report, "https://usenet.krcg.org/t/vekn-8405/#m5") {
+		t.Error("audit report included a post already cited by a ruling on Foreshadowing Destruction")
+	}
+
+	// -twda drops cards not played in the TWDA window (Extremis Boon has 0 TWDA decks).
+	twdaOnly, _, err := runAudit("-twda", "Villein", "Extremis Boon")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(twdaOnly, "### Villein (") || strings.Contains(twdaOnly, "### Extremis Boon (") {
+		t.Errorf("-twda report unexpected: %s", twdaOnly[:min(len(twdaOnly), 400)])
+	}
+
+	// -since filters older posts; -out writes to disk.
+	outFile := filepath.Join(t.TempDir(), "audit.md")
+	stdout, stderr, err := runAudit("-since", "2019-01-01", "-out", outFile, "Villein", "Political Flux")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if stdout != "" || !strings.Contains(stderr, outFile) {
+		t.Errorf("with -out, got stdout=%q stderr=%q", stdout, stderr)
+	}
+	raw, err := os.ReadFile(outFile)
+	if err != nil {
+		t.Fatal(err)
+	}
+	written := string(raw)
+	if !strings.Contains(written, "### Villein (") || strings.Contains(written, "### Political Flux (") || strings.Contains(written, "2015-05-24") {
+		t.Errorf("filtered -out report unexpected: %s", written[:min(len(written), 400)])
+	}
+
+	if _, _, err := runAudit("-since", "not-a-date"); err == nil {
+		t.Error("expected error for invalid -since")
+	}
+}

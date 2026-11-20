@@ -30,7 +30,10 @@ A rulemonger approves a proposal on `rulings.krcg.org`; the site writes
 `vtes-rulings`; the copy packaged with `krcg` feeds the card data at
 `static.krcg.org`, and lags: on 2026-11-11 its references still pointed at
 Google Groups where `references.yaml` points at the archive. Primogen reads
-`vtes-rulings` itself.
+`vtes-rulings` itself, and `primogen audit` ([operations.md](operations.md)
+"Commands") lists by card and card pair the sitting rules directors' posts in
+the archive that no ruling on those cards cites yet, for the rulemongers to
+curate.
 
 Each ruling ends with reference ids (`[LSJ 20040518]`), which
 `references.yaml` resolves to a URL. A newsgroup-era reference points into
