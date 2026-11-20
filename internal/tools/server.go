@@ -34,6 +34,7 @@ const (
 type Live struct {
 	p       atomic.Pointer[data]
 	archive atomic.Pointer[archiveSearch]
+	archon  atomic.Pointer[Archon]
 	// LoadArchive fetches the archive on first use, for a server not handed one.
 	LoadArchive func(context.Context) (*bundle.Archive, error)
 	// Sites replaces "https:/" before a deckbuilder's host, for the tests.

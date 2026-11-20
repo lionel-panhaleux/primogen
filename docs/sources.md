@@ -121,14 +121,24 @@ compares the unzipped content.
 
 ## Archon
 
-- The public API needs an app token (client credentials; the app's owner
-  holds the DEV role). `/v1/export` is the whole corpus as one file.
-- Members' names and ratings are visible to VEKN members only. Primogen
-  serves Archon data only to a user logged in through Archon OAuth
-  (owner, 2026-11-10: a GDPR matter), except community links
+- The public API needs an app token (`client_credentials` with `api:read`; the
+  app's owner holds the DEV role). `/v1/export` is the whole corpus as one
+  gzipped JSON Lines file (`header` with `generated_at`, `user`, `tournament`,
+  `deck` and `league` rows, `eof` with `count`), publishing VEKN IDs and never
+  member names.
+- Ratings, tournament standings, member play records and published non-TWDA
+  decklists are visible to VEKN members only. Primogen serves Archon data only
+  to a user logged in through Archon OAuth whose account carries a `vekn_id`
+  (owner, 2026-11-10 and 2026-11-20: a GDPR matter), except community links
   ([product.md](product.md)).
-- Archon's OAuth wants pre-registered clients with exact callback URLs.
-- A member is identified by `/oauth/userinfo` with the `profile:read` grant.
+- Archon's OAuth wants pre-registered clients with exact callback URLs and
+  sends the browser to `archon.vekn.net/consent`. `primogen serve` acts as the
+  MCP OAuth 2.1 authorization server (`/.well-known/oauth-protected-resource`,
+  `/.well-known/oauth-authorization-server`, `/oauth/register`,
+  `/oauth/authorize`, `/oauth/callback`, `/oauth/token`), bridging MCP clients
+  to one pre-registered Archon client (`https://mcp.krcg.org/oauth/callback`).
+- A member is identified by `/oauth/userinfo` with the `profile:read` grant
+  (`sub`, `vekn_id`, `roles`, `capabilities`).
 
 ## The engine
 

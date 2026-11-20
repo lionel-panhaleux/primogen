@@ -31,7 +31,11 @@ At most three open, each named by what someone can do afterwards. A board
 line serving one carries its token; done is deleted. Opening one is the
 owner's decision.
 
-None open: the next is the owner's to open.
+- **M:members**: a logged-in VEKN member gets Archon tournaments, standings,
+  rankings, member records (by VEKN ID), published decklists beyond the TWDA,
+  and full-field play share against win share; an unlogged user keeps every
+  public tool and community links (owner, 2026-11-20). Done when an
+  owner-graded session of member questions passes.
 
 ## Later, in this order unless the owner reorders
 
@@ -42,7 +46,5 @@ None open: the next is the owner's to open.
   what it misses.
 - The legality check on the engine (`vtes_engine_check`), which needs a
   position-check endpoint in zero-vtes.
-- Members: Archon login, tournaments, full-field meta, rankings, community
-  links.
 - Bot-based deck testing, once the engine covers the pool and the bot is
   strong enough.

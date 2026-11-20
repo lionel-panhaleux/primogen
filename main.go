@@ -37,7 +37,7 @@ const usage = `usage:
       meta [ARCHETYPE]           vtes_meta: the archetypes' shares of the latest window, or one archetype's (-months: the window's length)
       feedback QUESTION WRONG EXPECTED   vtes_feedback: file a report on an answer as a public GitHub issue, through the hosted server
   primogen stdio [-bundle PATH]                    serve the tools over stdio, for a local MCP client
-  primogen serve -bundle PATH [-addr ADDR] [-knowledge DIR] [-github-app ID -github-key PEM]   serve the tools over HTTP at /mcp, refreshing the bundle
+  primogen serve -bundle PATH [-addr ADDR] [-knowledge DIR] [-github-app ID -github-key PEM] [-archon-client ID -archon-secret FILE]   serve the tools over HTTP at /mcp, refreshing the bundle
 
 Without -bundle, query and stdio use the published bundle in the user cache
 directory: downloaded on first run (from -from, for the tests), and again when

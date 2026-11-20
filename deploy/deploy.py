@@ -45,6 +45,13 @@ binary = f"{OPT}/{digest}/{NAME}"
 files.put(name="Upload primogen", src=str(dist / NAME), dest=binary, mode="755")
 secrets = load(str(REPO / "secrets.sops.yaml"))
 key = put_secret(name="GitHub App key", content=secrets["github_app_key"], dest=f"/etc/{NAME}/github-app.pem")
+archon_args = ""
+archon_cred = ""
+archon_key = None
+if secrets.get("archon_client_id") and secrets.get("archon_client_secret"):
+    archon_key = put_secret(name="Archon OAuth secret", content=secrets["archon_client_secret"], dest=f"/etc/{NAME}/archon-secret")
+    archon_args = f" -archon-client {secrets['archon_client_id']} -archon-secret ${{CREDENTIALS_DIRECTORY}}/archon-secret"
+    archon_cred = f"\nLoadCredential=archon-secret:/etc/{NAME}/archon-secret"
 
 unit = files.put(
     name="Install primogen.service",
@@ -54,8 +61,8 @@ After=network-online.target
 Wants=network-online.target
 
 [Service]
-ExecStart={binary} serve -addr 127.0.0.1:{PORT} -bundle /var/lib/{NAME}/bundle.json.gz -github-app {APP_CLIENT_ID} -github-key ${{CREDENTIALS_DIRECTORY}}/github-app.pem
-LoadCredential=github-app.pem:/etc/{NAME}/github-app.pem
+ExecStart={binary} serve -addr 127.0.0.1:{PORT} -bundle /var/lib/{NAME}/bundle.json.gz -github-app {APP_CLIENT_ID} -github-key ${{CREDENTIALS_DIRECTORY}}/github-app.pem{archon_args}
+LoadCredential=github-app.pem:/etc/{NAME}/github-app.pem{archon_cred}
 DynamicUser=yes
 StateDirectory={NAME}
 Restart=always
@@ -75,7 +82,7 @@ systemd.service(
     name="Restart primogen",
     service=f"{NAME}.service",
     restarted=True,
-    _if=lambda: (unit.did_change() or key.did_change()) and not started.did_change(),
+    _if=lambda: (unit.did_change() or key.did_change() or (archon_key is not None and archon_key.did_change())) and not started.did_change(),
 )
 server.shell(
     name="Drop older builds",

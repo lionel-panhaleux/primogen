@@ -30,6 +30,8 @@ func serve(ctx context.Context, fs *flag.FlagSet, path *string, args []string) e
 	knowledge := fs.String("knowledge", "", "a local knowledge directory (default: knowledge/ at primogen's main branch on GitHub)")
 	appID := fs.String("github-app", "", "the client ID of the GitHub App filing vtes_feedback's reports (none: the tool refuses)")
 	appKey := fs.String("github-key", "", "the GitHub App's private key, a PEM file")
+	archonClient := fs.String("archon-client", "", "the Archon OAuth client ID, with api:read and profile:read (none: no Archon login or export)")
+	archonSecret := fs.String("archon-secret", "", "the Archon OAuth client secret, a file")
 	if err := fs.Parse(args); err != nil {
 		return err
 	}
@@ -53,11 +55,24 @@ func serve(ctx context.Context, fs *flag.FlagSet, path *string, args []string) e
 		}
 		r.fileWith(g)
 	}
+	if (*archonClient == "") != (*archonSecret == "") {
+		return errors.New("-archon-client and -archon-secret go together")
+	}
+	if *archonClient != "" {
+		a, err := newArchonApp("https://archon.vekn.net", "https://api.archon.vekn.net", *archonClient, *archonSecret)
+		if err != nil {
+			return err
+		}
+		r.withArchon(a)
+	}
 	go func() {
-		t := time.NewTicker(time.Hour)
+		t := time.NewTicker(15 * time.Minute)
 		defer t.Stop()
-		for now := time.Now(); ctx.Err() == nil; {
-			r.refresh(ctx, now)
+		for step, now := 0, time.Now(); ctx.Err() == nil; step++ {
+			r.refreshArchon(ctx, now)
+			if step%4 == 0 {
+				r.refresh(ctx, now)
+			}
 			select {
 			case <-ctx.Done():
 			case now = <-t.C:
@@ -88,12 +103,15 @@ type refresher struct {
 	archive *bundle.Archive
 	fetched time.Time
 	links   *http.Client
+	archon  *archonApp
 
-	mu       sync.Mutex
-	checked  time.Time
-	failure  error
-	warnings []string
-	dead     []string
+	mu            sync.Mutex
+	checked       time.Time
+	failure       error
+	warnings      []string
+	dead          []string
+	archonChecked time.Time
+	archonFailure error
 }
 
 // newRefresher serves the bundle at path, built first if there is none.
@@ -130,6 +148,26 @@ func (r *refresher) refresh(ctx context.Context, now time.Time) {
 	r.dead = dead
 	r.mu.Unlock()
 	r.done(now, err)
+}
+
+func (r *refresher) withArchon(a *archonApp) {
+	r.archon = a
+}
+
+func (r *refresher) refreshArchon(ctx context.Context, now time.Time) {
+	if r.archon == nil {
+		return
+	}
+	a, err := r.archon.export(ctx)
+	if err != nil {
+		r.log.Error("Archon export refresh failed, the previous export keeps serving", "err", err)
+	} else {
+		r.live.SetArchon(a)
+		r.log.Info("refreshed Archon export", "date", a.Date(), "tournaments", len(a.Tournaments), "decks", len(a.Decks), "users", len(a.Users))
+	}
+	r.mu.Lock()
+	r.archonChecked, r.archonFailure = now, err
+	r.mu.Unlock()
 }
 
 var reLink = regexp.MustCompile(`\]\(([^)\s]+)\)`)
@@ -259,13 +297,21 @@ func (r *refresher) fileWith(g *githubApp) {
 
 func (r *refresher) handler() http.Handler {
 	s := tools.NewServer(r.live)
-	mux := http.NewServeMux()
-	mux.Handle("/mcp", mcp.NewStreamableHTTPHandler(func(*http.Request) *mcp.Server { return s }, &mcp.StreamableHTTPOptions{
+	mcpHandler := mcp.NewStreamableHTTPHandler(func(*http.Request) *mcp.Server { return s }, &mcp.StreamableHTTPOptions{
 		Stateless:    true,
 		JSONResponse: true,
 		// behind nginx on the loopback, every request carries the public Host
 		DisableLocalhostProtection: true,
-	}))
+	})
+	mux := http.NewServeMux()
+	if r.archon != nil {
+		r.archon.registerRoutes(mux)
+		root, member := r.archon.wrapMCP(mcpHandler)
+		mux.Handle("/mcp", root)
+		mux.Handle("/mcp/member", member)
+	} else {
+		mux.Handle("/mcp", mcpHandler)
+	}
 	mux.HandleFunc("GET /bundle.json.gz", func(w http.ResponseWriter, req *http.Request) {
 		http.ServeFile(w, req, r.path)
 	})
@@ -284,6 +330,7 @@ func (r *refresher) catalog(w http.ResponseWriter, _ *http.Request) {
 func (r *refresher) status(w http.ResponseWriter, _ *http.Request) {
 	r.mu.Lock()
 	checked, failure, warnings := r.checked, r.failure, slices.Concat(r.warnings, r.dead)
+	archonChecked, archonFailure := r.archonChecked, r.archonFailure
 	r.mu.Unlock()
 	var out strings.Builder
 	fmt.Fprintf(&out, "Primogen %s, an MCP server for Vampire: The Eternal Struggle: add the /mcp endpoint to your assistant.\n\n", tools.Version())
@@ -295,6 +342,21 @@ func (r *refresher) status(w http.ResponseWriter, _ *http.Request) {
 		fmt.Fprintf(&out, "Last refresh %s: FAILED, the bundle above keeps serving: %v\n", checked.UTC().Format("2006-01-02 15:04 UTC"), failure)
 	default:
 		fmt.Fprintf(&out, "Last refresh %s: ok.\n", checked.UTC().Format("2006-01-02 15:04 UTC"))
+	}
+	if r.archon != nil {
+		a := r.live.Archon()
+		switch {
+		case archonChecked.IsZero():
+			fmt.Fprintln(&out, "Archon export: no refresh since the server started.")
+		case archonFailure != nil && a != nil:
+			fmt.Fprintf(&out, "Archon export: %s (%d tournaments, %d decks, %d members, %d leagues); last refresh %s: FAILED, the export above keeps serving: %v\n",
+				a.Date(), len(a.Tournaments), len(a.Decks), len(a.Users), len(a.Leagues), archonChecked.UTC().Format("2006-01-02 15:04 UTC"), archonFailure)
+		case archonFailure != nil:
+			fmt.Fprintf(&out, "Archon export: none; last refresh %s: FAILED: %v\n", archonChecked.UTC().Format("2006-01-02 15:04 UTC"), archonFailure)
+		default:
+			fmt.Fprintf(&out, "Archon export: %s (%d tournaments, %d decks, %d members, %d leagues); last refresh %s: ok.\n",
+				a.Date(), len(a.Tournaments), len(a.Decks), len(a.Users), len(a.Leagues), archonChecked.UTC().Format("2006-01-02 15:04 UTC"))
+		}
 	}
 	if len(warnings) > 0 {
 		fmt.Fprintf(&out, "\nNeeds a person (%d):\n", len(warnings))

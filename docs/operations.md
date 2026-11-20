@@ -18,12 +18,15 @@ commands are added here by the lines that create them.
 
 `secrets.sops.yaml`, encrypted with sops to the SSH keys `.sops.yaml` lists
 (the owner's, and server-setup's `deploy` key, which the release workflow
-holds), holds one secret: `github_app_key`, the private key of the
+holds), holds `github_app_key`, the private key of the
 GitHub App `app-feedback-issues` (Issues read and write, no webhook),
 installed on several of the owner's repositories: each token the server
-asks for is scoped to this repository's issues. `mise run deploy` decrypts it and puts it
-on frankfurt as `/etc/primogen/github-app.pem` (root, 600, never diffed),
-handed to the dynamic user through systemd's `LoadCredential`; the App's
+asks for is scoped to this repository's issues; and, when set,
+`archon_client_id` and `archon_client_secret`, the credentials of the Archon
+OAuth client (`api:read` and `profile:read`, callback
+`https://mcp.krcg.org/oauth/callback`). `mise run deploy` decrypts them and puts them
+on frankfurt as `/etc/primogen/github-app.pem` and `/etc/primogen/archon-secret` (root, 600, never diffed),
+handed to the dynamic user through systemd's `LoadCredential`; the GitHub App's
 client ID, not a secret, is in `deploy/deploy.py`. `sops edit
 secrets.sops.yaml` edits it; a new key is generated on the App's settings
 page, the old one deleted there after the deploy.
@@ -55,8 +58,11 @@ The server refreshes itself; there is no cron job and no operator.
 - A failed build leaves the previous bundle serving. It shows on the status
   page, the server's `/status`, and in the data date of every answer, which
   stops advancing.
-- Archon data, once primogen reads it, goes into a separate database that is
-  never published.
+- With `-archon-client` and `-archon-secret`, `primogen serve` fetches
+  `api.archon.vekn.net/v1/export` with a `client_credentials` (`api:read`) app
+  token at start and every 15 minutes, verifies its `header` and `eof` row
+  count, and swaps it in memory on `Live`, never into the published bundle. A
+  failed fetch leaves the previous export serving and shows on `/status`.
 - A local install downloads the published bundle on first run and again when
   a newer one exists, checked at most daily, and the archive's bulk file the
   same way, from `usenet.krcg.org`, the first time a tool needs it
@@ -128,12 +134,15 @@ Go, jq, node, sops and uv come from mise: `mise install` in the checkout reads
   bundle and the archive are downloaded from, `-sites` where the
   deckbuilders' APIs are read, each under its host, for the tests).
 - `primogen serve` is the hosted server: the tools over Streamable HTTP at
-  `/mcp` (stateless, JSON responses), the published bundle, the catalog of
+  `/mcp` (and `/mcp/member`, stateless, JSON responses), the published bundle, the catalog of
   the KRCG stack at `/` and `/llms.txt`, and the status page at `/status`,
   refreshed as "Data refresh" says, keeping current the file given
   with `-bundle`. With `-github-app` (the App's client ID) and `-github-key`
   (its PEM file), it files `vtes_feedback`'s reports; without, the tool
-  refuses, pointing to the repository's issues. It builds one first if there is none, and reads
+  refuses, pointing to the repository's issues. With `-archon-client` (the
+  Archon OAuth client ID) and `-archon-secret` (a file holding its secret),
+  it serves the OAuth 2.1 login endpoints bridging to Archon and refreshes
+  `api.archon.vekn.net/v1/export` in memory every 15 minutes. It builds a bundle first if there is none, and reads
   `knowledge/` from GitHub unless given `-knowledge`.
 - `gh workflow run release` runs `mise run release` on a GitHub Actions
   runner (`.github/workflows/release.yml`), as server-setup's `deploy`

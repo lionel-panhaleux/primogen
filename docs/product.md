@@ -116,10 +116,15 @@ table.
 
 ## Connecting
 
-- **One endpoint**, `mcp.krcg.org/mcp`. It offers the Archon login when the
-  user adds the server and never requires it. Without login every public tool
-  works, and the user is told once that tournaments, full-field meta and
-  rankings need the login.
+- **One endpoint**, `mcp.krcg.org/mcp`. It offers the Archon login (OAuth 2.1
+  protected-resource and authorization-server metadata, dynamic client
+  registration, and PKCE authorize/callback/token bridging to Archon) when the
+  user adds the server and never requires it: without a bearer token every
+  public tool works, an invalid or expired token is challenged with `401`, and
+  `/mcp?login=1` (or `/mcp/member`) challenges an unauthenticated call with
+  `401` so a client that starts OAuth only on an initial `401` triggers the
+  login. Without login, the user is told once that tournaments, full-field
+  meta and rankings need the login.
 - **MCP only.** The method reaches the model through the server's
   instructions (the grounding rules first), through each tool's description
   and every tool result (the contract and the next step), and through MCP
@@ -186,8 +191,8 @@ list, which the Gemini API answers with a 400
   journal holds no tool's arguments.
 - No Archon data for a user who is not a logged-in VEKN member, and none in
   the published bundle. One exception: community links are public links to
-  public sites, served to everyone, without the member's name when the user
-  is not logged in.
+  public sites, served to everyone. Archon's export identifies members by VEKN
+  ID, never by name (owner, 2026-11-20).
 - No external blogs or fan-made material; community pointers are Archon's
   community links.
 - No reading of zero-vtes's `rules-qa` as a source: its content is merged
