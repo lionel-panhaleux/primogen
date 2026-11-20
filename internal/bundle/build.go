@@ -92,11 +92,12 @@ func Build(ctx context.Context, up Upstream, archive *Archive) (*Bundle, []strin
 	if err != nil {
 		return nil, nil, err
 	}
-	var history, advanced, procedure, analysis, advice, terms, shorthand, catalog, classification, tags, modules, theory []byte
+	var history, advanced, procedure, analysis, advice, meta, terms, shorthand, catalog, classification, tags, modules, theory []byte
 	for name, body := range map[string]*[]byte{
 		"card-changes.md": &history, "rules/advanced-rules.md": &advanced,
 		"guide/rules-answer.md": &procedure, "guide/deck-analysis.md": &analysis, "guide/deck-advice.md": &advice,
-		"game-terms.json": &terms, "shorthand.json": &shorthand, "llms.txt": &catalog, "classification.json": &classification,
+		"guide/meta-reading.md": &meta,
+		"game-terms.json":       &terms, "shorthand.json": &shorthand, "llms.txt": &catalog, "classification.json": &classification,
 		"guide/module-tags.json": &tags, "guide/modules.md": &modules, "guide/theory.md": &theory,
 	} {
 		if *body, err = read(name); err != nil {
@@ -149,6 +150,7 @@ func Build(ctx context.Context, up Upstream, archive *Archive) (*Bundle, []strin
 		RulesAnswer:    string(procedure),
 		DeckAnalysis:   string(analysis),
 		DeckAdvice:     string(advice),
+		MetaReading:    string(meta),
 		GameTerms:      gameTerms,
 		Shorthand:      short.Shorthand,
 		Catalog:        string(catalog),

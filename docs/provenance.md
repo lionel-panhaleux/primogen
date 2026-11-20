@@ -22,8 +22,8 @@ compares them with upstream and records the commit below.
   strategist's graded cases stay in `calibration/codex-cases.md`, unserved.
   `rules-answer.md` closes every `vtes_rules_case` pack as its answer
   contract, `deck-analysis.md` and `deck-advice.md` every `vtes_deck`
-  dossier, `deck-advice.md` every `vtes_card_stats` result; `theory.md`, `modules.md`, `card-comparison.md` and
-  `meta-reading.md` are served by no tool yet.
+  dossier, `deck-advice.md` every `vtes_card_stats` result, `meta-reading.md` every `vtes_meta` result; `theory.md`,
+  `modules.md` and `card-comparison.md` are served by no tool yet.
   `examples/` holds the served examples (principles.md, principle 8): each
   an excerpt of one of primogen's own answers the owner graded clean, named
   after its task, naming its corpus entry and the dates of the answer and
@@ -52,7 +52,8 @@ compares them with upstream and records the commit below.
   tournament-winning decks since 2021-07 (the 2026-07 pass), forked from
   codex-of-the-damned @ `18be59e`. `vtes_deck` places a deck among its
   archetypes ([product.md](product.md)); the build names the decks since
-  that the labels lack and no archetype matches. A variant is of an archetype
+  that the labels lack and no archetype matches. `vtes_meta` counts the
+  decks of a window by archetype with them. A variant is of an archetype
   that is itself no variant; a file breaking that fails the build.
 - `game-terms.json`: the game terms in English (the 2024 rulebook's, plus
   the two 2025 terms and Seraph, a trait printed on Black Hand vampires)

@@ -25,7 +25,7 @@ import (
 
 const usage = `usage:
   primogen build [-bundle PATH] [-knowledge DIR]   build the data bundle (default: data/bundle.json.gz)
-  primogen query [-bundle PATH] [-detail] [-directors] [-draft] TOOL ARG...   call a tool and print what the model reads:
+  primogen query [-bundle PATH] [-detail] [-directors] [-draft] [-months N] TOOL ARG...   call a tool and print what the model reads:
       cards NAME...              vtes_cards
       case QUESTION [CARD...]    vtes_rules_case
       search WORDS...            vtes_rules_search
@@ -33,6 +33,7 @@ const usage = `usage:
       archive WORDS...           vtes_rulings_archive (-directors: the sitting rules directors' posts only)
       deck LIST|ID|LINK|-        vtes_deck: a decklist (its lines as one or several arguments, or - for stdin), a TWDA id or a deck link (VDB, VTES Decks, Amaranth); -draft: a deck idea's cards
       stats CARD [ARCHETYPE]     vtes_card_stats: a card's play rates, companions and competitors, overall or within an archetype
+      meta [ARCHETYPE]           vtes_meta: the archetypes' shares of the latest window, or one archetype's (-months: the window's length)
   primogen stdio [-bundle PATH]                    serve the tools over stdio, for a local MCP client
   primogen serve -bundle PATH [-addr ADDR] [-knowledge DIR]   serve the tools over HTTP at /mcp, refreshing the bundle
 
@@ -110,11 +111,12 @@ func query(ctx context.Context, fs *flag.FlagSet, path *string, args []string, s
 	directors := fs.Bool("directors", false, "archive: only posts by the rules director sitting when they were written")
 	from := fs.String("from", published, "where to download the bundle when -bundle is not given")
 	archive := fs.String("archive", bundle.KRCG.Archive, "where to download the rulings archive")
+	months := fs.Int("months", 0, "meta: the window's length in months")
 	sites := fs.String("sites", "", "where the deckbuilders' APIs are read, each under its host, instead of https://")
 	if err := fs.Parse(args); err != nil {
 		return err
 	}
-	if fs.NArg() < 2 {
+	if fs.NArg() < 2 && fs.Arg(0) != "meta" {
 		return errors.New(usage)
 	}
 	rest := fs.Args()[1:]
@@ -150,6 +152,14 @@ func query(ctx context.Context, fs *flag.FlagSet, path *string, args []string, s
 				return fmt.Errorf("-together: %w", err)
 			}
 			in["together"] = recipes
+		}
+	case "meta":
+		tool = "vtes_meta"
+		if *months != 0 {
+			in["months"] = *months
+		}
+		if len(rest) > 0 {
+			in["archetype"] = strings.Join(rest, " ")
 		}
 	case "stats":
 		tool, in["card"] = "vtes_card_stats", rest[0]

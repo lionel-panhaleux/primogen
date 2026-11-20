@@ -33,6 +33,8 @@ type Bundle struct {
 	// closes a card's statistics.
 	DeckAnalysis string
 	DeckAdvice   string
+	// MetaReading is knowledge/guide/meta-reading.md, the procedure a meta answer follows.
+	MetaReading string
 	// Decks is the TWDA, by id.
 	Decks []Deck
 	// Classification is the owner's archetype labels, knowledge/classification.json.

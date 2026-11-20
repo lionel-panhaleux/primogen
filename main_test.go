@@ -14,6 +14,7 @@ import (
 	"path/filepath"
 	"regexp"
 	"slices"
+	"strconv"
 	"strings"
 	"sync"
 	"sync/atomic"
@@ -766,6 +767,60 @@ func TestQueryStats(t *testing.T) {
 			t.Errorf("error %v, want %q", err, tc.err)
 		}
 	}
+}
+
+// TestQueryMeta reads the meta: the window's shares, the share in no
+// archetype stated with them, and an archetype's core and decks.
+func TestQueryMeta(t *testing.T) {
+	query := func(args ...string) (string, error) {
+		var stdout, stderr strings.Builder
+		err := run(t.Context(), append([]string{"query", "-bundle", testBundle}, args...), &stdout, &stderr)
+		return stdout.String(), err
+	}
+	out, err := query("meta")
+	if err != nil {
+		t.Fatal(err)
+	}
+	m := regexp.MustCompile(`Of the window's players, (\d+)% saw a deck the labels hold win, (\d+)% one placed by its nearest archetype, and \*\*(\d+)% one in no archetype\*\*`).FindStringSubmatch(out)
+	if m == nil {
+		t.Fatalf("no shares placed and unplaced in:\n%s", out)
+	}
+	if sum := atoi(t, m[1]) + atoi(t, m[2]) + atoi(t, m[3]); sum < 99 || sum > 101 {
+		t.Errorf("the labelled, placed and unplaced shares make %d%%:\n%s", sum, m[0])
+	}
+	for _, w := range []string{"| 1 | **", "| | in no archetype |", "## What rises and falls", "## The cards behind the move", "# Procedure: reading the meta"} {
+		if !strings.Contains(out, w) {
+			t.Errorf("missing %q in:\n%s", w, out)
+		}
+	}
+	out, err = query("meta", "Haqim Royalty")
+	if err != nil {
+		t.Fatal(err)
+	}
+	i, j := strings.Index(out, "## Its core"), strings.Index(out, "## Its decks")
+	if i < 0 || j < i || !strings.Contains(out[i:j], "- Hunger of Marduk: ") || !strings.Contains(out[j:], "The representative decks the labels pick:\n- 12494, ") {
+		t.Errorf("Haqim Royalty's core without Hunger of Marduk, or its decks without 12494:\n%s", out)
+	}
+	for _, tc := range []struct {
+		args []string
+		err  string
+	}{
+		{[]string{"meta", "Toreador"}, `no archetype is named "Toreador". Those whose name holds a word of it: **Weenie Toreador** (C70).`},
+		{[]string{"meta", "Nothing"}, "None has a name holding a word of it. vtes_meta without an archetype names the leading ones"},
+		{[]string{"-months", "99", "meta"}, "months must be 1 to "},
+	} {
+		if _, err := query(tc.args...); err == nil || !strings.Contains(err.Error(), tc.err) {
+			t.Errorf("%v: error %v, want %q", tc.args, err, tc.err)
+		}
+	}
+}
+
+func atoi(t *testing.T, s string) int {
+	n, err := strconv.Atoi(s)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return n
 }
 
 // TestQueryRules calls the rules tools as a model does.

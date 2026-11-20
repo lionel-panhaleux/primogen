@@ -99,7 +99,7 @@ Go, jq, node and uv come from mise: `mise install` in the checkout reads
   only), `deck LIST|ID|LINK` (the list's lines as one or
   several arguments, or `-` to read it from stdin; a link of VDB, VTES Decks
   or Amaranth; `-draft` for a deck idea's cards), `stats CARD
-  [ARCHETYPE]`.
+  [ARCHETYPE]`, `meta [ARCHETYPE]` (`-months` for the window's length).
 - `primogen stdio` serves the tools over stdio for a local MCP client.
 - Without `-bundle`, `query` and `stdio` are a local install: they use the
   published bundle in the user cache directory, which only the download

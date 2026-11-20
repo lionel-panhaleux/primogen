@@ -78,8 +78,11 @@ trailer; upkeep reads them.
 `vtes_deck` (a list validated, its crypt, library, modules and their odds in a hand, combat posture, costs, budgets and blood and pool sources beside its reference decks, track record and relatives computed) and
 `vtes_card_stats` (a card's play rates, companions and competitors for its slot) hosted at
 `https://mcp.krcg.org/mcp` and refreshing themselves (not announced yet), and
-from a local install (`primogen stdio`) downloading the published bundle.
-Cards, rules and the deck are done; the meta is the open milestone, and
-the announcement waits for it and for a feedback tool. From a checkout:
+from a local install (`primogen stdio`) downloading the published bundle;
+`vtes_meta` (the archetypes' shares of the latest window, the decks since
+the labels placed by similarity, the unplaced share stated) in `main`, live
+from the next release. Cards, rules and the deck are done; the meta is the
+open milestone, its clustering next, and the announcement waits for it and
+for a feedback tool. From a checkout:
 `primogen build`, then `primogen query` or `primogen stdio` with
 `-bundle data/bundle.json.gz`. The board holds the next lines.

@@ -384,16 +384,33 @@ func (r *Relatives) validate() {
 	r.GroupRate, r.RootRate = float64(group)/float64(len(own)), float64(root)/float64(len(own))
 }
 
+// Placement is the archetype of the window's deck i: its label, else its
+// nearest archetype at the threshold or more. g is -1 for none: the owner
+// put it in none (labelled), or it is near none.
+func (r *Relatives) Placement(i int) (g int, labelled bool) {
+	id := r.Decks[i].ID
+	if g, ok := r.groupOf[id]; ok {
+		return g, true
+	}
+	if r.noise[id] {
+		return -1, true
+	}
+	if r.vecs[i].Empty() {
+		return -1, false
+	}
+	if best := r.Archetypes(r.vecs[i], id, 1)[0]; best.Similarity >= r.Threshold {
+		return best.Index, false
+	}
+	return -1, false
+}
+
 // Unmatched are the decks of the window the owner has not labelled, archetype
 // or noise, that reach no archetype's threshold.
 func (r *Relatives) Unmatched() []string {
 	var out []string
 	for i, d := range r.Decks {
-		if _, ok := r.groupOf[d.ID]; ok || r.noise[d.ID] {
-			continue
-		}
-		best := r.Archetypes(r.vecs[i], d.ID, 1)[0]
-		if best.Similarity < r.Threshold {
+		if g, labelled := r.Placement(i); g < 0 && !labelled {
+			best := r.Archetypes(r.vecs[i], d.ID, 1)[0]
 			out = append(out, fmt.Sprintf("%s %q (%s, closest %s at %.2f)", d.ID, d.Name, d.Date, r.Class.Archetypes[best.Index].Name, best.Similarity))
 		}
 	}

@@ -8,14 +8,6 @@ date or an outside event is not a line.
 
 ---
 
-- `vtes_meta` (M:meta): archetype shares over a window weighted by event
-  size, what rises and falls against the previous window, an archetype's
-  core cards and representative decks; the decks since the labels placed by
-  their nearest archetype at `vtes_deck`'s bar, those near none counted and
-  said. Done when: `primogen query vtes_meta` on the current bundle gives
-  the latest window's shares with the unplaced share stated. Docs:
-  product.md (the `vtes_meta` row, the shipped-tools sentence), AGENTS.md
-  "Right now".
 - Clustering (M:meta): the window's decks no archetype holds, grouped into
   proposed archetypes with their core cards and decks, each named or
   rejected by the owner in `classification.json`. Done when: the build
@@ -41,4 +33,4 @@ date or an outside event is not a line.
   staples, and a fresh regression answer to that entry offers it. Docs:
   product.md (the `vtes_deck` row, "Grading a deck").
 
-<!-- completed-since-upkeep: 14 -->
+<!-- completed-since-upkeep: 15 -->

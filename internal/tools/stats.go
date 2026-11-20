@@ -63,7 +63,7 @@ func addStats(s *mcp.Server, l *Live) {
 		var arch *bundle.Archetype
 		if in.Archetype != "" {
 			var err error
-			if arch, err = d.findArchetype(in.Archetype, cards[0]); err != nil {
+			if arch, err = d.findArchetype(in.Archetype, cards[0], "vtes_card_stats"); err != nil {
 				return nil, nil, err
 			}
 		}
@@ -78,8 +78,8 @@ func addStats(s *mcp.Server, l *Live) {
 }
 
 // findArchetype takes a name or a ref; for a name no archetype has, it offers
-// the archetypes playing the card, then the names holding a word of it.
-func (d *data) findArchetype(name string, c *bundle.Card) (*bundle.Archetype, error) {
+// the archetypes playing the card, if any, then the names holding a word of it.
+func (d *data) findArchetype(name string, c *bundle.Card, tool string) (*bundle.Archetype, error) {
 	r := d.rel
 	q := bundle.Fold(name)
 	as := r.Class.Archetypes
@@ -97,7 +97,7 @@ func (d *data) findArchetype(name string, c *bundle.Card) (*bundle.Archetype, er
 		for i, a := range found {
 			names[i] = archetypeName(r, a)
 		}
-		return nil, fmt.Errorf("several archetypes are named %q: %s. Call vtes_card_stats again with the ref of the one meant", name, strings.Join(names, "; "))
+		return nil, fmt.Errorf("several archetypes are named %q: %s. Call %s again with the ref of the one meant", name, strings.Join(names, "; "), tool)
 	}
 	names := func(as []*bundle.Archetype) string {
 		out := make([]string, len(as))
@@ -106,7 +106,6 @@ func (d *data) findArchetype(name string, c *bundle.Card) (*bundle.Archetype, er
 		}
 		return strings.Join(out, "; ")
 	}
-	playing, _, _, _ := d.playedBy(c)
 	var named []*bundle.Archetype
 	for i := range as {
 		words := strings.Fields(bundle.Fold(as[i].Name))
@@ -115,15 +114,20 @@ func (d *data) findArchetype(name string, c *bundle.Card) (*bundle.Archetype, er
 		}
 	}
 	msg := fmt.Sprintf("no archetype is named %q.", name)
-	if len(playing) > 0 {
-		msg += fmt.Sprintf(" The archetypes playing %s most: %s.", c.Name, names(playing[:min(5, len(playing))]))
+	if c != nil {
+		if playing, _, _, _ := d.playedBy(c); len(playing) > 0 {
+			msg += fmt.Sprintf(" The archetypes playing %s most: %s.", c.Name, names(playing[:min(5, len(playing))]))
+		}
 	}
 	if len(named) > 0 {
 		msg += " Those whose name holds a word of it: " + names(named) + "."
 	} else {
 		msg += " None has a name holding a word of it."
 	}
-	return nil, fmt.Errorf("%s Call vtes_card_stats again with a name or ref, or vtes_deck on a list to find its archetype", msg)
+	if tool == "vtes_meta" {
+		msg += " vtes_meta without an archetype names the leading ones with their refs (detail, sixty)."
+	}
+	return nil, fmt.Errorf("%s Call %s again with a name or ref, or vtes_deck on a list to find its archetype", msg, tool)
 }
 
 // playedBy counts the window's decks playing c by the root of their
