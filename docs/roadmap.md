@@ -31,11 +31,7 @@ At most three open, each named by what someone can do afterwards. A board
 line serving one carries its token; done is deleted. Opening one is the
 owner's decision.
 
-- **M:members**: a logged-in VEKN member gets Archon tournaments, standings,
-  rankings, member records (by VEKN ID), published decklists beyond the TWDA,
-  and full-field play share against win share; an unlogged user keeps every
-  public tool and community links (owner, 2026-11-20). Done when an
-  owner-graded session of member questions passes.
+None open.
 
 ## Later, in this order unless the owner reorders
 
