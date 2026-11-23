@@ -348,7 +348,7 @@ func TestQueryDeck(t *testing.T) {
 		"- With one library copy or none (one copy: in 8% of opening hands): **Big-cap ramp** (Information Highway); **Permanent intercept** (Mr. Winthrop)\n",
 		"In no module shown (23 copies, 25.6% of the library): Thing ×11, Deep Ecology ×5, Powerbase: Savannah ×2, Anarch Railroad, Backways, Ecoterrorists, Ennoia's Theater, Revolutionary Council\n",
 		// its relatives, the deck left out of them, and how well the labels classify back
-		"pass of 2026-07-05, revised on 2026-11-20 by the same maintainer from primogen's build's proposals, curated and revisable; each of their decks left out in turn, 97% are placed back in their archetype, 99% in its family (variants merged).",
+		"pass of 2026-07-05, revised on 2026-11-23 by the same maintainer, curated and revisable; each of their decks left out in turn, 97% are placed back in their archetype, 99% in its family (variants merged).",
 		"Nearest archetypes (95 in 100 of an archetype's own decks are at 0.49 or more from it):\n- **Gangrel Resistance** (C11): 0.92; 44 decks, its representative decks 12101.\n- **Gangrel Grinder** (C64), a variant of **Gangrel Resistance**: ",
 		"### 12511, Intelligent Gangrel: 0.99\n\nWon by Milos Krstic at Shell Game in Belgrade, Belgrade, Serbia, 2025-11-15, 13 players. Event report: https://www.vekn.net/event-calendar/event/12511 Labelled **Gangrel Resistance** (C11).",
 		"Only in this deck: 1× Monkey Wrench; 1× Revolutionary Council.\nOnly in 12511: 1× The Barrens; 1× The Parthenon.\nOther counts: Thing, 11 here and 9 there;",

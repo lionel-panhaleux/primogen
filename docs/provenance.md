@@ -55,10 +55,12 @@ compares them with upstream and records the commit below.
   codex-of-the-damned @ `18be59e`. Its `editor_state` is that site's
   review page's, and its `params` but `since`, `crypt_weight` and `min_df`
   describe that site's clustering pass: no code here reads them. Its
-  `revised` date is the last day the owner ruled on the build's proposals:
-  seven named on 2026-11-20 (G32 to G38, not among that site's labels),
-  from 11 decks the labels lacked and 20 of the owner's noise; the tools
-  date the labels with both days.
+  `revised` date is the last day the owner revised the labels:
+  seven named from the build's proposals on 2026-11-20 (G32 to G38, not
+  among that site's labels, from 11 decks the labels lacked and 20 of the
+  owner's noise), and two promoted out of the owner's noise on 2026-11-23
+  (G39 Lasombra Rush and G40 Máddji Vozhd, variant of C87, from 6 noise
+  decks); the tools date the labels with both days.
   `vtes_deck` places a deck among its archetypes ([product.md](product.md)).
   The build groups the window's decks in no archetype, the owner's noise
   and those near none: a group of three decks or more, each of which, left

@@ -1,6 +1,6 @@
 {
  "generated": "2026-07-05",
- "revised": "2026-11-20",
+ "revised": "2026-11-23",
  "params": {
   "since": "2021-07-01",
   "until": "",
@@ -8961,6 +8961,31 @@
    ]
   },
   {
+   "ref": "G40",
+   "name": "M\u00e1ddji Vozhd",
+   "variant_of": "C87",
+   "anchors": [],
+   "reviewed": true,
+   "decks": [
+    {
+     "id": "13049",
+     "date": "2026-03-14",
+     "name": "Pra que tanto Vozhd?",
+     "players": 13,
+     "qualifying": false,
+     "representative": false
+    },
+    {
+     "id": "13079",
+     "date": "2026-03-07",
+     "name": "Heart of the Guardian",
+     "players": 13,
+     "qualifying": false,
+     "representative": false
+    }
+   ]
+  },
+  {
    "ref": "C88",
    "name": "Kalinda",
    "variant_of": null,
@@ -10178,6 +10203,47 @@
      "representative": false
     }
    ]
+  },
+  {
+   "ref": "G39",
+   "name": "Lasombra Rush",
+   "variant_of": null,
+   "anchors": [],
+   "reviewed": true,
+   "decks": [
+    {
+     "id": "12933",
+     "date": "2026-01-15",
+     "name": "Lasombra Fortitunado",
+     "players": 14,
+     "qualifying": false,
+     "representative": false
+    },
+    {
+     "id": "12753",
+     "date": "2025-11-22",
+     "name": "Water Dog - Lasombra Shift",
+     "players": 10,
+     "qualifying": false,
+     "representative": false
+    },
+    {
+     "id": "12608",
+     "date": "2025-09-28",
+     "name": "Lasombra Rush",
+     "players": 10,
+     "qualifying": false,
+     "representative": false
+    },
+    {
+     "id": "12412",
+     "date": "2025-07-06",
+     "name": "Lasombra Deadpool v5",
+     "players": 0,
+     "qualifying": false,
+     "representative": false
+    }
+   ]
   }
  ],
  "noise": [
@@ -10238,22 +10304,6 @@
    "representative": false
   },
   {
-   "id": "13049",
-   "date": "2026-03-14",
-   "name": "Pra que tanto Vozhd?",
-   "players": 13,
-   "qualifying": false,
-   "representative": false
-  },
-  {
-   "id": "13079",
-   "date": "2026-03-07",
-   "name": "Heart of the Guardian",
-   "players": 13,
-   "qualifying": false,
-   "representative": false
-  },
-  {
    "id": "13025",
    "date": "2026-02-22",
    "name": "Man Bear Wolf",
@@ -10286,14 +10336,6 @@
    "representative": false
   },
   {
-   "id": "12933",
-   "date": "2026-01-15",
-   "name": "Lasombat Fortitunado",
-   "players": 14,
-   "qualifying": false,
-   "representative": false
-  },
-  {
    "id": "12842",
    "date": "2025-12-23",
    "name": "Pop\u00f3",
@@ -10314,14 +10356,6 @@
    "date": "2025-11-29",
    "name": "Death by a 1000 cuts II",
    "players": 13,
-   "qualifying": false,
-   "representative": false
-  },
-  {
-   "id": "12753",
-   "date": "2025-11-22",
-   "name": "Water Dog - Lasombra Shift",
-   "players": 10,
    "qualifying": false,
    "representative": false
   },
@@ -10362,14 +10396,6 @@
    "date": "2025-09-28",
    "name": "Royal with Cheese",
    "players": 12,
-   "qualifying": false,
-   "representative": false
-  },
-  {
-   "id": "12608",
-   "date": "2025-09-28",
-   "name": "Lasombra Rush",
-   "players": 10,
    "qualifying": false,
    "representative": false
   },
@@ -10418,14 +10444,6 @@
    "date": "2025-07-13",
    "name": "Anarquista para sempre",
    "players": 18,
-   "qualifying": false,
-   "representative": false
-  },
-  {
-   "id": "12412",
-   "date": "2025-07-06",
-   "name": "Lasombra Deadpool v5",
-   "players": 0,
    "qualifying": false,
    "representative": false
   },

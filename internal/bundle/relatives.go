@@ -14,7 +14,7 @@ import (
 // knowledge/classification.json.
 type Classification struct {
 	Generated   string
-	Revised     string // the last day the owner ruled on the build's proposals, if after Generated
+	Revised     string // the last day the owner revised the labels, if after Generated
 	Since       string // the first date of the labelled window
 	CryptWeight float64
 	MinDF       int // the decks a card must be in to count
@@ -36,7 +36,7 @@ func (c *Classification) Pass() string {
 	if c.Revised == "" {
 		return c.Generated
 	}
-	return c.Generated + ", revised on " + c.Revised + " by the same maintainer from primogen's build's proposals"
+	return c.Generated + ", revised on " + c.Revised + " by the same maintainer"
 }
 
 func readClassification(raw []byte) (Classification, error) {
