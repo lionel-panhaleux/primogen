@@ -67,7 +67,7 @@ func addCards(s *mcp.Server, l *Live) {
 			}
 		}
 		if found {
-			out.WriteString("Answer from these texts and rulings, quoting them and citing their links, never from memory. " +
+			out.WriteString("Answer from these texts and rulings, never from memory; for a rules question, quote them and cite their links. " +
 				"Where neither a card's text nor a ruling here settles a point, search vtes_rulings_archive (the card's name, directors only) before calling it unsettled: " +
 				"a sitting rules director's reply settles it. Only when nothing does, say it is unsettled rather than filling the gap.\n\n")
 		}

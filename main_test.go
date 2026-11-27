@@ -187,7 +187,7 @@ func TestQueryCards(t *testing.T) {
 			"LSJ 19981028: https://usenet.krcg.org/t/JZHY1bTCAa0/#m1",
 			"ANK 20190425: https://usenet.krcg.org/t/vekn-77581/#94652 (archived from https://www.vekn.net/",
 			"Changes: no line of the history of card changes names this card.",
-			"Answer from these texts and rulings, quoting them and citing their links, never from memory.",
+			"Answer from these texts and rulings, never from memory; for a rules question, quote them and cite their links.",
 			"Data: cards of static.krcg.org ",
 		}, not: []string{"Printings:"}},
 		{args: []string{"cards", "Lord of Serenity"}, want: []string{
