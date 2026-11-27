@@ -139,6 +139,8 @@ Go, jq, node, sops and uv come from mise: `mise install` in the checkout reads
   `-country` and `-continent` for geographic filters),
   `events [TOURNAMENT]` (`-member`, `-rankings`, `-category`, `-league`,
   `-links`, `-country`, `-since`, `-until`, `-rank`, `-format`, `-state`),
+  `guide TOPIC [SECTION...]` (`-lang` for game-term translations, `-filter` to
+  narrow terms or examples),
   `feedback QUESTION WRONG EXPECTED` (files a public issue, through the
   hosted server, or the one `-from` names).
 - `primogen stdio` serves the tools over stdio for a local MCP client.

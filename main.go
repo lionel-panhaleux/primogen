@@ -37,6 +37,7 @@ const usage = `usage:
       stats CARD [ARCHETYPE]     vtes_card_stats: a card's play rates, companions and competitors, overall or within an archetype
       meta [ARCHETYPE]           vtes_meta: the archetypes' shares of the latest window, or one archetype's (-months: the window's length; -country, -continent: geographic filter)
       events [TOURNAMENT]        vtes_events: tournaments, standings, rankings (-rankings, -category), a member (-member), leagues (-league) or community links (-links)
+      guide TOPIC [SECTION...]   vtes_guide: task procedures, theory, modules, game terms (-lang, -filter) or served examples (-filter)
       feedback QUESTION WRONG EXPECTED   vtes_feedback: file a report on an answer as a public GitHub issue, through the hosted server
   primogen stdio [-bundle PATH]                    serve the tools over stdio, for a local MCP client
   primogen serve -bundle PATH [-addr ADDR] [-knowledge DIR] [-github-app ID -github-key PEM] [-archon-client ID -archon-secret FILE]   serve the tools over HTTP at /mcp, refreshing the bundle
@@ -178,11 +179,13 @@ func query(ctx context.Context, fs *flag.FlagSet, path *string, args []string, s
 	rank := fs.String("rank", "", "events: championship level (NC, CC, basic)")
 	format := fs.String("format", "", "events: tournament format (Standard, V5, Limited, Storyline)")
 	state := fs.String("state", "", "events: tournament state (Planned, Registration, Waiting, Playing, Finished)")
+	lang := fs.String("lang", "", "guide: language code for terms (EN, FR, ES, PT-BR, IT, JP, LATIN)")
+	filter := fs.String("filter", "", "guide: substring filter for terms or examples")
 	sites := fs.String("sites", "", "where the deckbuilders' APIs are read, each under its host, instead of https://")
 	if err := fs.Parse(args); err != nil {
 		return err
 	}
-	if fs.NArg() < 2 && fs.Arg(0) != "meta" && fs.Arg(0) != "events" {
+	if fs.NArg() < 2 && fs.Arg(0) != "meta" && fs.Arg(0) != "events" && fs.Arg(0) != "guide" {
 		return errors.New(usage)
 	}
 	rest := fs.Args()[1:]
@@ -252,6 +255,23 @@ func query(ctx context.Context, fs *flag.FlagSet, path *string, args []string, s
 		}
 		if *links {
 			in["links"] = true
+		}
+	case "guide":
+		tool = "vtes_guide"
+		in = map[string]any{}
+		if len(rest) > 0 {
+			in["topic"] = rest[0]
+		} else {
+			in["topic"] = ""
+		}
+		if len(rest) > 1 {
+			in["section"] = strings.Join(rest[1:], " ")
+		}
+		if *lang != "" {
+			in["language"] = *lang
+		}
+		if *filter != "" {
+			in["filter"] = *filter
 		}
 	case "feedback":
 		if len(rest) != 3 {

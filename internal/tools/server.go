@@ -18,7 +18,7 @@ import (
 )
 
 const instructions = `Primogen grounds answers about Vampire: The Eternal Struggle (VTES).
-Never state a card's text, a ruling or a rule from memory: call vtes_cards for every card the answer relies on, vtes_rules_case first for any rules question, vtes_deck first for a decklist, or with draft for a deck idea's cards, vtes_meta for any claim about the meta, and vtes_events for tournaments, standings, rankings, a member's wins or decklists, leagues and community links.
+Never state a card's text, a ruling or a rule from memory: call vtes_cards for every card the answer relies on, vtes_rules_case first for any rules question, vtes_deck first for a decklist, or with draft for a deck idea's cards, vtes_meta for any claim about the meta, vtes_events for tournaments, standings, rankings, a member's wins or decklists, leagues and community links, and vtes_guide for VTES strategy theory, module vocabulary, task procedures, game-term translations and worked examples.
 For rules questions, quote what the tools return and cite their links (each item carries its authority and its link). When the result says no ruling covers a point, search vtes_rulings_archive (the card's name, directors only) before calling it unsettled: a sitting rules director's reply settles it, even one whose own words name no card. Only when nothing does, say the point is unsettled rather than filling the gap.
 When the user says an answer was wrong, offer to report it with vtes_feedback.`
 
@@ -108,6 +108,7 @@ func NewServer(l *Live) *mcp.Server {
 	addStats(s, l)
 	addMeta(s, l)
 	addEvents(s, l)
+	addGuide(s, l)
 	addFeedback(s, l)
 	return s
 }

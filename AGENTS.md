@@ -88,7 +88,9 @@ events that published decklists beyond the winner),
 `vtes_events` (community links for everyone; with Archon OAuth login,
 tournaments, standings, published decklists, rating rankings, a member's
 ratings, known wins, tournament history and decks by VEKN ID, and leagues,
-with `vtes_deck` also reading published Archon decks) and
+with `vtes_deck` also reading published Archon decks),
+`vtes_guide` (task procedures, VTES strategy theory, module vocabulary and
+combat defenses, game-term translations and owner-graded worked examples) and
 `vtes_feedback` (a user's report on an answer filed as a public `feedback`
 issue, which `/intake` reads) hosted at
 `https://mcp.krcg.org/mcp` and refreshing themselves, and

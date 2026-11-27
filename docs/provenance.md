@@ -22,8 +22,9 @@ compares them with upstream and records the commit below.
   strategist's graded cases stay in `calibration/codex-cases.md`, unserved.
   `rules-answer.md` closes every `vtes_rules_case` pack as its answer
   contract, `deck-analysis.md` and `deck-advice.md` every `vtes_deck`
-  dossier, `deck-advice.md` every `vtes_card_stats` result, `meta-reading.md` every `vtes_meta` result; `theory.md`,
-  `modules.md` and `card-comparison.md` are served by no tool yet.
+  dossier, `deck-advice.md` every `vtes_card_stats` result, `meta-reading.md`
+  every `vtes_meta` result; `vtes_guide` serves all five procedures,
+  `theory.md`, `modules.md` and `examples/`.
   `examples/` holds the served examples (principles.md, principle 8): each
   an excerpt of one of primogen's own answers the owner graded clean, named
   after its task, naming its corpus entry and the dates of the answer and
@@ -31,7 +32,8 @@ compares them with upstream and records the commit below.
   from `calibration/corpus/2026-11-20-trap-or-conquer-the-beast.md`, and
   `meta-reading-top-tier-decks.md`, from
   `calibration/corpus/2026-11-20-top-tier-decks.md`, both promoted on
-  2026-11-20. Served by no tool until `vtes_guide` ships.
+  2026-11-20, discovered from `knowledge/guide/examples/` at each build and
+  served by `vtes_guide`.
   `modules.md` is the module catalog the owner canonized on 2026-08-25,
   checked against the card texts on 2026-11-19, but for its "Combat
   defenses", written on 2026-11-19 after codex-of-the-damned's
@@ -79,7 +81,7 @@ compares them with upstream and records the commit below.
   and their translations in six languages, from
   `vtes-skill` @ `65b5c3e`. The translations are unchecked, the exception
   [principles.md](principles.md) "Knowledge files" records; the file says so
-  itself.
+  itself, and `vtes_guide` serves them with that label.
 - `llms.txt`: the catalog of the KRCG stack the hosted server serves at
   its root ([product.md](product.md) "Connecting"), each line checked
   against its service's own specification when written.

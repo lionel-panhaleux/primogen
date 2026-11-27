@@ -22,6 +22,7 @@ Archon decklists, and full-field meta.
 - `vtes_card_stats`: a card among the tournament-winning decks, overall or within an archetype: how many play it and with how many copies, what is played with it, and its competitors for the slot with their texts.
 - `vtes_meta`: the archetypes' shares of the tournament-winning decks of the latest window, weighted by event size, the share in no archetype stated, what rises and falls and the cards behind it, and, with Archon login, full-field play share against win share and conversion over the events that published decklists beyond the winner; an archetype's share over time, core cards and decks.
 - `vtes_events`: community links (without login); with Archon login, tournaments, standings, published decklists, rating rankings, a member's ratings, known wins, tournament history and decks (by VEKN ID), and leagues.
+- `vtes_guide`: task procedures, VTES strategy theory, the module vocabulary and combat defenses, game-term translations (labeled unchecked, consistency reference), and owner-graded worked examples.
 - `vtes_feedback`: a report on a wrong answer (the question, what was wrong, what was expected), filed with the user's agreement as a public issue on this repository, labelled `feedback`.
 
 ## Sources

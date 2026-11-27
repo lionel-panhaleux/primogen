@@ -29,11 +29,12 @@ type Upstream struct {
 	RulingsHead string // answers the vtes-rulings commit to read, as a bare SHA
 	RulingsFile string // a file at that commit, formatted with the SHA and the file name
 	Archive     string // the archive's bulk file
-	// primogen's own knowledge/: a local directory, or else a head and files
-	// as for the rulings.
+	// primogen's own knowledge/: a local directory, or else a head, files and
+	// directory listing on GitHub.
 	KnowledgeDir  string
 	KnowledgeHead string
 	KnowledgeFile string
+	KnowledgeList string
 	// archon-vibe, whose help pages are the rulebook, the tournament rules and
 	// the judges' guide: the last commit touching a path, and files at one
 	ArchonCommits string // the last commit touching a path, formatted with the path
@@ -49,6 +50,7 @@ var KRCG = Upstream{
 	Archive:       "https://usenet.krcg.org/archive.json.gz",
 	KnowledgeHead: "https://api.github.com/repos/lionel-panhaleux/primogen/commits/main",
 	KnowledgeFile: "https://raw.githubusercontent.com/lionel-panhaleux/primogen/%s/knowledge/%s",
+	KnowledgeList: "https://api.github.com/repos/lionel-panhaleux/primogen/contents/knowledge/%s?ref=%s",
 	ArchonCommits: "https://api.github.com/repos/vtes-biased/archon-vibe/commits?per_page=1&path=%s",
 	ArchonFile:    "https://raw.githubusercontent.com/vtes-biased/archon-vibe/%s/frontend/src/lib/help-content/%s",
 }
@@ -88,23 +90,44 @@ func Build(ctx context.Context, up Upstream, archive *Archive) (*Bundle, []strin
 	if err != nil {
 		return nil, nil, err
 	}
-	knowledgeVersion, read, err := knowledge(ctx, up)
+	knowledgeVersion, read, list, err := knowledge(ctx, up)
 	if err != nil {
 		return nil, nil, err
 	}
-	var history, advanced, procedure, analysis, advice, meta, terms, shorthand, catalog, classification, tags, modules, theory []byte
+	var history, advanced, procedure, analysis, advice, meta, comparison, terms, shorthand, catalog, classification, tags, modules, theory []byte
 	for name, body := range map[string]*[]byte{
 		"card-changes.md": &history, "rules/advanced-rules.md": &advanced,
 		"guide/rules-answer.md": &procedure, "guide/deck-analysis.md": &analysis, "guide/deck-advice.md": &advice,
-		"guide/meta-reading.md": &meta,
-		"game-terms.json":       &terms, "shorthand.json": &shorthand, "llms.txt": &catalog, "classification.json": &classification,
+		"guide/meta-reading.md": &meta, "guide/card-comparison.md": &comparison,
+		"game-terms.json": &terms, "shorthand.json": &shorthand, "llms.txt": &catalog, "classification.json": &classification,
 		"guide/module-tags.json": &tags, "guide/modules.md": &modules, "guide/theory.md": &theory,
 	} {
 		if *body, err = read(name); err != nil {
 			return nil, nil, err
 		}
 	}
-	gameTerms, err := readGameTerms(terms)
+	exampleFiles, err := list("guide/examples")
+	if err != nil {
+		return nil, nil, err
+	}
+	var examples []Example
+	for _, name := range exampleFiles {
+		if !strings.HasSuffix(name, ".md") {
+			continue
+		}
+		raw, err := read("guide/examples/" + name)
+		if err != nil {
+			return nil, nil, err
+		}
+		slug := strings.TrimSuffix(name, ".md")
+		text := string(raw)
+		title := slug
+		if first, _, _ := strings.Cut(strings.TrimSpace(text), "\n"); strings.HasPrefix(first, "# ") {
+			title = strings.TrimSpace(strings.TrimPrefix(first, "# "))
+		}
+		examples = append(examples, Example{Name: slug, Title: title, Text: text})
+	}
+	gameTerms, glossary, err := readGameTerms(terms)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -151,7 +174,12 @@ func Build(ctx context.Context, up Upstream, archive *Archive) (*Bundle, []strin
 		DeckAnalysis:   string(analysis),
 		DeckAdvice:     string(advice),
 		MetaReading:    string(meta),
+		CardComparison: string(comparison),
+		Theory:         string(theory),
+		ModuleCatalog:  string(modules),
+		Examples:       examples,
 		GameTerms:      gameTerms,
+		Terms:          glossary,
 		Shorthand:      short.Shorthand,
 		Catalog:        string(catalog),
 		Classification: labels,
@@ -234,7 +262,7 @@ func Probe(ctx context.Context, up Upstream) ([]Source, error) {
 	if err != nil {
 		return nil, err
 	}
-	version, _, err := knowledge(ctx, up)
+	version, _, _, err := knowledge(ctx, up)
 	if err != nil {
 		return nil, err
 	}
@@ -247,34 +275,98 @@ func Probe(ctx context.Context, up Upstream) ([]Source, error) {
 	}, nil
 }
 
-// readGameTerms answers the English terms of game-terms.json, every key of
-// its categories.
-func readGameTerms(raw []byte) ([]string, error) {
-	var categories map[string]map[string]json.RawMessage
-	if err := json.Unmarshal(raw, &categories); err != nil {
-		return nil, fmt.Errorf("game-terms.json: %w", err)
+// readGameTerms parses game-terms.json into its sorted English terms and full
+// categorized glossary with translations and provenance metadata.
+func readGameTerms(raw []byte) ([]string, Glossary, error) {
+	var top map[string]json.RawMessage
+	if err := json.Unmarshal(raw, &top); err != nil {
+		return nil, Glossary{}, fmt.Errorf("game-terms.json: %w", err)
 	}
-	var out []string
-	for name, terms := range categories {
-		if name != "_meta" {
-			out = append(out, slices.Collect(maps.Keys(terms))...)
+	var g Glossary
+	if metaRaw, ok := top["_meta"]; ok {
+		var meta struct {
+			Description string            `json:"description"`
+			Sources     map[string]string `json:"sources"`
+			Partial     string            `json:"partial"`
 		}
+		if err := json.Unmarshal(metaRaw, &meta); err != nil {
+			return nil, Glossary{}, fmt.Errorf("game-terms.json _meta: %w", err)
+		}
+		g.Description, g.Sources, g.Partial = meta.Description, meta.Sources, meta.Partial
 	}
-	slices.Sort(out)
-	return out, nil
+	var english []string
+	for _, cat := range slices.Sorted(maps.Keys(top)) {
+		if cat == "_meta" {
+			continue
+		}
+		var terms map[string]map[string]*string
+		if err := json.Unmarshal(top[cat], &terms); err != nil {
+			return nil, Glossary{}, fmt.Errorf("game-terms.json %s: %w", cat, err)
+		}
+		tc := TermCategory{Name: cat}
+		for _, name := range slices.Sorted(maps.Keys(terms)) {
+			english = append(english, name)
+			tr := map[string]string{}
+			for lang, val := range terms[name] {
+				if val != nil && *val != "" {
+					tr[lang] = *val
+				}
+			}
+			tc.Terms = append(tc.Terms, Term{English: name, Translations: tr})
+		}
+		g.Categories = append(g.Categories, tc)
+	}
+	slices.Sort(english)
+	return english, g, nil
 }
 
-// knowledge says which version of knowledge/ a build reads, and reads its files
-// at that version.
-func knowledge(ctx context.Context, up Upstream) (string, func(string) ([]byte, error), error) {
+// knowledge says which version of knowledge/ a build reads, and returns readers
+// for its files and directories at that version.
+func knowledge(ctx context.Context, up Upstream) (string, func(string) ([]byte, error), func(string) ([]string, error), error) {
 	if up.KnowledgeDir != "" {
-		return "local", func(name string) ([]byte, error) { return os.ReadFile(filepath.Join(up.KnowledgeDir, name)) }, nil
+		read := func(name string) ([]byte, error) { return os.ReadFile(filepath.Join(up.KnowledgeDir, name)) }
+		list := func(dir string) ([]string, error) {
+			entries, err := os.ReadDir(filepath.Join(up.KnowledgeDir, dir))
+			if err != nil {
+				return nil, err
+			}
+			var names []string
+			for _, e := range entries {
+				if !e.IsDir() {
+					names = append(names, e.Name())
+				}
+			}
+			return names, nil
+		}
+		return "local", read, list, nil
 	}
 	commit, err := headCommit(ctx, up.KnowledgeHead)
 	if err != nil {
-		return "", nil, err
+		return "", nil, nil, err
 	}
-	return commit[:7], func(name string) ([]byte, error) { return fetch(ctx, fmt.Sprintf(up.KnowledgeFile, commit, name), "") }, nil
+	read := func(name string) ([]byte, error) { return fetch(ctx, fmt.Sprintf(up.KnowledgeFile, commit, name), "") }
+	list := func(dir string) ([]string, error) {
+		body, err := fetch(ctx, fmt.Sprintf(up.KnowledgeList, dir, commit), "application/vnd.github+json")
+		if err != nil {
+			return nil, err
+		}
+		var entries []struct {
+			Name string `json:"name"`
+			Type string `json:"type"`
+		}
+		if err := json.Unmarshal(body, &entries); err != nil {
+			return nil, fmt.Errorf("%s: %w", dir, err)
+		}
+		var names []string
+		for _, e := range entries {
+			if e.Type == "file" {
+				names = append(names, e.Name)
+			}
+		}
+		slices.Sort(names)
+		return names, nil
+	}
+	return commit[:7], read, list, nil
 }
 
 var reCommit = regexp.MustCompile(`^[0-9a-f]{40}$`)

@@ -35,6 +35,14 @@ type Bundle struct {
 	DeckAdvice   string
 	// MetaReading is knowledge/guide/meta-reading.md, the procedure a meta answer follows.
 	MetaReading string
+	// CardComparison is knowledge/guide/card-comparison.md, the procedure for comparing cards.
+	CardComparison string
+	// Theory is knowledge/guide/theory.md, VTES strategy theory.
+	Theory string
+	// ModuleCatalog is knowledge/guide/modules.md, the module vocabulary and combat defenses.
+	ModuleCatalog string
+	// Examples are the served owner-graded excerpts from knowledge/guide/examples/.
+	Examples []Example
 	// Decks is the TWDA, by id.
 	Decks []Deck
 	// Classification is the owner's archetype labels, knowledge/classification.json.
@@ -47,10 +55,37 @@ type Bundle struct {
 	Economy []Gain
 	// GameTerms are the game's terms in English, from knowledge/game-terms.json.
 	GameTerms []string
+	// Terms holds knowledge/game-terms.json with its categories, translations and provenance note.
+	Terms Glossary
 	// Shorthand is the players' shorthand of knowledge/shorthand.json.
 	Shorthand []string
 	// Catalog is knowledge/llms.txt, the KRCG stack for developers and their agents.
 	Catalog string
+}
+
+// Example is a served owner-graded answer excerpt from knowledge/guide/examples/.
+type Example struct {
+	Name  string
+	Title string
+	Text  string
+}
+
+// Glossary is knowledge/game-terms.json: English terms by category with unchecked translations.
+type Glossary struct {
+	Description string
+	Sources     map[string]string
+	Partial     string
+	Categories  []TermCategory
+}
+
+type TermCategory struct {
+	Name  string
+	Terms []Term
+}
+
+type Term struct {
+	English      string
+	Translations map[string]string
 }
 
 // Source dates what the bundle read: a commit, a file date, the newest post.

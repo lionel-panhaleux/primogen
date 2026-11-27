@@ -6,7 +6,7 @@ To answer VTES questions in an assistant, add the MCP endpoint below. To build a
 
 ## Primogen
 
-- [MCP endpoint](https://mcp.krcg.org/mcp): Streamable HTTP, public tools need no sign-in; optional Archon OAuth login for VEKN members. Cards with their rulings, rules evidence and rules/archive search, decklist and draft analysis, card play rates and competitors, meta shares (and full-field play against win share with Archon login), tournaments/rankings/member records/leagues and community links, and feedback reporting. `tools/list` describes each tool.
+- [MCP endpoint](https://mcp.krcg.org/mcp): Streamable HTTP, public tools need no sign-in; optional Archon OAuth login for VEKN members. Cards with their rulings, rules evidence and rules/archive search, decklist and draft analysis, card play rates and competitors, meta shares (and full-field play against win share with Archon login), tournaments/rankings/member records/leagues and community links, VTES guide/theory/modules/game-term translations/worked examples, and feedback reporting. `tools/list` describes each tool.
 - [Primogen's README](https://github.com/lionel-panhaleux/primogen#readme): the tools, adding the server to Claude, Claude Code or Gemini, running it locally over stdio.
 - [Data bundle](https://mcp.krcg.org/bundle.json.gz): everything the public tools serve but the rulings archive (its bulk file is below) and Archon's export, as gzipped JSON, rebuilt when a source moves; its format is the `Bundle` type of [bundle.go](https://github.com/lionel-panhaleux/primogen/blob/main/internal/bundle/bundle.go).
 - [Status](https://mcp.krcg.org/status): the data's dates, the last refresh, what needs a person.

@@ -132,6 +132,26 @@ func (u *upstream) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, filepath.Join("knowledge", name))
 		return
 	}
+	if dir, ok := strings.CutPrefix(r.URL.Path, "/primogen-list/"); ok {
+		if r.URL.Query().Get("ref") != u.knowledge {
+			http.NotFound(w, r)
+			return
+		}
+		entries, err := os.ReadDir(filepath.Join("knowledge", dir))
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusNotFound)
+			return
+		}
+		var out []map[string]string
+		for _, e := range entries {
+			if !e.IsDir() {
+				out = append(out, map[string]string{"name": e.Name(), "type": "file"})
+			}
+		}
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(out)
+		return
+	}
 	http.FileServer(http.Dir("testdata/upstream")).ServeHTTP(w, r)
 }
 
@@ -1257,6 +1277,7 @@ func TestServe(t *testing.T) {
 	up.KnowledgeDir = ""
 	up.KnowledgeHead = u.srv.URL + "/primogen-commit"
 	up.KnowledgeFile = u.srv.URL + "/primogen/%s/knowledge/%s"
+	up.KnowledgeList = u.srv.URL + "/primogen-list/%s?ref=%s"
 	r, err := newRefresher(ctx, up, filepath.Join(t.TempDir(), "bundle.json.gz"), slog.New(slog.DiscardHandler))
 	if err != nil {
 		t.Fatal(err)
@@ -1340,6 +1361,11 @@ func TestServe(t *testing.T) {
 	tools, err := cs.ListTools(ctx, nil)
 	if err != nil {
 		t.Fatal(err)
+	}
+	if res, err := cs.CallTool(ctx, &mcp.CallToolParams{Name: "vtes_guide", Arguments: map[string]any{"topic": "examples"}}); err != nil || res.IsError {
+		t.Fatalf("vtes_guide examples on hosted server: %v %v", err, res)
+	} else {
+		expect("hosted vtes_guide examples", res.Content[0].(*mcp.TextContent).Text, "card-comparison-trap-conquer-the-beast", "meta-reading-top-tier-decks")
 	}
 	cs.Close()
 	for _, tool := range tools.Tools {
@@ -1525,5 +1551,175 @@ func TestAudit(t *testing.T) {
 	}
 	if !strings.Contains(noiseReport, "vekn-74643/#m4") || strings.Contains(noiseReport, "vekn-79165") || strings.Contains(noiseReport, "M9f7z02UbzI") {
 		t.Errorf("noise thread filter unexpected in audit report")
+	}
+}
+
+func TestQueryGuide(t *testing.T) {
+	runGuide := func(args ...string) (string, error) {
+		var stdout, stderr strings.Builder
+		err := run(t.Context(), append([]string{"query", "-bundle", testBundle}, args...), &stdout, &stderr)
+		return stdout.String(), err
+	}
+
+	for _, tc := range []struct {
+		name      string
+		args      []string
+		want, not []string
+		err       string
+	}{
+		{
+			name: "procedure card-comparison",
+			args: []string{"guide", "card-comparison"},
+			want: []string{
+				"Authority: curated guide",
+				"# Procedure: comparing or evaluating cards",
+				"Minion Tap beats Villein",
+				"never from memory",
+				"Data: ",
+			},
+		},
+		{
+			name: "procedure with space alias",
+			args: []string{"guide", "rules answer"},
+			want: []string{"Authority: curated guide", "Data: "},
+		},
+		{
+			name: "theory section",
+			args: []string{"guide", "theory", "Combat"},
+			want: []string{"## Combat", "Authority: curated guide"},
+			not:  []string{"## Economy"},
+		},
+		{
+			name: "modules whole fits bound",
+			args: []string{"guide", "modules"},
+			want: []string{"# Modules catalog", "## Combat defenses", "not yet canonized by the owner"},
+			not:  []string{"(cut here"},
+		},
+		{
+			name: "modules section",
+			args: []string{"guide", "modules", "Combat defenses"},
+			want: []string{"## Combat defenses", "not yet canonized by the owner"},
+			not:  []string{"## Bloat & pool economy"},
+		},
+		{
+			name: "terms default EN",
+			args: []string{"guide", "terms"},
+			want: []string{
+				"# VTES game terms (EN)",
+				"not an official authority",
+				"Available languages: EN, ES, FR, IT, JP, LATIN, PT-BR",
+				"- Bleed",
+			},
+		},
+		{
+			name: "terms FR with filter",
+			args: []string{"-lang", "fr", "-filter", "Bleed", "guide", "terms"},
+			want: []string{
+				"# VTES game terms (FR)",
+				"Translations have not been checked against the translated rulebooks.",
+				"Recorded source for FR:",
+				"- Bleed: Morsure",
+			},
+			not: []string{"- Hunt:"},
+		},
+		{
+			name: "terms FR untranslated term",
+			args: []string{"-lang", "FR", "-filter", "Stun", "guide", "terms"},
+			want: []string{"- Stun: (no translation recorded)"},
+		},
+		{
+			name: "terms category disciplines shows partial note",
+			args: []string{"-lang", "FR", "guide", "terms", "disciplines"},
+			want: []string{"## disciplines", "lists only some disciplines", "- Animalism: Animalisme"},
+			not:  []string{"## actions"},
+		},
+		{
+			name: "examples listing",
+			args: []string{"guide", "examples"},
+			want: []string{
+				"# Served examples",
+				"`card-comparison-trap-conquer-the-beast`",
+				"`meta-reading-top-tier-decks`",
+				"Call vtes_guide with topic",
+			},
+			not: []string{"**1. Equipment.**"},
+		},
+		{
+			name: "examples filtered listing",
+			args: []string{"-filter", "top tier", "guide", "examples"},
+			want: []string{"`meta-reading-top-tier-decks`"},
+			not:  []string{"`card-comparison-trap-conquer-the-beast`"},
+		},
+		{
+			name: "example read by name",
+			args: []string{"guide", "examples", "card-comparison-trap-conquer-the-beast"},
+			want: []string{
+				"Authority: worked example",
+				"**1. Equipment.**",
+				"Who owns the press",
+				"Data: ",
+			},
+		},
+		{
+			name: "unknown topic lists valid options",
+			args: []string{"guide", "unknown"},
+			err:  "rules-answer, deck-analysis, deck-advice, card-comparison, meta-reading, theory, modules, terms, examples",
+		},
+		{
+			name: "empty topic lists valid options",
+			args: []string{"guide"},
+			err:  "rules-answer, deck-analysis, deck-advice, card-comparison, meta-reading, theory, modules, terms, examples",
+		},
+		{
+			name: "unknown language lists valid languages",
+			args: []string{"-lang", "DE", "guide", "terms"},
+			err:  "EN, ES, FR, IT, JP, LATIN, PT-BR",
+		},
+		{
+			name: "unknown terms category lists categories",
+			args: []string{"guide", "terms", "bogus"},
+			err:  "actions",
+		},
+		{
+			name: "unknown theory section lists sections",
+			args: []string{"guide", "theory", "bogus"},
+			err:  "Economy",
+		},
+		{
+			name: "unknown example lists available examples",
+			args: []string{"guide", "examples", "bogus"},
+			err:  "card-comparison-trap-conquer-the-beast",
+		},
+		{
+			name: "ambiguous example lists matching examples",
+			args: []string{"guide", "examples", "Example"},
+			err:  "card-comparison-trap-conquer-the-beast, meta-reading-top-tier-decks",
+		},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			out, err := runGuide(tc.args...)
+			if tc.err != "" {
+				if err == nil || !strings.Contains(err.Error(), tc.err) {
+					t.Fatalf("got err=%v, want substring %q", err, tc.err)
+				}
+				return
+			}
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
+			if len(out) > 40000 {
+				t.Errorf("result length %d exceeds 40,000-character bound", len(out))
+			}
+			for _, w := range tc.want {
+				if !strings.Contains(out, w) {
+					t.Errorf("missing %q in:\n%s", w, out)
+				}
+			}
+			for _, n := range tc.not {
+				if strings.Contains(out, n) {
+					t.Errorf("unexpected %q in:\n%s", n, out)
+				}
+			}
+		})
 	}
 }
