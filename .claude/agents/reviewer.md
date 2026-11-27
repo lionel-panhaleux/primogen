@@ -42,6 +42,7 @@ the whole files the diff sits in.
    rejection. So is a suite growing faster than the behaviour it guards.
 
 Never modify the repository: no edits, no git command that changes the tree.
+Never decrypt `secrets.sops.yaml` or print secret values.
 
 ## Output
 

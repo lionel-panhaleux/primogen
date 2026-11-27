@@ -18,8 +18,9 @@ has a `board/<slug>.md`, read it and keep working notes there.
 
 Hold to `docs/principles.md`. Before using a library, a protocol or a tool,
 read its current documentation (`docs/operations.md` "Looking things up").
-Before writing any card or rules claim into `knowledge/`, a test or a tool's
-text, check it against the sources; never from memory. Rebuild
+Before writing any card, rules, data or upstream claim into `knowledge/`,
+`docs/`, a test or a tool's text, check it against the sources; never from
+memory. Rebuild
 `data/bundle.json.gz` (`primogen build`) before tuning or checking anything
 against it.
 

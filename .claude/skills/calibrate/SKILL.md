@@ -11,6 +11,9 @@ in `calibration/README.md`; follow them exactly.
 ## Graded session
 
 1. Note `git rev-parse --short HEAD`: it goes in every entry's `answered-by`.
+   When grading through the hosted MCP server rather than local
+   `primogen query -bundle`, check `/status` and the client's loaded tool
+   schemas match `HEAD` before starting.
 2. Take the owner's question; infer the mode (rules, analysis, advice).
 3. Answer as a user's assistant would: with primogen's tools only (the MCP
    server, or `primogen query`), no repository file, no other skill, no extra
@@ -29,7 +32,7 @@ in `calibration/README.md`; follow them exactly.
 7. An answer graded clean that shows the bar may be proposed as a served
    example (principle 8): an excerpt in `knowledge/guide/examples/`, naming
    its corpus entry, the date of the answer and of its data, with its line
-   in `docs/provenance.md` and the `vtes_guide` row of `docs/product.md`.
+   in `docs/provenance.md`.
    Its entry joins the regression set. The owner decides.
 8. One commit for the session, entries and guide edits together.
 

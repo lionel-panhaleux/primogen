@@ -1,14 +1,14 @@
 # KRCG
 
-> The public services for Vampire: The Eternal Struggle (VTES) around krcg.org: card data, the rulings, the rulings archive, the rules, tournaments, a rules engine, and Primogen, an MCP server that grounds an assistant's answers in them. All free to read without an account, except Archon's API.
+> The public services for Vampire: The Eternal Struggle (VTES) around krcg.org: card data, the rulings, the rulings archive, the rules, tournaments, a rules engine, and Primogen, an MCP server that grounds an assistant's answers in them. All free to read without an account, except Archon's API (and Primogen's member-only Archon data).
 
 To answer VTES questions in an assistant, add the MCP endpoint below. To build a program, start from the card data. Each line links the service's own specification, which settles what this page summarizes. Card texts and images are Paradox Interactive's, used under the Dark Pack agreement. Primogen checks every link here each hour: a dead one shows on its status page.
 
 ## Primogen
 
-- [MCP endpoint](https://mcp.krcg.org/mcp): Streamable HTTP, no sign-in. Cards with their rulings, the evidence for a rules question, the rules searched or read by section, the rulings archive searched. `tools/list` describes each tool.
+- [MCP endpoint](https://mcp.krcg.org/mcp): Streamable HTTP, public tools need no sign-in; optional Archon OAuth login for VEKN members. Cards with their rulings, rules evidence and rules/archive search, decklist and draft analysis, card play rates and competitors, meta shares (and full-field play against win share with Archon login), tournaments/rankings/member records/leagues and community links, and feedback reporting. `tools/list` describes each tool.
 - [Primogen's README](https://github.com/lionel-panhaleux/primogen#readme): the tools, adding the server to Claude, Claude Code or Gemini, running it locally over stdio.
-- [Data bundle](https://mcp.krcg.org/bundle.json.gz): everything the tools serve but the rulings archive (its bulk file is below), as gzipped JSON, rebuilt when a source moves; its format is the `Bundle` type of [bundle.go](https://github.com/lionel-panhaleux/primogen/blob/main/internal/bundle/bundle.go).
+- [Data bundle](https://mcp.krcg.org/bundle.json.gz): everything the public tools serve but the rulings archive (its bulk file is below) and Archon's export, as gzipped JSON, rebuilt when a source moves; its format is the `Bundle` type of [bundle.go](https://github.com/lionel-panhaleux/primogen/blob/main/internal/bundle/bundle.go).
 - [Status](https://mcp.krcg.org/status): the data's dates, the last refresh, what needs a person.
 
 ## Cards and decks

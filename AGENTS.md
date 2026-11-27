@@ -91,10 +91,9 @@ ratings, known wins, tournament history and decks by VEKN ID, and leagues,
 with `vtes_deck` also reading published Archon decks) and
 `vtes_feedback` (a user's report on an answer filed as a public `feedback`
 issue, which `/intake` reads) hosted at
-`https://mcp.krcg.org/mcp` and refreshing themselves (not announced yet), and
+`https://mcp.krcg.org/mcp` and refreshing themselves, and
 from a local install (`primogen stdio`) downloading the published bundle,
 the build proposing new archetypes from the unplaced decks for the owner to
-name. Cards, rules, the deck and the meta are done; the announcement is
-the owner's to make. From a checkout:
+name. From a checkout:
 `primogen build`, then `primogen query` or `primogen stdio` with
 `-bundle data/bundle.json.gz`. The board holds the next lines.

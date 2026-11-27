@@ -9,13 +9,11 @@ they can trust on a rules question, a deck read the way a tournament player
 reads it, a meta picture with numbers. We would know by the owner's grading
 of real questions ([product.md](product.md) "Evaluation").
 
-## The phase: building, before any user
+## The phase: live, with users
 
-Served at `mcp.krcg.org`, not announced. Ends when the owner announces it
-to the community; real users change the ranking and may change the harness.
-The tools cover the three questions of [product.md](product.md), each
-through an owner-graded session; the announcement is the owner's to make.
-`vtes_feedback` turns what users report into the issues `/intake` reads.
+Announced and served at `mcp.krcg.org`. `vtes_feedback` turns what users
+report into the `feedback` issues `/intake` reads; real usage drives what
+moves next.
 
 ## Ranking
 
@@ -35,7 +33,6 @@ owner's decision.
 
 ## Later, in this order unless the owner reorders
 
-- The announcement (the phase above).
 - The legality check on the engine (`vtes_engine_check`), which needs a
   position-check endpoint in zero-vtes.
 - Bot-based deck testing, once the engine covers the pool and the bot is
