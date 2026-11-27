@@ -21,10 +21,9 @@ commands are added here by the lines that create them.
 holds), holds `github_app_key`, the private key of the
 GitHub App `app-feedback-issues` (Issues read and write, no webhook),
 installed on several of the owner's repositories: each token the server
-asks for is scoped to this repository's issues; and, when set,
-`archon_client_id` and `archon_client_secret`, the credentials of the Archon
-OAuth client (`api:read` and `profile:read`, callback
-`https://mcp.krcg.org/oauth/callback`). `mise run deploy` decrypts them and puts them
+asks for is scoped to this repository's issues; and `archon_client_id` and
+`archon_client_secret`, the credentials of the Archon OAuth client (`api:read`
+and `profile:read`, callback `https://mcp.krcg.org/oauth/callback`). `mise run deploy` decrypts them and puts them
 on frankfurt as `/etc/primogen/github-app.pem` and `/etc/primogen/archon-secret` (root, 600, never diffed),
 handed to the dynamic user through systemd's `LoadCredential`; the GitHub App's
 client ID, not a secret, is in `deploy/deploy.py`. `sops edit
@@ -134,7 +133,8 @@ Go, jq, node, sops and uv come from mise: `mise install` in the checkout reads
   `archive WORDS...` (`-directors` for the sitting rules directors' posts
   only), `deck LIST|ID|LINK` (the list's lines as one or
   several arguments, or `-` to read it from stdin; a link of VDB, VTES Decks,
-  Amaranth or Archon; `-draft` for a deck idea's cards), `stats CARD
+  Amaranth or Archon; `-draft` for a deck idea's cards, `-library-size` for a draft's
+  library size, `-together` for hand-odds recipes as JSON), `stats CARD
   [ARCHETYPE]`, `meta [ARCHETYPE]` (`-months` for the window's length,
   `-country` and `-continent` for geographic filters),
   `events [TOURNAMENT]` (`-member`, `-rankings`, `-category`, `-league`,

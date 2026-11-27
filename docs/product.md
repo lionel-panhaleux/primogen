@@ -165,8 +165,9 @@ documentation and issue tracker, linked in each cell.
 
 Primogen is built for the weakest of them. Claude's connectors drop the
 instructions and defer the tools, so a model may first meet primogen through
-a tool's name alone: the grounding rule opens each tool's description and is
-repeated at the end of every result. Results are text only, but `vtes_feedback`'s, which also carries the
+a tool's name alone: the grounding rule opens each read tool's description and is
+repeated at the end of every read tool's result (for `vtes_cards`, when a card
+matches). Results are text only, but `vtes_feedback`'s, which also carries the
 issue's link as structured content for a local install to read back (the
 text holds the same link, so a client without `structuredContent` loses
 nothing). The rules
